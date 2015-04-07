@@ -1,1 +1,1 @@
-# ShortSounds - [Website](https://github.com/nharlow89/ShortSounds.git)
+# ShortSounds - [Website](http://nharlow89.github.io/ShortSounds/)
