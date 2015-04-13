@@ -1,4 +1,4 @@
-package com.example.neilharlow.shortsounds;
+package com.sloths.speedy.shortsounds;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
