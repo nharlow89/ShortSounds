@@ -1,5 +1,8 @@
 package com.sloths.speedy.shortsounds;
 
+import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,50 +13,70 @@ public class ShortSound {
     /**
      * Local vars
      */
+    private static final String DEFAULT_TITLE = "Untitled";
     private List<ShortSoundTrack> tracks;
     private String title;
-
-
-    public ShortSound() {
-        // Create entry in DB
-    }
-
-    public static void getAll() {
-
-    }
-
-    public static void get( String identifier ) {
-
-    }
+    private int id;
+    private static SQLiteOpenHelper sqlHelper =
+            new ShortSoundSQLHelper( ShortSoundsApplication.getAppContext() );
 
     /**
-     * Save the ShortSound to disk (does not generate compiled audio file)
+     * Constructor: Create a new empty ShortSound
      */
-    public void save() {
-
+    public ShortSound() {
+        title = DEFAULT_TITLE;  // Default
+        tracks = new ArrayList<ShortSoundTrack>();  // Initially no tracks
     }
 
     /**
-     * Generate audio file
+     * Fetch all available ShortSounds (used on app start)
+     */
+    public static List<ShortSound> getAll() {
+        return null;
+    }
+
+    /**
+     * Generate audio file (with all compiled tracks)
      */
     public void generateAudioFile() {
 
     }
 
-    public void getTracks() {
-
+    /**
+     * Get the tracks for this ShortSound
+     */
+    public List<ShortSoundTrack> getTracks() {
+        return null;
     }
-    public void addTrack() {
 
+    /**
+     * Add a track to the ShortSound
+     */
+    public void addTrack( ShortSoundTrack track ) {
+        // Store the file to disk
+        // Add a new Track entry in DB for this ShortSound
     }
+
+    /**
+     * Remove a track from this ShortSound
+     */
     public void removeTrack() {
 
     }
 
-    public void getTitle() {
-
+    /**
+     * Getter for title
+     * @return title
+     */
+    public String getTitle() {
+        return this.title;
     }
-    public void setTitle() {
 
+    /**
+     * Setter for title
+     * @param new_title Updated title
+     */
+    public void setTitle( String new_title ) {
+        this.title = new_title;
     }
 }
