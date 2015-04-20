@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- This is for the actual header of the Tracks -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!--- This will be populated by the track names -->
+    <TextView
+        android:id="@+id/trackHeader"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textSize="17dp"/>
+</LinearLayout>

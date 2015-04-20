@@ -5,12 +5,13 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -24,7 +25,7 @@ import android.widget.ListView;
 //       5) Possibly figure out how to expand track w/ a fake effect (just a String)
 
 public class MainActivity extends Activity {
-    private String[] mPlanetTitles;
+    private String[] mShortSounds;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
 
@@ -39,21 +40,22 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         // Drawer Layout Stuff:
-        mPlanetTitles = getResources().getStringArray(R.array.shortsounds_array);
+        // This array can later be an array of actual short sounds (or connection from string->obj)
+        mShortSounds = getResources().getStringArray(R.array.shortsounds_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         // Set the adapter for the list view
+        //  ==> This connects the listview to the actual sounds
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mPlanetTitles));
+                R.layout.drawer_list_item, mShortSounds));
         // Set the list's click listener
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         mTitle = mDrawerTitle = getTitle();
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        // ActionBarDrawerToggle ties together the the proper interactions
-        // between the sliding drawer and the action bar app icon
+        // ActionBarDrawerToggle ties together drawer to action bar
+        // TODO: change to v7, currently deprecated
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
@@ -114,24 +116,48 @@ public class MainActivity extends Activity {
      * Swaps fragments in the main content view
      */
     private void selectItem(int position) {
-        // Create a new fragment and specify the planet to show based on position
+        // Grabs the ShortSound and populates the screen with it
+        Fragment fragment = new ShortSoundFragment();
 
-        // TODO: Populate item based upon the track that is clicked -- below is example code
-//        Fragment fragment = new PlanetFragment();
-//        Bundle args = new Bundle();
-//        args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
-//        fragment.setArguments(args);
-//
-//        // Insert the fragment by replacing any existing fragment
-//        FragmentManager fragmentManager = getFragmentManager();
-//        fragmentManager.beginTransaction()
-//                .replace(R.id.content_frame, fragment)
-//                .commit();
-//
-//        // Highlight the selected item, update the title, and close the drawer
-//        mDrawerList.setItemChecked(position, true);
-//        setTitle(mPlanetTitles[position]);
-//        mDrawerLayout.closeDrawer(mDrawerList);
+        // Sets it to the correct ShortSound
+        Bundle args = new Bundle();
+        args.putInt(ShortSoundFragment.ARG_SOUND_NUMBER, position);
+        fragment.setArguments(args);
+
+        // Replaces the main content screen w/ Short sound
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+        // Highlight item, update title, close drawer
+        mDrawerList.setItemChecked(position, true);
+        setTitle(mShortSounds[position]);
+        mDrawerLayout.closeDrawer(mDrawerList);
+    }
+
+
+    /**
+     * Fragment that appears in the "content_frame", shows a current ShortSound
+     * This will display
+     */
+    public static class ShortSoundFragment extends Fragment {
+        public static final String ARG_SOUND_NUMBER = "sound_number";
+
+        public ShortSoundFragment() {
+            // Empty constructor required for fragment subclasses
+        }
+
+        // Creates the view to put in to the main screen
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+
+            View rootView = inflater.inflate(R.layout.short_sound_group, container, false);
+            int i = getArguments().getInt(ARG_SOUND_NUMBER);
+            String sound = getResources().getStringArray(R.array.shortsounds_array)[i];
+
+            getActivity().setTitle(sound);
+            return rootView;
+        }
     }
 
     @Override
@@ -140,6 +166,12 @@ public class MainActivity extends Activity {
         getActionBar().setTitle(mTitle);
     }
 
+
+
+
+    // ---------------------------------------------------------------
+    // Don't know if this stuff is needed, it's copied code
+    // ---------------------------------------------------------------
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
