@@ -15,8 +15,32 @@
             android:id="@+id/track_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </FrameLayout>
 
+        <!-- This is the bottom toolbar -->
+        <FrameLayout android:id="@+id/footer" android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            style="@android:style/ButtonBar"
+            android:layout_gravity="center_horizontal|bottom"
+            android:weightSum="1">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageButtonPlay"
+                android:src="@drawable/ic_action_play"
+                android:layout_gravity="left|top" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageButtonRecord"
+                android:src="@drawable/ic_action_mic"
+                android:layout_gravity="right|top" />
+        </FrameLayout>
+
+    </FrameLayout>
 
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"
