@@ -2,6 +2,7 @@ package com.sloths.speedy.shortsounds;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -12,6 +13,13 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.e("DB_TEST", "MainActivity:onCreate()");
+        ShortSound ss = new ShortSound();
+        ss.setTitle( "The Best Song Ever" );
+
+        ss.addTrack( new ShortSoundTrack( new byte[ShortSoundTrack.BUFFER_SIZE] ) );
+
+        ShortSound.getAll();
     }
 
 

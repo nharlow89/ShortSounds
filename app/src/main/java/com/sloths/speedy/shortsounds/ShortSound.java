@@ -1,6 +1,6 @@
 package com.sloths.speedy.shortsounds;
 
-import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,22 +16,26 @@ public class ShortSound {
     private static final String DEFAULT_TITLE = "Untitled";
     private List<ShortSoundTrack> tracks;
     private String title;
-    private int id;
-    private static SQLiteOpenHelper sqlHelper =
+    private long id;
+    private static ShortSoundSQLHelper sqlHelper =
             new ShortSoundSQLHelper( ShortSoundsApplication.getAppContext() );
 
     /**
      * Constructor: Create a new empty ShortSound
      */
     public ShortSound() {
+        Log.d("DB_TEST", "ShortSound:constructor()");
         title = DEFAULT_TITLE;  // Default
         tracks = new ArrayList<ShortSoundTrack>();  // Initially no tracks
+        this.id = sqlHelper.insertShortSound( this );  // Add ShortSound to the DB
+        Log.d("DB_TEST", "Inserted ShortSound: " + this.toString() );
     }
 
     /**
      * Fetch all available ShortSounds (used on app start)
      */
     public static List<ShortSound> getAll() {
+        sqlHelper.queryAllShortSounds();
         return null;
     }
 
@@ -53,8 +57,8 @@ public class ShortSound {
      * Add a track to the ShortSound
      */
     public void addTrack( ShortSoundTrack track ) {
-        // Store the file to disk
-        // Add a new Track entry in DB for this ShortSound
+        this.tracks.add( track );  // Add track to list
+        this.sqlHelper.insertShortSoundTrack( track, this.id );
     }
 
     /**
@@ -78,5 +82,15 @@ public class ShortSound {
      */
     public void setTitle( String new_title ) {
         this.title = new_title;
+        sqlHelper.updateShortSound( this );  // Update the DB
+    }
+
+    @Override
+    public String toString() {
+        return this.title + ":" + this.id;
+    }
+
+    public long getId() {
+        return id;
     }
 }
