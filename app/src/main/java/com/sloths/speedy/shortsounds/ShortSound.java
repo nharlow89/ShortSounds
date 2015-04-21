@@ -94,3 +94,15 @@ public class ShortSound {
         return id;
     }
 }
+
+
+/* ADD THIS TO THE MAIN ACTIVITY FOR TESTING
+
+Log.e("DB_TEST", "MainActivity:onCreate()");
+ShortSound ss = new ShortSound();
+ss.setTitle( "The Best Song Ever" );
+
+ss.addTrack( new ShortSoundTrack( new byte[ShortSoundTrack.BUFFER_SIZE] ) );
+
+ShortSound.getAll();
+ */
