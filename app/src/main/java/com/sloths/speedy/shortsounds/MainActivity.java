@@ -14,7 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 
 // TODO: 1) Populate pieces for skeleton (String names etc.)
@@ -151,11 +157,24 @@ public class MainActivity extends Activity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
-            View rootView = inflater.inflate(R.layout.short_sound_group, container, false);
+            ExpandableListView rootView = (ExpandableListView) inflater.inflate(R.layout.short_sound_exp_view, container, false);
+            // Set title
             int i = getArguments().getInt(ARG_SOUND_NUMBER);
             String sound = getResources().getStringArray(R.array.shortsounds_array)[i];
-
             getActivity().setTitle(sound);
+            // Populate array of tracks
+            // TODO: This will be updated based upon shortSound, but for now it is static
+            List<String> listDataHeader =
+                    Arrays.asList(getResources().getStringArray(R.array.track_array));
+            HashMap<String, List<String>> listDataChild = new HashMap<String, List<String>>();
+            for (String s : listDataHeader) {
+                List<String> list = new ArrayList<String>();
+                list.add(getResources().getString(R.string.fake_track));
+                listDataChild.put(s, list);
+            }
+
+            ExpandableListAdapter listAdapter = new ExpandableListAdapter(this.getActivity(), listDataHeader, listDataChild);
+            rootView.setAdapter(listAdapter);
             return rootView;
         }
     }

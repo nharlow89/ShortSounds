@@ -12,6 +12,15 @@
         <item>Lame_S0ng</item>
         <item>For Fred</item>
     </string-array>
+    <string-array name="track_array">
+        <item>track 1</item>
+        <item>track 2</item>
+        <item>track 3</item>
+        <item>track 4</item>
+        <item>track 5</item>
+        <item>track 6</item>
+    </string-array>
+    <string name="fake_track">editing stuff</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="action_websearch">Web search</string>
