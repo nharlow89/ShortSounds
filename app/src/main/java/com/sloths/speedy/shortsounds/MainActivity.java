@@ -6,6 +6,8 @@ import android.app.FragmentManager;
 import android.content.res.Configuration;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,12 +43,24 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //jbuscher git test comment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setUpLibraryDrawer();
+        // enable ActionBar app icon to behave as action to toggle nav drawer
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        //setUpRecyclerView();
+    }
 
-        // Drawer Layout Stuff:
-        // This array can later be an array of actual short sounds (or connection from string->obj)
+    private void setUpRecyclerView() {
+        RecyclerView recList = (RecyclerView) findViewById(R.id.track_list);
+        recList.setHasFixedSize(true);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        recList.setLayoutManager(llm);
+    }
+
+    private void setUpLibraryDrawer() {
         mShortSounds = getResources().getStringArray(R.array.shortsounds_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -61,7 +75,6 @@ public class MainActivity extends Activity {
         mTitle = mDrawerTitle = getTitle();
 
         // ActionBarDrawerToggle ties together drawer to action bar
-        // TODO: change to v7, currently deprecated
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
@@ -82,10 +95,6 @@ public class MainActivity extends Activity {
 
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-        // enable ActionBar app icon to behave as action to toggle nav drawer
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
     }
 
     @Override
@@ -156,14 +165,13 @@ public class MainActivity extends Activity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-
+            /*
             ExpandableListView rootView = (ExpandableListView) inflater.inflate(R.layout.short_sound_exp_view, container, false);
             // Set title
             int i = getArguments().getInt(ARG_SOUND_NUMBER);
             String sound = getResources().getStringArray(R.array.shortsounds_array)[i];
             getActivity().setTitle(sound);
             // Populate array of tracks
-            // TODO: This will be updated based upon shortSound, but for now it is static
             List<String> listDataHeader =
                     Arrays.asList(getResources().getStringArray(R.array.track_array));
             HashMap<String, List<String>> listDataChild = new HashMap<String, List<String>>();
@@ -174,8 +182,8 @@ public class MainActivity extends Activity {
             }
 
             ExpandableListAdapter listAdapter = new ExpandableListAdapter(this.getActivity(), listDataHeader, listDataChild);
-            rootView.setAdapter(listAdapter);
-            return rootView;
+            rootView.setAdapter(listAdapter);*/
+            return null;
         }
     }
 
@@ -185,12 +193,6 @@ public class MainActivity extends Activity {
         getActionBar().setTitle(mTitle);
     }
 
-
-
-
-    // ---------------------------------------------------------------
-    // Don't know if this stuff is needed, it's copied code
-    // ---------------------------------------------------------------
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

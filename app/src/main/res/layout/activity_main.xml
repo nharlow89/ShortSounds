@@ -11,10 +11,11 @@
         android:layout_height="match_parent">
 
         <!-- This is where the ShortSounds go -->
-        <ExpandableListView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/track_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            />
 
         <!-- This is the bottom toolbar -->
         <FrameLayout android:id="@+id/footer" android:layout_width="fill_parent"
