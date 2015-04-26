@@ -1,9 +1,11 @@
 package com.sloths.speedy.shortsounds;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
+
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.content.res.Configuration;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,8 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.support.v4.app.Fragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +34,7 @@ import java.util.List;
 //       4) Populate in java code the expandable list view w/ tracks
 //       5) Possibly figure out how to expand track w/ a fake effect (just a String)
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
     private String[] mShortSounds;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -132,15 +134,15 @@ public class MainActivity extends Activity {
      */
     private void selectItem(int position) {
         // Grabs the ShortSound and populates the screen with it
-        Fragment fragment = new ShortSoundFragment();
+        RecyclerViewFragment fragment = new RecyclerViewFragment();
 
         // Sets it to the correct ShortSound
         Bundle args = new Bundle();
-        args.putInt(ShortSoundFragment.ARG_SOUND_NUMBER, position);
+        args.putInt(RecyclerViewFragment.ARG_SOUND_NUMBER, position);
         fragment.setArguments(args);
 
         // Replaces the main content screen w/ Short sound
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
         // Highlight item, update title, close drawer
