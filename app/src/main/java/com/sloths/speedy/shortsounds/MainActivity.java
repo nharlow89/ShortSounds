@@ -151,44 +151,6 @@ public class MainActivity extends FragmentActivity {
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
-
-    /**
-     * Fragment that appears in the "content_frame", shows a current ShortSound
-     * This will display
-     */
-    public static class ShortSoundFragment extends Fragment {
-        public static final String ARG_SOUND_NUMBER = "sound_number";
-
-        public ShortSoundFragment() {
-            // Empty constructor required for fragment subclasses
-        }
-
-        // Creates the view to put in to the main screen
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            /*
-            ExpandableListView rootView = (ExpandableListView) inflater.inflate(R.layout.short_sound_exp_view, container, false);
-            // Set title
-            int i = getArguments().getInt(ARG_SOUND_NUMBER);
-            String sound = getResources().getStringArray(R.array.shortsounds_array)[i];
-            getActivity().setTitle(sound);
-            // Populate array of tracks
-            List<String> listDataHeader =
-                    Arrays.asList(getResources().getStringArray(R.array.track_array));
-            HashMap<String, List<String>> listDataChild = new HashMap<String, List<String>>();
-            for (String s : listDataHeader) {
-                List<String> list = new ArrayList<String>();
-                list.add(getResources().getString(R.string.fake_track));
-                listDataChild.put(s, list);
-            }
-
-            ExpandableListAdapter listAdapter = new ExpandableListAdapter(this.getActivity(), listDataHeader, listDataChild);
-            rootView.setAdapter(listAdapter);*/
-            return null;
-        }
-    }
-
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;

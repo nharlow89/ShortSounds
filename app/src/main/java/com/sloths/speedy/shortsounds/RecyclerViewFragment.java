@@ -12,6 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Demonstrates the use of {@link RecyclerView} with a {@link LinearLayoutManager} and a
  * {@link GridLayoutManager}.
@@ -30,7 +33,7 @@ public class RecyclerViewFragment extends Fragment {
     protected RecyclerView mRecyclerView;
     protected RecyclerViewAdapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
-    protected String[] mDataset;
+    protected String[] trackNames;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +65,7 @@ public class RecyclerViewFragment extends Fragment {
         }
         setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
 
-        mAdapter = new RecyclerViewAdapter(mDataset);
+        mAdapter = new RecyclerViewAdapter(trackNames);
         // Set CustomAdapter as the adapter for RecyclerView.
         mRecyclerView.setAdapter(mAdapter);
         return rootView;
@@ -110,9 +113,11 @@ public class RecyclerViewFragment extends Fragment {
      * from a local content provider or remote server.
      */
     private void initDataset() {
-        /*mDataset = new String[DATASET_COUNT];
-        for (int i = 0; i < DATASET_COUNT; i++) {
-            mDataset[i] = "This is element #" + i;
-        }*/
+        int sound_num = getArguments().getInt(ARG_SOUND_NUMBER);
+        String sound = getResources().getStringArray(R.array.shortsounds_array)[sound_num];
+        getActivity().setTitle(sound);
+        // Populate array of tracks
+        List<String> trackTitles = Arrays.asList(getResources().getStringArray(R.array.track_array));
+        trackNames = (String[]) trackTitles.toArray();
     }
 }
