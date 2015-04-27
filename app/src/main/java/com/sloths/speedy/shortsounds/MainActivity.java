@@ -10,7 +10,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
@@ -47,10 +47,20 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setUpInitialRecyclerView();
         setUpLibraryDrawer();
         // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+    }
+
+    private void setUpInitialRecyclerView() {
+        RecyclerView recList = (RecyclerView) findViewById(R.id.track_list);
+        recList.setHasFixedSize(true);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        recList.setLayoutManager(llm);
     }
 
     private void setUpLibraryDrawer() {
@@ -125,7 +135,7 @@ public class MainActivity extends FragmentActivity {
      */
     private void selectItem(int position) {
         // Grabs the ShortSound and populates the screen with it
-        RecyclerViewFragment fragment = new RecyclerViewFragment();
+        Fragment fragment = new RecyclerViewFragment();
 
         // Sets it to the correct ShortSound
         Bundle args = new Bundle();
@@ -134,7 +144,7 @@ public class MainActivity extends FragmentActivity {
 
         // Replaces the main content screen w/ Short sound
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.track_list, fragment).commit();
 
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
