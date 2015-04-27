@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 .gradle
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
 .DS_Store
 /build
+=======
+app
+build
+.gradle
+.idea
+local.properties
+
+>>>>>>> remotes/origin/gh-pages
