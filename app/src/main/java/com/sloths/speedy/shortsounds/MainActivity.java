@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
@@ -16,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,6 +44,10 @@ public class MainActivity extends Activity {
         //jbuscher git test comment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.d("DB_TEST", "MainActivity:onCreate()");
+        List<ShortSound> sounds = ShortSound.getAll();
+        Log.d("DB_TEST", sounds.toString());
 
         // Drawer Layout Stuff:
         // This array can later be an array of actual short sounds (or connection from string->obj)

@@ -1,5 +1,8 @@
 package com.sloths.speedy.shortsounds;
 
+import java.io.File;
+import java.util.HashMap;
+
 /**
  * Created by neilharlow on 4/17/15.
  */
@@ -10,14 +13,31 @@ public class ShortSoundTrack {
     public static final int BUFFER_SIZE = 2000;  // TODO: make buffer size with respect to TRACK_LENGTH
     public static final String DEFAULT_TITLE = "Untitled Track";
 
+    private final String originalFile;
+    private final String file;
+    private long id;
     private String title;
-    private String fileName = null;
-    private byte[] audioBuffer = new byte[ BUFFER_SIZE ];
 
-    ShortSoundTrack( byte[] audioBuffer ) {
-        this.audioBuffer = audioBuffer;
+
+    /**
+     * Constructor for a ShortSoundTrack.
+     * @param filename The filename of the recorded audio file.
+     */
+    public ShortSoundTrack( String filename ) {
         this.title = DEFAULT_TITLE;
-        // TODO
+        this.originalFile = filename;
+        this.file = filename + "-ss";  // May need to change?
+    }
+
+    /**
+     * Construct a ShortSoundTrack from data stored in the DB.
+     * @param map
+     */
+    public ShortSoundTrack( HashMap<String, String> map ) {
+        this.id = Long.parseLong( map.get( ShortSoundSQLHelper.KEY_ID ) );
+        this.file = map.get( ShortSoundSQLHelper.KEY_TRACK_FILENAME_MODIFIED );
+        this.originalFile = map.get( ShortSoundSQLHelper.KEY_TRACK_FILENAME_ORIGINAL );
+        this.title = map.get( ShortSoundSQLHelper.KEY_TITLE );
     }
 
     public void addEffect() {
@@ -28,16 +48,40 @@ public class ShortSoundTrack {
         // TODO
     }
 
+    /**
+     * Remove this ShortSoundTrack's files from memory (both the original and
+     * any modified)
+     */
+    public void deleteFiles() {
+        File originalFile = new File( this.originalFile );
+        if( originalFile.exists() ) {
+            originalFile.delete();
+        }
+        File file = new File( this.file );
+        if( file.exists() ) {
+            file.delete();
+        }
+    }
+
+    public void setId( long id ) {
+        this.id = id;
+    }
+
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String toString() {
+        return this.title;
     }
 }
 
 
 /*
-Record a sound.
-Create ShortSoundTrack.
-Add ShortSoundTrack to the ShortSound.
+    Record a sound.
+    Create ShortSoundTrack.
+    Add ShortSoundTrack to the ShortSound.
     Save ShortSoundTrack to disk
     Update DB to associate the ShortSoundTrack with the ShortSound
  */
