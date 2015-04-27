@@ -11,7 +11,7 @@
         android:layout_height="match_parent">
 
         <!-- This is where the ShortSounds go -->
-        <android.support.v7.widget.RecyclerView
+        <RelativeLayout
             android:id="@+id/track_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
