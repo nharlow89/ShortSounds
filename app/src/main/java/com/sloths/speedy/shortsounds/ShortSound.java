@@ -3,6 +3,7 @@ package com.sloths.speedy.shortsounds;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -32,18 +33,28 @@ public class ShortSound {
     }
 
     /**
+     * Decodes a short sound retrieved form the database and converts into an actual
+     * ShortSound object.
+     * @param map
+     * @return
+     */
+    public ShortSound( HashMap<String, String> map ) {
+        this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
+        this.title = map.get( sqlHelper.KEY_TITLE );
+    }
+
+    /**
      * Fetch all available ShortSounds (used on app start)
      */
     public static List<ShortSound> getAll() {
-        sqlHelper.queryAllShortSounds();
-        return null;
+        return sqlHelper.queryAllShortSounds();
     }
 
     /**
      * Generate audio file (with all compiled tracks)
      */
     public void generateAudioFile() {
-
+        // TODO
     }
 
     /**
@@ -58,14 +69,26 @@ public class ShortSound {
      */
     public void addTrack( ShortSoundTrack track ) {
         this.tracks.add( track );  // Add track to list
-        this.sqlHelper.insertShortSoundTrack( track, this.id );
+        long new_id = this.sqlHelper.insertShortSoundTrack( track, this.id );
+        track.setId( new_id );  // Update the ShortSoundTrack with db id
     }
 
     /**
-     * Remove a track from this ShortSound
+     * Remove a track from this ShortSound.
      */
-    public void removeTrack() {
+    public void removeTrack( ShortSoundTrack track ) {
+        this.tracks.remove(track);
+        sqlHelper.removeShortSoundTrack( track );
+        track.deleteFiles();
+    }
 
+    /**
+     * Specifically set the list of tracks associated with this ShortSound.
+     * Should <b>only</b> be used when populating a ShortSound from the DB.
+     * @param tracks
+     */
+    public void setTracks( List<ShortSoundTrack> tracks ) {
+        this.tracks = tracks;
     }
 
     /**
@@ -87,7 +110,14 @@ public class ShortSound {
 
     @Override
     public String toString() {
-        return this.title + ":" + this.id;
+        String s = this.title + "[" + this.id + "]{";
+        String tracksString = "";
+        for (int i = 0; i < this.tracks.size(); i++) {
+            tracksString += this.tracks.get(i);
+            if ( i != this.tracks.size() - 1 )
+                tracksString += ",";
+        }
+        return s + tracksString + "}";
     }
 
     public long getId() {
