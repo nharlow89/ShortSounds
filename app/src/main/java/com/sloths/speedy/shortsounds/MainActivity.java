@@ -51,15 +51,6 @@ public class MainActivity extends FragmentActivity {
         // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-        //setUpRecyclerView();
-    }
-
-    private void setUpRecyclerView() {
-        RecyclerView recList = (RecyclerView) findViewById(R.id.track_list);
-        recList.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(this);
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        recList.setLayoutManager(llm);
     }
 
     private void setUpLibraryDrawer() {

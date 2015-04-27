@@ -21,10 +21,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     /**
      * Initialize the dataset of the Adapter.
      *
-     * @param dataSet String[] containing the data to populate views to be used by RecyclerView.
+     * @param trackNames String[] containing the data to populate views to be used by RecyclerView.
      */
-    public RecyclerViewAdapter(String[] dataSet) {
-        mDataSet = dataSet;
+    public RecyclerViewAdapter(String[] trackNames) {
+        mDataSet = trackNames;
     }
 
     // Create new views (invoked by the layout manager)
@@ -66,7 +66,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     Log.d(TAG, "Element " + getPosition() + " clicked.");
                 }
             });
-            vTitle = (TextView) v.findViewById(R.id.title);
+            vTitle = (TextView) v.findViewById(R.id.track_title);
         }
 
         public TextView getTitle() {
