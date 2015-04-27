@@ -15,7 +15,9 @@
             android:id="@+id/track_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            />
+            >
+
+        </RelativeLayout>
 
         <!-- This is the bottom toolbar -->
         <FrameLayout android:id="@+id/footer" android:layout_width="fill_parent"
