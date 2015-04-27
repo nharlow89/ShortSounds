@@ -3,13 +3,9 @@
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
+.idea/
 .DS_Store
 /build
-=======
-app
-build
-.gradle
-.idea
-local.properties
+app/app.iml
 
 >>>>>>> remotes/origin/gh-pages
