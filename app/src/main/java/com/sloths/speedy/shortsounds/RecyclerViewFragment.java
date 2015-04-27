@@ -28,16 +28,20 @@ public class RecyclerViewFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initDataset();
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // grab the root view of the layout for recycler view
         View rootView = inflater.inflate(R.layout.recycler_view_frag, container, false);
+        // grab the RecyclerView component from the layout
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        // create an mLayoutManager which is required for RecyclerViews
         mLayoutManager = new LinearLayoutManager(getActivity());
+        // set the LayoutManager for the RecyclerView
         mRecyclerView.setLayoutManager(mLayoutManager);
+        // set the adapter for the RecyclerView, passing in the data
         mAdapter = new RecyclerViewAdapter(trackNames);
         mRecyclerView.setAdapter(mAdapter);
         return rootView;

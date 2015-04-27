@@ -1,30 +1,18 @@
 package com.sloths.speedy.shortsounds;
 
-import android.app.Activity;
-
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.content.res.Configuration;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.support.v4.app.Fragment;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 
 // TODO: 1) Populate pieces for skeleton (String names etc.)
@@ -38,7 +26,6 @@ public class MainActivity extends FragmentActivity {
     private String[] mShortSounds;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
@@ -47,14 +34,21 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //setUpInitialRecyclerView();
         setUpLibraryDrawer();
-        // enable ActionBar app icon to behave as action to toggle nav drawer
+        enableActionBarLibraryToggleButton();
+    }
+
+    /**
+     * Enables the action bar icon for the nav drawer that opens the library.
+     */
+    private void enableActionBarLibraryToggleButton() {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
     }
 
+    /**
+     * Provides logic for setting up the library drawer.
+     */
     private void setUpLibraryDrawer() {
         mShortSounds = getResources().getStringArray(R.array.shortsounds_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -118,14 +112,17 @@ public class MainActivity extends FragmentActivity {
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectItem(position);
+            selectShortSoundFromDrawer(position);
         }
     }
 
     /**
-     * Swaps fragments in the main content view
+     * Helper method for the the DrawerItemClickListener. When a drawer item is clicked
+     * its position is passed in as a parameter which determines the short sound to load
+     * into a recyclerViewFragment, which is then inflated into the UI.
+     * @param position int the position of the drawer item clicked
      */
-    private void selectItem(int position) {
+    private void selectShortSoundFromDrawer(int position) {
         // Grabs the ShortSound and populates the screen with it
         Fragment fragment = new RecyclerViewFragment();
 
@@ -165,7 +162,6 @@ public class MainActivity extends FragmentActivity {
             return true;
         }
         // Handle your other action bar items...
-
         return super.onOptionsItemSelected(item);
     }
 }
