@@ -1,3 +1,13 @@
+.source-code .btn {
+    padding: 0.25rem 0.5rem;
+    background-color: #159957;
+    color: white;
+}
+.source-code .btn:hover {
+    background-color: #159957;
+    color: black;
+}
+
 * {
   box-sizing: border-box; }
 
