@@ -1,56 +1,57 @@
 package com.sloths.speedy.shortsounds;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.content.res.Configuration;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ExpandableListView;
 import android.widget.ListView;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import android.support.v4.app.Fragment;
 
 
-// TODO: 1) Populate pieces for skeleton (String names etc.)
-//       2) Run application and get a good look on what's happening
-//            -Populate other aspects as see fit
-//       3) Add ExpandableListView to FrameLayout in activity_main.xml
-//       4) Populate in java code the expandable list view w/ tracks
-//       5) Possibly figure out how to expand track w/ a fake effect (just a String)
-
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
     private String[] mShortSounds;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
+    private List<ShortSound> sounds;
+    // TODO: Current sound could be implemented differntly, mockup done this way
+    private ShortSound currSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //jbuscher git test comment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        setUpLibraryDrawer();
+        enableActionBarLibraryToggleButton();
         Log.d("DB_TEST", "MainActivity:onCreate()");
-        List<ShortSound> sounds = ShortSound.getAll();
+        sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
+    }
 
-        // Drawer Layout Stuff:
-        // This array can later be an array of actual short sounds (or connection from string->obj)
+
+    /**
+     * Enables the action bar icon for the nav drawer that opens the library.
+     */
+    private void enableActionBarLibraryToggleButton() {
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+    }
+
+    /**
+     * Provides logic for setting up the library drawer.
+     */
+    private void setUpLibraryDrawer() {
         mShortSounds = getResources().getStringArray(R.array.shortsounds_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -65,7 +66,6 @@ public class MainActivity extends Activity {
         mTitle = mDrawerTitle = getTitle();
 
         // ActionBarDrawerToggle ties together drawer to action bar
-        // TODO: change to v7, currently deprecated
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
@@ -86,10 +86,6 @@ public class MainActivity extends Activity {
 
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-        // enable ActionBar app icon to behave as action to toggle nav drawer
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
     }
 
     @Override
@@ -118,69 +114,33 @@ public class MainActivity extends Activity {
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectItem(position);
+            selectShortSoundFromDrawer(position);
         }
     }
 
     /**
-     * Swaps fragments in the main content view
+     * Helper method for the the DrawerItemClickListener. When a drawer item is clicked
+     * its position is passed in as a parameter which determines the short sound to load
+     * into a recyclerViewFragment, which is then inflated into the UI.
+     * @param position int the position of the drawer item clicked
      */
-    private void selectItem(int position) {
+    private void selectShortSoundFromDrawer(int position) {
         // Grabs the ShortSound and populates the screen with it
-        Fragment fragment = new ShortSoundFragment();
+        Fragment fragment = new RecyclerViewFragment();
 
         // Sets it to the correct ShortSound
         Bundle args = new Bundle();
-        args.putInt(ShortSoundFragment.ARG_SOUND_NUMBER, position);
+        args.putInt(RecyclerViewFragment.ARG_SOUND_NUMBER, position);
         fragment.setArguments(args);
 
         // Replaces the main content screen w/ Short sound
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.track_list, fragment).commit();
 
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
         setTitle(mShortSounds[position]);
         mDrawerLayout.closeDrawer(mDrawerList);
-    }
-
-
-    /**
-     * Fragment that appears in the "content_frame", shows a current ShortSound
-     * This will display
-     */
-    public static class ShortSoundFragment extends Fragment {
-        public static final String ARG_SOUND_NUMBER = "sound_number";
-
-        public ShortSoundFragment() {
-            // Empty constructor required for fragment subclasses
-        }
-
-        // Creates the view to put in to the main screen
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-
-            ExpandableListView rootView = (ExpandableListView) inflater.inflate(R.layout.short_sound_exp_view, container, false);
-            // Set title
-            int i = getArguments().getInt(ARG_SOUND_NUMBER);
-            String sound = getResources().getStringArray(R.array.shortsounds_array)[i];
-            getActivity().setTitle(sound);
-            // Populate array of tracks
-            // TODO: This will be updated based upon shortSound, but for now it is static
-            List<String> listDataHeader =
-                    Arrays.asList(getResources().getStringArray(R.array.track_array));
-            HashMap<String, List<String>> listDataChild = new HashMap<String, List<String>>();
-            for (String s : listDataHeader) {
-                List<String> list = new ArrayList<String>();
-                list.add(getResources().getString(R.string.fake_track));
-                listDataChild.put(s, list);
-            }
-
-            ExpandableListAdapter listAdapter = new ExpandableListAdapter(this.getActivity(), listDataHeader, listDataChild);
-            rootView.setAdapter(listAdapter);
-            return rootView;
-        }
     }
 
     @Override
@@ -189,7 +149,21 @@ public class MainActivity extends Activity {
         getActionBar().setTitle(mTitle);
     }
 
+    /**
+     * Swaps card view w/ our track content
+     */
+    private void selectTrack(int position) {
+        // Grabs the ShortSound and populates the screen with it
 
+        // Create fragment for tracks
+        ShortSoundTrack currTrack = currSound.getTracks().get(position);
+        Fragment trackFragment = new TrackEffectsPanelFragment();
+
+        // Replaces the main content screen w/ Short sound
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        // TODO: replace current track item with this fragment
+        fragmentManager.beginTransaction().replace(R.id.content_frame, trackFragment).commit();
+    }
 
 
     // ---------------------------------------------------------------
@@ -210,7 +184,6 @@ public class MainActivity extends Activity {
             return true;
         }
         // Handle your other action bar items...
-
         return super.onOptionsItemSelected(item);
     }
 }

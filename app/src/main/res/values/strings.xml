@@ -20,6 +20,10 @@
         <item>track 5</item>
         <item>track 6</item>
     </string-array>
+    <string-array name="effects_array">
+        <item>effect 1</item>
+        <item>effect 2</item>
+    </string-array>
     <string name="fake_track">editing stuff</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
