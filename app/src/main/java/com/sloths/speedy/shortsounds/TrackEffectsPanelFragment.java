@@ -1,14 +1,11 @@
 package com.sloths.speedy.shortsounds;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +23,7 @@ public class TrackEffectsPanelFragment extends Fragment {
     public TrackEffectsPanelFragment() {
         // Default constructore (required)
     }
+
     public TrackEffectsPanelFragment(ShortSoundTrack track) {
         this.track = track;
     }
