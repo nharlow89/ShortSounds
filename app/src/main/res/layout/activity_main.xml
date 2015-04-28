@@ -5,26 +5,29 @@
     android:layout_height="match_parent">
 
     <!-- The main content view -->
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <!-- This is where the ShortSounds go -->
-        <ExpandableListView
+        <RelativeLayout
             android:id="@+id/track_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            >
+
+        </RelativeLayout>
 
         <!-- This is the bottom toolbar -->
         <FrameLayout android:id="@+id/footer" android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_alignParentBottom="true"
             style="@android:style/ButtonBar"
-            android:layout_gravity="center_horizontal|bottom"
-            android:weightSum="1">
 
+            android:weightSum="1">
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -40,7 +43,7 @@
                 android:layout_gravity="right|top" />
         </FrameLayout>
 
-    </FrameLayout>
+    </LinearLayout>
 
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"
