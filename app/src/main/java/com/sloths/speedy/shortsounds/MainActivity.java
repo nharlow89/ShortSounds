@@ -22,14 +22,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-
-// TODO: 1) Populate pieces for skeleton (String names etc.)
-//       2) Run application and get a good look on what's happening
-//            -Populate other aspects as see fit
-//       3) Add ExpandableListView to FrameLayout in activity_main.xml
-//       4) Populate in java code the expandable list view w/ tracks
-//       5) Possibly figure out how to expand track w/ a fake effect (just a String)
-
 public class MainActivity extends Activity {
     private String[] mShortSounds;
     private DrawerLayout mDrawerLayout;
@@ -38,6 +30,9 @@ public class MainActivity extends Activity {
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
+    private List<ShortSound> sounds;
+    // TODO: Current sound could be implemented differntly, mockup done this way
+    private ShortSound currSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +41,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         Log.d("DB_TEST", "MainActivity:onCreate()");
-        List<ShortSound> sounds = ShortSound.getAll();
+        sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
 
         // Drawer Layout Stuff:
@@ -118,6 +113,8 @@ public class MainActivity extends Activity {
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // TODO: Before integration w/ Joel's code this while suffice for currSound
+            currSound = sounds.get(position);
             selectItem(position);
         }
     }
@@ -189,7 +186,20 @@ public class MainActivity extends Activity {
         getActionBar().setTitle(mTitle);
     }
 
+    /**
+     * Swaps card view w/ our track content
+     */
+    private void selectTrack(int position) {
+        // Grabs the ShortSound and populates the screen with it
 
+        // Create fragment for tracks
+        Fragment trackFragment = new TrackEffectsPanelFragment(currSound.getTracks().get(position));
+
+        // Replaces the main content screen w/ Short sound
+        FragmentManager fragmentManager = getFragmentManager();
+        // TODO: replace current track item with this fragment
+        fragmentManager.beginTransaction().replace(R.id.content_frame, trackFragment).commit();
+    }
 
 
     // ---------------------------------------------------------------
