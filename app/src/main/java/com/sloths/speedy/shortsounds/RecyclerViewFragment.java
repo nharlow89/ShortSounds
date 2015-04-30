@@ -46,6 +46,13 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         // set the adapter for the RecyclerView, passing in the data
         mAdapter = new RecyclerViewAdapter(trackNames, this);
         mRecyclerView.setAdapter(mAdapter);
+//
+//        mRecyclerView.setRecyclerListener(new RecyclerView.RecyclerListener() {
+//            @Override
+//            public void onViewRecycled(RecyclerView.ViewHolder viewHolder) {
+//
+//            }
+//        });
         return rootView;
 
     }
@@ -66,6 +73,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
 
     @Override
     public void onItemClicked(View v, int position) {
+
 
     }
 }
