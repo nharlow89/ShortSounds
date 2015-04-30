@@ -16,6 +16,35 @@
 .btn.bug:hover {
     color: black;
 }
+.team {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  padding: 2em;
+}
+.team ul {
+  list-style: none;
+  margin: 0;
+  text-align: right;
+  color: white;
+}
+.team ul a {
+  color: white;
+}
+section {
+  position: relative;
+}
+@media screen and (max-width: 64em) {
+  .team {
+    padding: 1em;
+  }
+}
+@media screen and (max-width: 42em) {
+  .team {
+    display: none;
+  }
+}
 
 * {
   box-sizing: border-box; }
