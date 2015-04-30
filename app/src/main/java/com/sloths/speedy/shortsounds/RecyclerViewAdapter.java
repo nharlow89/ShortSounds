@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
@@ -42,8 +43,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         View v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click listener for the ViewHolder's View.
+        ViewHolder vh = new ViewHolder(v);
 
-        return new ViewHolder(v);
+        return vh;
     }
 
     public String[] getTrackNames() {
@@ -70,12 +72,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
+        private final LinearLayout controller;
 
         public ViewHolder(View v) {
             super(v);
-
             v.setOnClickListener(new TrackItemClickListener());
             vTitle = (TextView) v.findViewById(R.id.track_title);
+            controller = (LinearLayout) v.findViewById(R.id.track_child);
+            controller.setVisibility(View.GONE);
 
         }
 
@@ -89,30 +93,31 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 listener.onItemClicked(v, getPosition());
-                selectTrack(getPosition());
+
+                controller.setVisibility(View.VISIBLE);
+//                selectTrack(getPosition());
             }
         }
 
-        /**
-         * Swaps card view holder w/ our track content
-         */
-        private void selectTrack(int position) {
-
-            // Grabs the ShortSound and populates the screen with it
-
-            // Create fragment for tracks
-            String currTrack = getTrackNames()[position];
-            Fragment trackFragment = new TrackEffectsPanelFragment();
-
-            // ================================================================
-            // TODO: Figure out how to recycle card view to show full track info
-            // ================================================================
-            // Replaces the main content screen w/ track
-            FragmentActivity activity = (FragmentActivity) context;
-            FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, trackFragment).commit();
-        }
-
+//        /**
+//         * Swaps card view holder w/ our track content
+//         */
+//        private void selectTrack(int position) {
+//
+//            // Grabs the ShortSound and populates the screen with it
+//
+//            // Create fragment for tracks
+//            String currTrack = getTrackNames()[position];
+//            Fragment trackFragment = new TrackEffectsPanelFragment();
+//
+//            // ================================================================
+//            // TODO: Figure out how to recycle card view to show full track info
+//            // ================================================================
+//            // Replaces the main content screen w/ track
+//            FragmentActivity activity = (FragmentActivity) context;
+//            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+//            fragmentManager.beginTransaction().replace(R.id.content_frame, trackFragment).commit();
+//        }
     }
 
     public interface RVListener {

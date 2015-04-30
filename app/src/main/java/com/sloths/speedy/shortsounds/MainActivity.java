@@ -127,7 +127,6 @@ public class MainActivity extends FragmentActivity {
     private void selectShortSoundFromDrawer(int position) {
         // Grabs the ShortSound and populates the screen with it
         Fragment fragment = new RecyclerViewFragment();
-        fragment.getL
         // Sets it to the correct ShortSound
         Bundle args = new Bundle();
         args.putInt(RecyclerViewFragment.ARG_SOUND_NUMBER, position);
