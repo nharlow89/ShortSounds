@@ -30,6 +30,7 @@ public class ShortSound {
         tracks = new ArrayList<ShortSoundTrack>();  // Initially no tracks
         this.id = sqlHelper.insertShortSound( this );  // Add ShortSound to the DB
         Log.d("DB_TEST", "Inserted ShortSound: " + this.toString() );
+        repInvariant();
     }
 
     /**
@@ -41,6 +42,7 @@ public class ShortSound {
     public ShortSound( HashMap<String, String> map ) {
         this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
         this.title = map.get( sqlHelper.KEY_TITLE );
+        repInvariant();
     }
 
     /**
@@ -80,6 +82,7 @@ public class ShortSound {
         this.tracks.remove(track);
         sqlHelper.removeShortSoundTrack( track );
         track.deleteFiles();
+        repInvariant();
     }
 
     /**
@@ -89,6 +92,7 @@ public class ShortSound {
      */
     public void setTracks( List<ShortSoundTrack> tracks ) {
         this.tracks = tracks;
+        repInvariant();
     }
 
     /**
@@ -106,6 +110,7 @@ public class ShortSound {
     public void setTitle( String new_title ) {
         this.title = new_title;
         sqlHelper.updateShortSound( this );  // Update the DB
+        repInvariant();
     }
 
     @Override
@@ -122,6 +127,12 @@ public class ShortSound {
 
     public long getId() {
         return id;
+    }
+
+    private void repInvariant() {
+        assert( this.title != null && this.title instanceof String );
+        assert( this.id > 0 );
+        assert( this.tracks instanceof ArrayList );
     }
 }
 
