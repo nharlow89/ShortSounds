@@ -38,15 +38,28 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("DB_TEST", "MainActivity:onCreate()");
+        List<ShortSound> sounds = ShortSound.getAll();
+        Log.d("DB_TEST", sounds.toString());
+        mShortSounds = getShortSoundTitles(sounds);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
-        Log.d("DB_TEST", "MainActivity:onCreate()");
-        List<ShortSound> sounds = ShortSound.getAll();
-        Log.d("DB_TEST", sounds.toString());
     }
 
+    /**
+     * Takes a list of short sounds and creates an String array of the titles
+     * @param sounds list of shortsounds
+     * @return string[] of titles
+     */
+    private String[] getShortSoundTitles(List<ShortSound> sounds) {
+        String[] titles = new String[sounds.size()];
+        for(int i = 0; i < sounds.size(); i++)
+            titles[i] = sounds.get(i).getTitle();
+        return titles;
+    }
 
     /**
      * Enables the action bar icon for the nav drawer that opens the library.
@@ -60,7 +73,6 @@ public class MainActivity extends FragmentActivity {
      * Provides logic for setting up the library drawer.
      */
     private void setUpLibraryDrawer() {
-        mShortSounds = getResources().getStringArray(R.array.shortsounds_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
@@ -147,6 +159,7 @@ public class MainActivity extends FragmentActivity {
 
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
+        Log.d("ssList", Arrays.toString(mShortSounds));
         setTitle(mShortSounds[position]);
         mDrawerLayout.closeDrawer(mDrawerList);
     }
