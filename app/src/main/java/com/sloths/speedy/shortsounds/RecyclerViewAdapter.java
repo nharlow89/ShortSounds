@@ -20,6 +20,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private static final String TAG = "RecyclerViewAdapter";
     private String[] mDataSet;
     private Context context;
+    private RVListener listener;
 
 
     /**
@@ -27,9 +28,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      *
      * @param trackNames String[] containing the data to populate views to be used by RecyclerView.
      */
-    public RecyclerViewAdapter(String[] trackNames, Context context) {
+    public RecyclerViewAdapter(String[] trackNames, RecyclerViewFragment rvf) {
         mDataSet = trackNames;
-        this.context = context;
+        this.context = rvf.getActivity();
+        listener = rvf;
 
     }
 
@@ -53,7 +55,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
-        viewHolder.getTitle().setText(mDataSet[position]);
+        viewHolder.setTitleView(position);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -71,19 +73,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         public ViewHolder(View v) {
             super(v);
+
             v.setOnClickListener(new TrackItemClickListener());
             vTitle = (TextView) v.findViewById(R.id.track_title);
 
         }
 
-        public TextView getTitle() {
-            return vTitle;
+        public void setTitleView(int position) {
+            vTitle.setText(mDataSet[position]);
         }
+
 
         /* The click listener for ListView in the navigation drawer */
         private class TrackItemClickListener implements View.OnClickListener {
             @Override
             public void onClick(View v) {
+                listener.onItemClicked(v, getPosition());
                 selectTrack(getPosition());
             }
         }
@@ -92,6 +97,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          * Swaps card view holder w/ our track content
          */
         private void selectTrack(int position) {
+
             // Grabs the ShortSound and populates the screen with it
 
             // Create fragment for tracks
@@ -107,5 +113,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             fragmentManager.beginTransaction().replace(R.id.content_frame, trackFragment).commit();
         }
 
+    }
+
+    public interface RVListener {
+        public void onItemClicked(View v, int position);
     }
 }

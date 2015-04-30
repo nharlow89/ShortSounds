@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class RecyclerViewFragment extends Fragment {
+public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapter.RVListener {
 
     public static final String ARG_SOUND_NUMBER = "sound_number";
     private static final String TAG = "RecyclerViewFragment";
@@ -44,22 +44,10 @@ public class RecyclerViewFragment extends Fragment {
         // set the LayoutManager for the RecyclerView
         mRecyclerView.setLayoutManager(mLayoutManager);
         // set the adapter for the RecyclerView, passing in the data
-        mAdapter = new RecyclerViewAdapter(trackNames, inflater.getContext());
+        mAdapter = new RecyclerViewAdapter(trackNames, this);
         mRecyclerView.setAdapter(mAdapter);
-
-//        // Set touch listener
-//        mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-//            @Override
-//            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-//                return true;
-//            }
-//
-//            @Override
-//            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-//                Log.d(TAG, "Clicked an item");
-//            }
-//        });
         return rootView;
+
     }
 
 
@@ -74,5 +62,10 @@ public class RecyclerViewFragment extends Fragment {
         // Populate array of tracks
         List<String> trackTitles = Arrays.asList(getResources().getStringArray(R.array.track_array));
         trackNames = (String[]) trackTitles.toArray();
+    }
+
+    @Override
+    public void onItemClicked(View v, int position) {
+
     }
 }
