@@ -7,6 +7,15 @@
     background-color: #159957;
     color: black;
 }
+.btn.bug {
+    background-color: #159957;
+    color: white;
+    padding: 0px 6px;
+    margin: 0;
+}
+.btn.bug:hover {
+    color: black;
+}
 
 * {
   box-sizing: border-box; }
