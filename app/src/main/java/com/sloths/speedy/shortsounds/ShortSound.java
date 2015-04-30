@@ -18,8 +18,7 @@ public class ShortSound {
     private List<ShortSoundTrack> tracks;
     private String title;
     private long id;
-    private static ShortSoundSQLHelper sqlHelper =
-            new ShortSoundSQLHelper( ShortSoundsApplication.getAppContext() );
+    private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
 
     /**
      * Constructor: Create a new empty ShortSound
@@ -71,8 +70,6 @@ public class ShortSound {
      */
     public void addTrack( ShortSoundTrack track ) {
         this.tracks.add( track );  // Add track to list
-        long new_id = this.sqlHelper.insertShortSoundTrack( track, this.id );
-        track.setId( new_id );  // Update the ShortSoundTrack with db id
     }
 
     /**
@@ -80,8 +77,7 @@ public class ShortSound {
      */
     public void removeTrack( ShortSoundTrack track ) {
         this.tracks.remove(track);
-        sqlHelper.removeShortSoundTrack( track );
-        track.deleteFiles();
+        track.delete();
         repInvariant();
     }
 
@@ -130,9 +126,9 @@ public class ShortSound {
     }
 
     private void repInvariant() {
-        assert( this.title != null && this.title instanceof String );
-        assert( this.id > 0 );
-        assert( this.tracks instanceof ArrayList );
+        if ( this.title == null || !(this.title instanceof String) ) throw new AssertionError("Invalid title");
+        if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id );
+        if ( !( this.tracks instanceof  ArrayList ) ) throw new AssertionError("List of tracks should be an ArrayList!");
     }
 }
 

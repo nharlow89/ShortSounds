@@ -8,6 +8,8 @@ import java.util.HashMap;
  */
 public class ShortSoundTrack {
 
+    private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
+
     public static final String AUDIO_FORMAT = "";  // TODO: format/encoding?
     public static final int TRACK_LENGTH = 30;  // Track length in seconds
     public static final int BUFFER_SIZE = 2000;  // TODO: make buffer size with respect to TRACK_LENGTH
@@ -23,10 +25,11 @@ public class ShortSoundTrack {
      * Constructor for a ShortSoundTrack.
      * @param filename The filename of the recorded audio file.
      */
-    public ShortSoundTrack( String filename ) {
+    public ShortSoundTrack( String filename, long shortSoundId ) {
         this.title = DEFAULT_TITLE;
         this.originalFile = filename;
         this.file = filename + "-ss";  // May need to change?
+        this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
     }
 
     /**
@@ -49,10 +52,19 @@ public class ShortSoundTrack {
     }
 
     /**
+     * Remove the ShortSoundTrack from the database and delete the corresponding
+     * files.
+     */
+    public void delete() {
+        sqlHelper.removeShortSoundTrack( this );
+        deleteFiles();
+    }
+
+    /**
      * Remove this ShortSoundTrack's files from memory (both the original and
      * any modified)
      */
-    public void deleteFiles() {
+    private void deleteFiles() {
         File originalFile = new File( this.originalFile );
         if( originalFile.exists() ) {
             originalFile.delete();
@@ -75,13 +87,16 @@ public class ShortSoundTrack {
     public String toString() {
         return this.title;
     }
+
+    private void repInvariant() {
+        if ( this.title == null || !(this.title instanceof String) ) throw new AssertionError("Invalid title");
+        if ( this.file == null || !(this.file instanceof String) ) throw new AssertionError("Invalid filename");
+        if ( this.originalFile == null || !(this.originalFile instanceof String) ) throw new AssertionError("Invalid filename");
+        if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
+        // Check that the files are on disk
+        File originalFile = new File( this.originalFile );
+        if ( !originalFile.exists() ) throw new AssertionError("File does not exist: " + originalFile);
+        File file = new File( this.file );
+        if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
+    }
 }
-
-
-/*
-    Record a sound.
-    Create ShortSoundTrack.
-    Add ShortSoundTrack to the ShortSound.
-    Save ShortSoundTrack to disk
-    Update DB to associate the ShortSoundTrack with the ShortSound
- */

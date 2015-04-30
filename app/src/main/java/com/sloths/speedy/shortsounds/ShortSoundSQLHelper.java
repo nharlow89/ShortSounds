@@ -20,6 +20,7 @@ import java.util.List;
 public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     private SQLiteDatabase db;
+    private static ShortSoundSQLHelper instance;
 
     private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "ShortSounds.db";
@@ -54,10 +55,18 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                     KEY_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
                     KEY_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP);";
 
-    public ShortSoundSQLHelper(Context context) {
+    private ShortSoundSQLHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         //  context.deleteDatabase(DATABASE_NAME);  // TODO: remove, only for clearing the db
         db = getWritableDatabase();
+    }
+
+    public static ShortSoundSQLHelper getInstance() {
+        if ( instance == null ) {
+            return new ShortSoundSQLHelper( ShortSoundsApplication.getAppContext() );
+        } else {
+            return instance;
+        }
     }
 
     /**
