@@ -30,7 +30,7 @@
                 <SeekBar
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight=".8"
+                    android:layout_weight=".87"
                     android:id="@+id/volumeSlider"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
@@ -38,7 +38,7 @@
                 <Button
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight=".2"
+                    android:layout_weight=".13"
                     android:id="@+id/trackPlay"
                     android:background="@android:drawable/ic_media_play"
                     android:layout_marginLeft="10dp"
