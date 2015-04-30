@@ -24,9 +24,9 @@ public class TrackEffectsPanelFragment extends Fragment {
         // Default constructore (required)
     }
 
-    public TrackEffectsPanelFragment(ShortSoundTrack track) {
-        this.track = track;
-    }
+//    public TrackEffectsPanelFragment(ShortSoundTrack track) {
+//        this.track = track;
+//    }
 
     // Creates the view to put in to the card View
     @Override

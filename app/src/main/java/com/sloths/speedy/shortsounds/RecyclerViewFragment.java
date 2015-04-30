@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -42,8 +44,21 @@ public class RecyclerViewFragment extends Fragment {
         // set the LayoutManager for the RecyclerView
         mRecyclerView.setLayoutManager(mLayoutManager);
         // set the adapter for the RecyclerView, passing in the data
-        mAdapter = new RecyclerViewAdapter(trackNames);
+        mAdapter = new RecyclerViewAdapter(trackNames, inflater.getContext());
         mRecyclerView.setAdapter(mAdapter);
+
+//        // Set touch listener
+//        mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+//            @Override
+//            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+//                return true;
+//            }
+//
+//            @Override
+//            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+//                Log.d(TAG, "Clicked an item");
+//            }
+//        });
         return rootView;
     }
 

@@ -127,7 +127,7 @@ public class MainActivity extends FragmentActivity {
     private void selectShortSoundFromDrawer(int position) {
         // Grabs the ShortSound and populates the screen with it
         Fragment fragment = new RecyclerViewFragment();
-
+        fragment.getL
         // Sets it to the correct ShortSound
         Bundle args = new Bundle();
         args.putInt(RecyclerViewFragment.ARG_SOUND_NUMBER, position);
@@ -147,22 +147,6 @@ public class MainActivity extends FragmentActivity {
     public void setTitle(CharSequence title) {
         mTitle = title;
         getActionBar().setTitle(mTitle);
-    }
-
-    /**
-     * Swaps card view w/ our track content
-     */
-    private void selectTrack(int position) {
-        // Grabs the ShortSound and populates the screen with it
-
-        // Create fragment for tracks
-        ShortSoundTrack currTrack = currSound.getTracks().get(position);
-        Fragment trackFragment = new TrackEffectsPanelFragment();
-
-        // Replaces the main content screen w/ Short sound
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        // TODO: replace current track item with this fragment
-        fragmentManager.beginTransaction().replace(R.id.content_frame, trackFragment).commit();
     }
 
 
