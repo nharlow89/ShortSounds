@@ -1,13 +1,10 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.model;
 
 /**
  * Created by caseympfischer on 4/28/15.
  */
 public abstract class Effect {
     protected boolean active;
-    private EffectName title;
-    private long id;
-    public enum EffectName {EqEffect, Reverb, BitCrush, Distortion};
     public android.media.audiofx.AudioEffect effect;
 
     /**
@@ -28,10 +25,6 @@ public abstract class Effect {
      * Returns the name of the effect
      * @return The name of the effect
      */
-    public EffectName getTitle() {
-        return title;
-    }
-
     public abstract String getTitleString();
 
     /**

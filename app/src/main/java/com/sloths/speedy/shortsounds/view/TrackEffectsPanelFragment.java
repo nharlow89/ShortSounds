@@ -1,14 +1,12 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.view;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
-import java.util.Arrays;
-import java.util.List;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 /**
  * Created by shampson on 4/27/15.

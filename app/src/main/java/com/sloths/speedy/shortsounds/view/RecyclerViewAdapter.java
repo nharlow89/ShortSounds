@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.view;
 
 /**
  * Created by joel on 4/25/2015.
@@ -11,6 +11,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.model.Effect;
+import com.sloths.speedy.shortsounds.model.EqEffect;
+import com.sloths.speedy.shortsounds.model.ReverbEffect;
 
 import java.util.ArrayList;
 import java.util.List;

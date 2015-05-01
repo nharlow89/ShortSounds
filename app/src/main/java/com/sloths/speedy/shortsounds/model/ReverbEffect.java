@@ -1,14 +1,23 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.model;
+
+import com.sloths.speedy.shortsounds.model.Effect;
 
 /**
  * Created by caseympfischer on 4/28/15.
  */
 public class ReverbEffect extends Effect {
-    private static final int ACTIVE = 1;
-    private static final int DECAY = 2;
-    private static final int REFLECTION_DELAY = 3;
-    private static final int REFLECTION_LEVEL = 4;
-    private static final int DENSITY = 5;
+    // these INDEX constants are for accessing the values encoded in the string after
+    // it has been split by "."
+    private static final int INDEX_ACTIVE = 1;
+    private static final int INDEX_DECAY = 2;
+    private static final int INDEX_REFLECTION_DELAY = 3;
+    private static final int INDEX_REFLECTION_LEVEL = 4;
+    private static final int INDEX_DENSITY = 5;
+
+    private static final int DEFAULT_DECAY = 0;
+    private static final int DEFAULT_REFLECTION_DELAY = 0;
+    private static final int DEFAULT_REFLECTION_LEVEL = 0;
+    private static final int DEFAULT_DENSITY = 0;
 
     private int decay;
     private int reflectDelay;
@@ -26,11 +35,11 @@ public class ReverbEffect extends Effect {
     }
 
     public static Effect parseParameters(String[] parameters) {
-        ReverbEffect retVal = new ReverbEffect(parameters[ACTIVE].equals("ON"),
-                Integer.parseInt(parameters[DECAY]),
-                Integer.parseInt(parameters[REFLECTION_DELAY]),
-                Integer.parseInt(parameters[REFLECTION_LEVEL]),
-                Integer.parseInt(parameters[DENSITY]));
+        ReverbEffect retVal = new ReverbEffect(parameters[INDEX_ACTIVE].equals("ON"),
+                Integer.parseInt(parameters[INDEX_DECAY]),
+                Integer.parseInt(parameters[INDEX_REFLECTION_DELAY]),
+                Integer.parseInt(parameters[INDEX_REFLECTION_LEVEL]),
+                Integer.parseInt(parameters[INDEX_DENSITY]));
         return retVal;
     }
 
@@ -40,6 +49,14 @@ public class ReverbEffect extends Effect {
         this.reflectLevel = reflectLevel;
         this.reflectDelay = reflectDelay;
         this.density = density;
+    }
+
+    public ReverbEffect() {
+        this.active = false;
+        this.decay = DEFAULT_DECAY;
+        this.reflectLevel = DEFAULT_REFLECTION_LEVEL;
+        this.reflectDelay = DEFAULT_REFLECTION_DELAY;
+        this.density = DEFAULT_DENSITY;
     }
 
     /**

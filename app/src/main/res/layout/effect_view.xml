@@ -5,66 +5,68 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
     <LinearLayout android:id="@+id/topPanel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:layout_weight=".1"
+        android:orientation="vertical"
+        android:minHeight="30dp">
         <TextView android:id="@+id/effectNameTitle"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:orientation="horizontal"
+            android:layout_height="match_parent"
             android:gravity="center"
             android:text="Effect Name"
             android:textSize="20dp"
-            android:layout_weight=".1"
-            android:layout_margin="10dp">
+            android:minHeight="30dp">
         </TextView>
         <!-- If the client uses a customTitle, it will be added here. -->
     </LinearLayout>
 
-    <LinearLayout
+    <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:id="@+id/effect_content"
         android:layout_weight=".8"
         android:gravity="center">
 
-    </LinearLayout>
+    </View>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="bottom"
         android:layout_weight=".1"
         android:orientation="horizontal">
 
-
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cancel"
             android:id="@+id/cancelEffectButton"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="60dp"
-            android:layout_gravity="center_vertical" />
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight=".7" />
+            android:layout_gravity="center_vertical"
+            android:layout_toLeftOf="@+id/effectSpace"
+            android:layout_toStartOf="@+id/effectSpace"
+            android:layout_centerHorizontal="true" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Save"
             android:id="@+id/saveEffectButton"
-            android:layout_marginRight="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_alignBottom="@+id/cancelEffectButton"
+            android:layout_toRightOf="@+id/effectSpace"
+            android:layout_toEndOf="@+id/effectSpace"
+            android:layout_centerHorizontal="true" />
 
-    </LinearLayout>
+        <Space
+            android:layout_width="100px"
+            android:layout_height="20px"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/effectSpace" />
+
+    </RelativeLayout>
 
 </LinearLayout>

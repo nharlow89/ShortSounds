@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.view;
 
 import android.app.Application;
 import android.content.Context;

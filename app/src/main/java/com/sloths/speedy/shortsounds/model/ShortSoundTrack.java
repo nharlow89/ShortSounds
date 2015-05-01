@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.model;
 
 import java.io.File;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.model;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
