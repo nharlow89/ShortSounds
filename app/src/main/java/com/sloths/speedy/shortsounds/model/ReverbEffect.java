@@ -1,4 +1,6 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.model;
+
+import com.sloths.speedy.shortsounds.model.Effect;
 
 /**
  * Created by caseympfischer on 4/28/15.

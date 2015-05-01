@@ -1,26 +1,22 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.view;
 
 /**
  * Created by joel on 4/25/2015.
  */
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.sloths.speedy.shortsounds.R;
 
 import java.util.Arrays;
 import java.util.List;

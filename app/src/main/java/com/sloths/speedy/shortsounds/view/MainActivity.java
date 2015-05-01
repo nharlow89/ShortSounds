@@ -1,23 +1,28 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.view;
 
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
+
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.res.Configuration;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.os.Bundle;
+import android.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.model.ShortSound;
+
 import java.util.List;
-import android.support.v4.app.Fragment;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends Activity {
     private String[] mShortSounds;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -69,7 +74,7 @@ public class MainActivity extends FragmentActivity {
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
+//                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
                 R.string.drawer_open,  /* "open drawer" description for accessibility */
                 R.string.drawer_close  /* "close drawer" description for accessibility */
         ) {
@@ -133,7 +138,7 @@ public class MainActivity extends FragmentActivity {
         fragment.setArguments(args);
 
         // Replaces the main content screen w/ Short sound
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = this.getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.track_list, fragment).commit();
 
         // Highlight item, update title, close drawer

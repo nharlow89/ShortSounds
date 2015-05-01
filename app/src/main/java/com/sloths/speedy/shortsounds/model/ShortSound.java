@@ -1,6 +1,8 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.model;
 
 import android.util.Log;
+
+import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
 import java.util.ArrayList;
 import java.util.HashMap;
