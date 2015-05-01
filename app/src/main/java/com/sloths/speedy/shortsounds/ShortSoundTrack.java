@@ -15,7 +15,7 @@ public class ShortSoundTrack {
     public static final int BUFFER_SIZE = 2000;  // TODO: make buffer size with respect to TRACK_LENGTH
     public static final String DEFAULT_TITLE = "Untitled Track";
 
-    private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance( ShortSoundsApplication.getAppContext() );
+    private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
     private final String originalFile;
     private final String file;
     private long id;

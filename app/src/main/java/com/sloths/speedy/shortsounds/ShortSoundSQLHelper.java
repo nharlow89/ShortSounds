@@ -22,7 +22,7 @@ import java.util.List;
 public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     private SQLiteDatabase db;
-    private static ShortSoundSQLHelper instance;
+    private static ShortSoundSQLHelper instance = new ShortSoundSQLHelper( ShortSoundsApplication.getAppContext() );
 
     private static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "ShortSounds.db";
@@ -63,13 +63,22 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     }
 
 
-    public static ShortSoundSQLHelper getInstance( Context context ) {
+    public static ShortSoundSQLHelper getInstance() {
         if ( instance == null ) {
-            instance = new ShortSoundSQLHelper( context );
+            instance = new ShortSoundSQLHelper( ShortSoundsApplication.getAppContext() );
             return instance;
         } else {
             return instance;
         }
+    }
+
+    /**
+     * Might be frowned upon, but had to make this to get around singleton for testing.
+     * Basically, the singleton prevented the tests from recreating a new db each test.
+     */
+    public static ShortSoundSQLHelper getTestInstance( Context context ) {
+        instance = new ShortSoundSQLHelper( context );
+        return instance;
     }
 
     /**
@@ -130,8 +139,12 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         Log.d("DB_TEST", "Updated ShortSound: " + ss.toString() );
     }
 
+    /**
+     * Remove a ShortSound from the database and removes any associated ShortSoundTracks.
+     * @param ss
+     */
     public void removeShortSound( ShortSound ss ) {
-        // TODO:
+        // TODO
     }
 
     /**
@@ -191,7 +204,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      * @param track
      */
     public void removeShortSoundTrack( ShortSoundTrack track ) {
-        // TODO
+        // TODO remove from db and delete any files
     }
 
 

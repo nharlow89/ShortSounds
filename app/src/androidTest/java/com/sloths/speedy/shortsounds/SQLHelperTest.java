@@ -1,10 +1,8 @@
 package com.sloths.speedy.shortsounds;
 
-import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -18,10 +16,8 @@ public class SQLHelperTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        context = new RenamingDelegatingContext(getContext(), "test_");
-        File dbFile = new File("test_" + ShortSoundSQLHelper.DATABASE_NAME);
-        SQLiteDatabase.deleteDatabase( dbFile );
-        db = ShortSoundSQLHelper.getInstance( context );
+        context = new RenamingDelegatingContext(getContext(), "test-");
+        db = ShortSoundSQLHelper.getTestInstance( context );
     }
 
     @Override
@@ -30,12 +26,13 @@ public class SQLHelperTest extends AndroidTestCase {
         super.tearDown();
     }
 
+
     /**
      * Test that our singleton is implemented properly.
      */
     public void testSingleton() {
         // Lets try to grab another instance and compare to the existing one
-        ShortSoundSQLHelper newHelper = ShortSoundSQLHelper.getInstance( context );
+        ShortSoundSQLHelper newHelper = ShortSoundSQLHelper.getInstance();
         assertEquals( db, newHelper );
     }
 
@@ -61,7 +58,6 @@ public class SQLHelperTest extends AndroidTestCase {
                 found = true;
             }
         }
-        // TODO: make sure this gets removed so it doesnt effect other tests?
         assertTrue( found );
     }
 
