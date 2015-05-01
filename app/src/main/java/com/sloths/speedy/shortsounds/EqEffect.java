@@ -3,6 +3,7 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by caseympfischer on 4/28/15.
  */
+public class EqEffect extends Effect {
 public class EqEffect extends ShortSoundTrackEffect {
     // these constants are for accessing the values encoded in the string after
     // it has been split by "."
@@ -46,5 +47,11 @@ public class EqEffect extends ShortSoundTrackEffect {
             throw new IllegalArgumentException("Only two EQ frequency bands are permitted.");
         }
         return bandLevels[band];
+    public short getBandLevel(short band) {
+        return 0;
+    }
+
+    public String getTitleString() {
+        return "Equalizer";
     }
 }

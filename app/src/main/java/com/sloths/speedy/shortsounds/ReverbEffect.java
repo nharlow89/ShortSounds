@@ -3,7 +3,7 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by caseympfischer on 4/28/15.
  */
-public class ReverbEffect extends ShortSoundTrackEffect {
+public class ReverbEffect extends Effect {
     private static final int ACTIVE = 1;
     private static final int DECAY = 2;
     private static final int REFLECTION_DELAY = 3;
@@ -25,7 +25,7 @@ public class ReverbEffect extends ShortSoundTrackEffect {
         return retVal + "," + decay + "," + reflectDelay + "," + reflectLevel + "," + density;
     }
 
-    public static ShortSoundTrackEffect parseParameters(String[] parameters) {
+    public static Effect parseParameters(String[] parameters) {
         ReverbEffect retVal = new ReverbEffect(parameters[ACTIVE].equals("ON"),
                 Integer.parseInt(parameters[DECAY]),
                 Integer.parseInt(parameters[REFLECTION_DELAY]),
@@ -66,6 +66,10 @@ public class ReverbEffect extends ShortSoundTrackEffect {
     public void setReflections(int delay, int level) {
         this.reflectDelay = delay;
         this.reflectLevel = level;
+    }
+
+    public String getTitleString() {
+        return "Reverb";
     }
 
     /**

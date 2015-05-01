@@ -3,16 +3,13 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by joel on 4/25/2015.
  */
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -45,7 +42,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view.
         View v = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.track_view, viewGroup, false);
+                .inflate(R.layout.track_view_with_buttons, viewGroup, false);
         // Define click listener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
 
@@ -77,47 +74,72 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
         private final LinearLayout controller;
-        private final ListView effectsList;
+        final Button eqButton;
+        final Button reverbButton;
+        final Button distButton;
+        final Button bitButton;
+        //        private final ListView effectsList;
         private boolean trackExpanded;
 
         public ViewHolder(View v) {
             super(v);
-            v.setOnClickListener(new TrackItemClickListener());
+            v.setOnClickListener(new TrackListener());
+
             vTitle = (TextView) v.findViewById(R.id.track_title);
-            controller = (LinearLayout) v.findViewById(R.id.track_child);
+            controller = (LinearLayout) v.findViewById(R.id.track_child_b);
+            eqButton = ((Button) v.findViewById(R.id.eq_button));
+            reverbButton = ((Button) v.findViewById(R.id.reverb_button));
+            distButton = ((Button) v.findViewById(R.id.dist_button));
+            bitButton = ((Button) v.findViewById(R.id.bit_button));
+
+            setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
+
             controller.setVisibility(View.GONE);
 
             // Populate effects in the effects list the track keeps
             // TODO: Link the effects to the real ones in the database
             // Currently populating a fake effects list
-            List<ShortSoundTrackEffect> effects = getEffects();
-
-            effectsList = (ListView) v.findViewById(R.id.effects_list);
-            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
-            effectsList.setAdapter(effectsAdapter);
+//            List<Effect> effects = getEffects();
+//
+//            effectsList = (ListView) v.findViewById(R.id.effects_list_b);
+//            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
+//            effectsList.setAdapter(effectsAdapter);
             trackExpanded = false;
+
         }
 
         public void setTitleView(int position) {
             vTitle.setText(mDataSet[position]);
         }
 
-        private List<ShortSoundTrackEffect> getEffects() {
-            List<ShortSoundTrackEffect> retList = new ArrayList<ShortSoundTrackEffect>();
-            ShortSoundTrackEffect effect1 = new EqEffect();
+        private List<Effect> getEffects() {
+            List<Effect> retList = new ArrayList<Effect>();
+            Effect effect1 = new EqEffect();
             retList.add(effect1);
-            ShortSoundTrackEffect effect2 = new ReverbEffect();
+            Effect effect2 = new ReverbEffect();
             retList.add(effect2);
             retList.add(effect2);
             return retList;
         }
 
+        private void setUpButtons(Button[] bs) {
+            for (int i = 0; i < 4; i++) {
+
+                final String name = bs[i].getText().toString();
+                bs[i].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        listener.onButtonClicked(v, getPosition(), name);
+                    }
+                });
+            }
+        }
 
         /* The click listener for ListView in the navigation drawer */
-        private class TrackItemClickListener implements View.OnClickListener {
+        private class TrackListener implements View.OnClickListener  {
             @Override
             public void onClick(View v) {
-                listener.onItemClicked(v, getPosition());
+                //listener.onButtonClicked(v, getPosition());
                 if (!trackExpanded) {
                     // Expand track
                     controller.setVisibility(View.VISIBLE);
@@ -131,6 +153,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public interface RVListener {
-        public void onItemClicked(View v, int position);
+        public void onButtonClicked(View v, int track, String name);
     }
 }
