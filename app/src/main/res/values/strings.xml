@@ -3,6 +3,8 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_save">Save</string>
+    <string name="action_new">New Short Sound</string>
     <string-array name="shortsounds_array">
         <item>Rock</item>
         <item>Your</item>

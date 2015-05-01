@@ -126,7 +126,7 @@ public class MainActivity extends FragmentActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-        menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
+        menu.findItem(R.id.action_settings).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -159,9 +159,9 @@ public class MainActivity extends FragmentActivity {
 
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
-        Log.d("ssList", Arrays.toString(mShortSounds));
-        setTitle(mShortSounds[position]);
+
         mDrawerLayout.closeDrawer(mDrawerList);
+        setTitle(mShortSounds[position]);
     }
 
     @Override
