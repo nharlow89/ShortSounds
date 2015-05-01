@@ -31,7 +31,7 @@ public class ShortSoundTrack {
 
     /**
      * Construct a ShortSoundTrack from data stored in the DB.
-     * @param map
+     * @param map A map from DB column names to their respective values for this ShortSound
      */
     public ShortSoundTrack( HashMap<String, String> map ) {
         this.id = Long.parseLong( map.get( ShortSoundSQLHelper.KEY_ID ) );
