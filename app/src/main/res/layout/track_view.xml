@@ -6,10 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     card_view:cardCornerRadius="4dp"
-    android:layout_margin="5dp">
+    android:layout_margin="5dp"
+    style="@style/AppTheme"
+    android:background="@android:color/background_dark">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        style="@style/AppTheme"
+        android:background="@android:color/darker_gray">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -18,10 +22,10 @@
             <TextView
                 android:id="@+id/track_title"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:gravity="center_vertical"
-                android:textColor="@android:color/black"
-                android:textSize="14dp"/>
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="18dp"/>
 
         </RelativeLayout>
 
@@ -39,15 +43,7 @@
                 android:layout_weight=".3"
                 android:id="@+id/upperTrackView"
                 android:layout_margin="20dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/trackName"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="Track Name"
-                    android:layout_above="@+id/controls"
-                    android:layout_centerHorizontal="true"
-                    android:layout_margin="10dp" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -75,53 +71,122 @@
                 </LinearLayout>
 
             </RelativeLayout>
+
+            <!-- This is all the effects stuff -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight=".7"
                 android:gravity="center">
-                <Button
-                    android:layout_width="140dp"
-                    android:layout_height="80dp"
-                    android:layout_margin="20dp"
-                    android:id="@+id/eq_button"
-                    android:text="EQ"
-                    android:textColor="@color/accent_material_light"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginBottom="20dp" />
-                <Button
-                    android:layout_width="140dp"
-                    android:layout_height="80dp"
-                    android:id="@+id/dist_button"
-                    android:text="Distortion"
-                    android:textColor="@color/accent_material_light"
-                    android:layout_alignTop="@+id/eq_button"
-                    android:layout_toRightOf="@+id/bit_button"
-                    android:layout_toEndOf="@+id/bit_button"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginBottom="20dp" />
-                <Button
-                    android:layout_width="140dp"
-                    android:layout_height="80dp"
-                    android:id="@+id/reverb_button"
-                    android:text="Reverb"
-                    android:textColor="@color/accent_material_light"
-                    android:layout_below="@+id/eq_button"
-                    android:layout_toRightOf="@+id/bit_button"
-                    android:layout_toEndOf="@+id/bit_button"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="20dp" />
-                <Button
-                    android:layout_width="140dp"
-                    android:layout_height="80dp"
-                    android:id="@+id/bit_button"
-                    android:text="BitCrush"
-                    android:textColor="@color/accent_material_light"
-                    android:layout_below="@+id/eq_button"
-                    android:layout_alignLeft="@+id/eq_button"
-                    android:layout_alignStart="@+id/eq_button"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginTop="20dp" />
+
+                <!-- Equalizer -->
+                <RelativeLayout
+                    android:layout_width="220dp"
+                    android:layout_height="50dp"
+                    android:id="@+id/eq_layout"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/eq_button"
+                        android:layout_width="140dp"
+                        android:layout_height="40dp"
+                        android:text="EQ"
+                        android:gravity="center"
+                        android:textColor="@color/accent_material_dark" />
+
+                    <Switch
+                        android:id="@+id/eq_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="false"
+                        android:layout_alignParentTop="true"
+                        android:layout_toRightOf="@+id/eq_button"
+                        android:gravity="right"/>
+
+                </RelativeLayout>
+
+                <!-- Distortion -->
+                <RelativeLayout
+                    android:layout_width="220dp"
+                    android:layout_height="50dp"
+                    android:id="@+id/dist_layout"
+                    android:gravity="center"
+                    android:layout_below="@+id/eq_layout">
+
+                    <Button
+                        android:layout_width="140dp"
+                        android:layout_height="40dp"
+                        android:id="@+id/dist_button"
+                        android:text="Distortion"
+                        android:gravity="center"
+                        android:textColor="@color/accent_material_dark"/>
+
+                    <Switch
+                        android:id="@+id/dist_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="false"
+                        android:layout_alignParentTop="true"
+                        android:layout_toRightOf="@+id/dist_button"
+                        android:gravity="center_vertical"/>
+                 </RelativeLayout>
+
+                <!-- Reverb -->
+                <RelativeLayout
+                    android:layout_width="220dp"
+                    android:layout_height="50dp"
+                    android:id="@+id/reverb_layout"
+                    android:gravity="center"
+                    android:layout_below="@+id/dist_layout">
+
+                    <Button
+                        android:layout_width="140dp"
+                        android:layout_height="40dp"
+                        android:id="@+id/reverb_button"
+                        android:text="Reverb"
+                        android:gravity="center"
+                        android:textColor="@color/accent_material_dark"/>
+
+                    <Switch
+                        android:id="@+id/reverb_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="false"
+                        android:layout_alignParentTop="true"
+                        android:layout_toRightOf="@+id/reverb_button"
+                        android:gravity="center_vertical"/>
+
+                </RelativeLayout>
+
+                <!-- BitCrush -->
+                <RelativeLayout
+                    android:layout_width="220dp"
+                    android:layout_height="50dp"
+                    android:id="@+id/bit_layout"
+                    android:gravity="center"
+                    android:layout_below="@+id/reverb_layout">
+
+                    <Button
+                        android:layout_width="140dp"
+                        android:layout_height="40dp"
+                        android:id="@+id/bit_button"
+                        android:text="BitCrush"
+                        android:gravity="center"
+                        android:textColor="@color/accent_material_dark"/>
+
+                    <Switch
+                        android:id="@+id/bit_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="false"
+                        android:layout_alignParentTop="true"
+                        android:layout_toRightOf="@+id/bit_button"
+                        android:gravity="center_vertical"/>
+
+                </RelativeLayout>
+
+
+
 
             </RelativeLayout>
         </LinearLayout>
