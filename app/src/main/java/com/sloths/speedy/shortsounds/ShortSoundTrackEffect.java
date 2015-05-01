@@ -4,10 +4,15 @@ package com.sloths.speedy.shortsounds;
  * Created by caseympfischer on 4/28/15.
  */
 public abstract class ShortSoundTrackEffect {
-    private boolean active;
-    private EffectName title;
-    private long id;
+    /* This ADT represents an audio effect to be applied to a ShortSoundTrack
+     *
+     */
+
     public enum EffectName {EqEffect, Reverb};
+
+    protected boolean active;
+    protected EffectName title;
+    protected long id;
     public android.media.audiofx.AudioEffect effect;
 
     /**
@@ -41,7 +46,7 @@ public abstract class ShortSoundTrackEffect {
     }
 
     /**
-     * This method is used for loading an effect from the string encoded in the
+     * This method is used for loading an effect from its string encoding in the
      * database. It parses the given string and returns the ShortSoundTrackEffect
      * object that the string represents.
      * @param parameters The String as taken from the database
