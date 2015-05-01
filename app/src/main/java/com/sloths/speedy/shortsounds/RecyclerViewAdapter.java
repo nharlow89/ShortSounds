@@ -3,16 +3,12 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by joel on 4/25/2015.
  */
-import android.app.AlertDialog;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -76,7 +72,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
         private final LinearLayout controller;
-        private final ListView effectsList;
+//        private final ListView effectsList;
         private boolean trackExpanded;
         private final ViewGroup viewGroup;
 
@@ -91,12 +87,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             // Populate effects in the effects list the track keeps
             // TODO: Link the effects to the real ones in the database
             // Currently populating a fake effects list
-            List<ShortSoundTrackEffect> effects = getEffects();
-
-            effectsList = (ListView) v.findViewById(R.id.effects_list);
-            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
-            effectsList.setAdapter(effectsAdapter);
+//            List<ShortSoundTrackEffect> effects = getEffects();
+//
+//            effectsList = (ListView) v.findViewById(R.id.effects_list_b);
+//            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
+//            effectsList.setAdapter(effectsAdapter);
             trackExpanded = false;
+
         }
 
         public void setTitleView(int position) {
