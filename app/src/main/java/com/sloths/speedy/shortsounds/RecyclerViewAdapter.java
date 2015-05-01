@@ -42,7 +42,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view.
         View v = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.track_view_with_buttons, viewGroup, false);
+                .inflate(R.layout.track_view, viewGroup, false);
         // Define click listener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
 
@@ -86,7 +86,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             v.setOnClickListener(new TrackListener());
 
             vTitle = (TextView) v.findViewById(R.id.track_title);
-            controller = (LinearLayout) v.findViewById(R.id.track_child_b);
+            controller = (LinearLayout) v.findViewById(R.id.track_child);
             eqButton = ((Button) v.findViewById(R.id.eq_button));
             reverbButton = ((Button) v.findViewById(R.id.reverb_button));
             distButton = ((Button) v.findViewById(R.id.dist_button));

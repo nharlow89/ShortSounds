@@ -61,7 +61,7 @@ public class ShortSound {
      * Get the tracks for this ShortSound
      */
     public List<ShortSoundTrack> getTracks() {
-        return null;
+        return tracks;
     }
 
     /**

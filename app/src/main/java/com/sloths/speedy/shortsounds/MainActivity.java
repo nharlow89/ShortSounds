@@ -25,8 +25,6 @@ public class MainActivity extends FragmentActivity {
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
     private List<ShortSound> sounds;
-    // TODO: Current sound could be implemented differently, mock-up done this way
-    private ShortSound currSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
