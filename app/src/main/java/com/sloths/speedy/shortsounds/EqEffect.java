@@ -4,6 +4,12 @@ package com.sloths.speedy.shortsounds;
  * Created by caseympfischer on 4/28/15.
  */
 public class EqEffect extends ShortSoundTrackEffect {
+    private EffectName title;
+
+    public EqEffect() {
+        this.title = EffectName.EqEffect;
+    }
+
     public String encodeParameters() {
         return null;
     }
@@ -24,5 +30,9 @@ public class EqEffect extends ShortSoundTrackEffect {
      */
     public short getBandLevel(short band) {
         return 0;
+    }
+
+    public String getTitleString() {
+        return "Equalizer";
     }
 }

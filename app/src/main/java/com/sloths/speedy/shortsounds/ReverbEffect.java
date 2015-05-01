@@ -4,6 +4,13 @@ package com.sloths.speedy.shortsounds;
  * Created by caseympfischer on 4/28/15.
  */
 public class ReverbEffect extends ShortSoundTrackEffect {
+
+    private EffectName title;
+
+    public ReverbEffect() {
+        this.title = EffectName.Reverb;
+    }
+
     public String encodeParameters() {
         return null;
     }
@@ -63,5 +70,9 @@ public class ReverbEffect extends ShortSoundTrackEffect {
      */
     public int getDensity() {
         return 0;
+    }
+
+    public String getTitleString() {
+        return "Reverb";
     }
 }

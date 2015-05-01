@@ -3,14 +3,14 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by joel on 4/25/2015.
  */
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
+import android.app.AlertDialog;
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -26,7 +26,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private String[] mDataSet;
     private Context context;
     private RVListener listener;
-
 
     /**
      * Initialize the dataset of the Adapter.
@@ -47,7 +46,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         View v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click listener for the ViewHolder's View.
-        ViewHolder vh = new ViewHolder(v);
+        ViewHolder vh = new ViewHolder(v, viewGroup);
 
         return vh;
     }
@@ -79,13 +78,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private final LinearLayout controller;
         private final ListView effectsList;
         private boolean trackExpanded;
+        private final ViewGroup viewGroup;
 
-        public ViewHolder(View v) {
+        public ViewHolder(View v, ViewGroup viewGroup) {
             super(v);
             v.setOnClickListener(new TrackItemClickListener());
             vTitle = (TextView) v.findViewById(R.id.track_title);
             controller = (LinearLayout) v.findViewById(R.id.track_child);
             controller.setVisibility(View.GONE);
+            this.viewGroup = viewGroup;
 
             // Populate effects in the effects list the track keeps
             // TODO: Link the effects to the real ones in the database
@@ -105,13 +106,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private List<ShortSoundTrackEffect> getEffects() {
             List<ShortSoundTrackEffect> retList = new ArrayList<ShortSoundTrackEffect>();
             ShortSoundTrackEffect effect1 = new EqEffect();
-            retList.add(effect1);
             ShortSoundTrackEffect effect2 = new ReverbEffect();
-            retList.add(effect2);
+            retList.add(effect1);
             retList.add(effect2);
             return retList;
         }
-
 
         /* The click listener for ListView in the navigation drawer */
         private class TrackItemClickListener implements View.OnClickListener {
