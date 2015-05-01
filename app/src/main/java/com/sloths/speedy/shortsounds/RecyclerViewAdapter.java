@@ -3,10 +3,7 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by joel on 4/25/2015.
  */
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,7 +42,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view.
         View v = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.track_view, viewGroup, false);
+                .inflate(R.layout.track_view_with_buttons, viewGroup, false);
         // Define click listener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
 
@@ -77,25 +74,26 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
         private final LinearLayout controller;
-        private final ListView effectsList;
+//        private final ListView effectsList;
         private boolean trackExpanded;
 
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(new TrackItemClickListener());
             vTitle = (TextView) v.findViewById(R.id.track_title);
-            controller = (LinearLayout) v.findViewById(R.id.track_child);
+            controller = (LinearLayout) v.findViewById(R.id.track_child_b);
             controller.setVisibility(View.GONE);
 
             // Populate effects in the effects list the track keeps
             // TODO: Link the effects to the real ones in the database
             // Currently populating a fake effects list
-            List<ShortSoundTrackEffect> effects = getEffects();
-
-            effectsList = (ListView) v.findViewById(R.id.effects_list);
-            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
-            effectsList.setAdapter(effectsAdapter);
+//            List<ShortSoundTrackEffect> effects = getEffects();
+//
+//            effectsList = (ListView) v.findViewById(R.id.effects_list_b);
+//            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
+//            effectsList.setAdapter(effectsAdapter);
             trackExpanded = false;
+
         }
 
         public void setTitleView(int position) {

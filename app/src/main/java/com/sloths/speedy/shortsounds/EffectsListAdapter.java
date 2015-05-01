@@ -1,5 +1,6 @@
 package com.sloths.speedy.shortsounds;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,12 +21,12 @@ import java.util.List;
 public class EffectsListAdapter extends BaseAdapter {
 
     private List<ShortSoundTrackEffect> effects;
-    private LayoutInflater mInflater;
+    private Context context;
 
     // After implementing tracks from database, this constructor
     // could take an input of the actual effects
     public EffectsListAdapter(Context context, List<ShortSoundTrackEffect> effects) {
-        mInflater = LayoutInflater.from(context);
+        this.context = context;
         this.effects = effects;
     }
 
@@ -33,24 +34,25 @@ public class EffectsListAdapter extends BaseAdapter {
     // This puts the effect name & toggle for populating the effect list
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view;
+        View rowView = convertView;
         ViewHolder holder;
 
-        if (convertView == null) {
-            view = mInflater.inflate(R.layout.effects_list_item, parent, false);
+        if (rowView == null) {
+
+            rowView = ((Activity) context).getLayoutInflater()
+                    .inflate(R.layout.effects_list_item, parent, false);
             holder = new ViewHolder();
-            holder.title = (TextView) view.findViewById(R.id.effectName);
-            holder.toggle = (Switch) view.findViewById(R.id.effectSwitch);
-            view.setTag(holder);
+            holder.title = (TextView) rowView.findViewById(R.id.effectName);
+            holder.toggle = (Switch) rowView.findViewById(R.id.effectSwitch);
+            rowView.setTag(holder);
         } else {
-            view = convertView;
-            holder = (ViewHolder) view.getTag();
+            holder = (ViewHolder) rowView.getTag();
         }
 
         ShortSoundTrackEffect effect = effects.get(position);
         holder.title.setText(effect.getTitleString());
         // Do something with setting views toggle?
-        return view;
+        return rowView;
     }
 
     @Override

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_view_b"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    card_view:cardCornerRadius="4dp"
+    android:layout_margin="5dp">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/track_parent">
+
+            <TextView
+                android:id="@+id/track_title"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:gravity="center_vertical"
+                android:textColor="@android:color/black"
+                android:textSize="14dp"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/track_child_b"
+            android:layout_below="@+id/track_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".3"
+                android:id="@+id/upperTrackView"
+                android:layout_margin="20dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/trackName"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="Track Name"
+                    android:layout_above="@+id/controls"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="10dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:id="@+id/controls"
+                    android:layout_centerVertical="true">
+
+                    <SeekBar
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".87"
+                        android:id="@+id/volumeSlider"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical" />
+                    <Button
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".13"
+                        android:id="@+id/trackPlay"
+                        android:background="@android:drawable/ic_media_play"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".7"
+                android:gravity="center">
+                <Button
+                    android:layout_width="140dp"
+                    android:layout_height="80dp"
+                    android:layout_margin="20dp"
+                    android:id="@+id/eq_button"
+                    android:text="EQ"
+                    android:textColor="@color/accent_material_light"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginBottom="20dp" />
+                <Button
+                    android:layout_width="140dp"
+                    android:layout_height="80dp"
+                    android:id="@+id/dist_button"
+                    android:text="Distortion"
+                    android:textColor="@color/accent_material_light"
+                    android:layout_alignTop="@+id/eq_button"
+                    android:layout_toRightOf="@+id/bit_button"
+                    android:layout_toEndOf="@+id/bit_button"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="20dp" />
+                <Button
+                    android:layout_width="140dp"
+                    android:layout_height="80dp"
+                    android:id="@+id/reverb_button"
+                    android:text="Reverb"
+                    android:textColor="@color/accent_material_light"
+                    android:layout_below="@+id/eq_button"
+                    android:layout_toRightOf="@+id/bit_button"
+                    android:layout_toEndOf="@+id/bit_button"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp" />
+                <Button
+                    android:layout_width="140dp"
+                    android:layout_height="80dp"
+                    android:id="@+id/bit_button"
+                    android:text="BitCrush"
+                    android:textColor="@color/accent_material_light"
+                    android:layout_below="@+id/eq_button"
+                    android:layout_alignLeft="@+id/eq_button"
+                    android:layout_alignStart="@+id/eq_button"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="20dp" />
+
+            </RelativeLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</android.support.v7.widget.CardView>
