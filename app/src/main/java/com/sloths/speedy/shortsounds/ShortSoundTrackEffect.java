@@ -32,6 +32,14 @@ public abstract class ShortSoundTrackEffect {
         return title;
     }
 
+    public String getTitleString() {
+        if (title == EffectName.EqEffect) {
+            return "Equalizer";
+        } else {
+            return "Reverb";
+        }
+    }
+
     /**
      * This method is used for loading an effect from the string encoded in the
      * database. It parses the given string and returns the ShortSoundTrackEffect

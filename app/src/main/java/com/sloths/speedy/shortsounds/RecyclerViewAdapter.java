@@ -12,7 +12,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provide views to RecyclerView with data from mDataSet.
@@ -73,6 +77,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
         private final LinearLayout controller;
+        private final ListView effectsList;
+        private boolean trackExpanded;
 
         public ViewHolder(View v) {
             super(v);
@@ -81,10 +87,29 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             controller = (LinearLayout) v.findViewById(R.id.track_child);
             controller.setVisibility(View.GONE);
 
+            // Populate effects in the effects list the track keeps
+            // TODO: Link the effects to the real ones in the database
+            // Currently populating a fake effects list
+            List<ShortSoundTrackEffect> effects = getEffects();
+
+            effectsList = (ListView) v.findViewById(R.id.effects_list);
+            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
+            effectsList.setAdapter(effectsAdapter);
+            trackExpanded = false;
         }
 
         public void setTitleView(int position) {
             vTitle.setText(mDataSet[position]);
+        }
+
+        private List<ShortSoundTrackEffect> getEffects() {
+            List<ShortSoundTrackEffect> retList = new ArrayList<ShortSoundTrackEffect>();
+            ShortSoundTrackEffect effect1 = new EqEffect();
+            retList.add(effect1);
+            ShortSoundTrackEffect effect2 = new ReverbEffect();
+            retList.add(effect2);
+            retList.add(effect2);
+            return retList;
         }
 
 
@@ -93,31 +118,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 listener.onItemClicked(v, getPosition());
-
-                controller.setVisibility(View.VISIBLE);
-//                selectTrack(getPosition());
+                if (!trackExpanded) {
+                    // Expand track
+                    controller.setVisibility(View.VISIBLE);
+                    trackExpanded = true;
+                } else {
+                    controller.setVisibility(View.GONE);
+                    trackExpanded = false;
+                }
             }
         }
-
-//        /**
-//         * Swaps card view holder w/ our track content
-//         */
-//        private void selectTrack(int position) {
-//
-//            // Grabs the ShortSound and populates the screen with it
-//
-//            // Create fragment for tracks
-//            String currTrack = getTrackNames()[position];
-//            Fragment trackFragment = new TrackEffectsPanelFragment();
-//
-//            // ================================================================
-//            // TODO: Figure out how to recycle card view to show full track info
-//            // ================================================================
-//            // Replaces the main content screen w/ track
-//            FragmentActivity activity = (FragmentActivity) context;
-//            FragmentManager fragmentManager = activity.getSupportFragmentManager();
-//            fragmentManager.beginTransaction().replace(R.id.content_frame, trackFragment).commit();
-//        }
     }
 
     public interface RVListener {
