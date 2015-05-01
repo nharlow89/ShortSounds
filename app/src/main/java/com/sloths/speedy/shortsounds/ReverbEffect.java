@@ -3,7 +3,7 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by caseympfischer on 4/28/15.
  */
-public class ReverbEffect extends ShortSoundTrackEffect {
+public class ReverbEffect extends Effect {
     public String encodeParameters() {
         return null;
     }

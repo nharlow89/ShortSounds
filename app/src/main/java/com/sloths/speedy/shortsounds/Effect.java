@@ -3,11 +3,11 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by caseympfischer on 4/28/15.
  */
-public abstract class ShortSoundTrackEffect {
+public abstract class Effect {
     private boolean active;
     private EffectName title;
     private long id;
-    public enum EffectName {EqEffect, Reverb};
+    public enum EffectName {EqEffect, Reverb, BitCrush, Distortion};
     public android.media.audiofx.AudioEffect effect;
 
     /**
@@ -42,12 +42,12 @@ public abstract class ShortSoundTrackEffect {
 
     /**
      * This method is used for loading an effect from the string encoded in the
-     * database. It parses the given string and returns the ShortSoundTrackEffect
+     * database. It parses the given string and returns the Effect
      * object that the string represents.
      * @param parameters The String as taken from the database
-     * @return An instance of a subclass of ShortSoundTrackEffect, representing a saved effect state
+     * @return An instance of a subclass of Effect, representing a saved effect state
      */
-    public static ShortSoundTrackEffect parseParameters(String parameters) {
+    public static Effect parseParameters(String parameters) {
         return null;
     }
 

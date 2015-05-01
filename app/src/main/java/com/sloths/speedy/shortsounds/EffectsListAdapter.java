@@ -2,15 +2,12 @@ package com.sloths.speedy.shortsounds;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,12 +17,12 @@ import java.util.List;
  */
 public class EffectsListAdapter extends BaseAdapter {
 
-    private List<ShortSoundTrackEffect> effects;
+    private List<Effect> effects;
     private Context context;
 
     // After implementing tracks from database, this constructor
     // could take an input of the actual effects
-    public EffectsListAdapter(Context context, List<ShortSoundTrackEffect> effects) {
+    public EffectsListAdapter(Context context, List<Effect> effects) {
         this.context = context;
         this.effects = effects;
     }
@@ -49,7 +46,7 @@ public class EffectsListAdapter extends BaseAdapter {
             holder = (ViewHolder) rowView.getTag();
         }
 
-        ShortSoundTrackEffect effect = effects.get(position);
+        Effect effect = effects.get(position);
         holder.title.setText(effect.getTitleString());
         // Do something with setting views toggle?
         return rowView;
