@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.model;
 
 /**
  * Created by caseympfischer on 4/28/15.
