@@ -5,12 +5,15 @@ package com.sloths.speedy.shortsounds;
  */
 
 import android.support.test.runner.AndroidJUnit4;
-import android.test.ActivityUnitTestCase;
+import android.test.ActivityInstrumentationTestCase2;
+
+import com.sloths.speedy.shortsounds.view.MainActivity;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class InitialFailingTest extends ActivityUnitTestCase<MainActivity> {
+public class InitialFailingTest extends ActivityInstrumentationTestCase2<MainActivity> {
 
     public InitialFailingTest() {
         super(MainActivity.class);
