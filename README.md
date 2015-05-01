@@ -1,8 +1,6 @@
 # ShortSounds - [Website](http://nharlow89.github.io/ShortSounds/)
 
-Documentation
+[Documentation for Users](http://nharlow89.github.io/ShortSounds/user.html)
 
-  [For Users](http://nharlow89.github.io/ShortSounds/user.html)
-
-  [For Developers](http://nharlow89.github.io/ShortSounds/developer.html)
+[Documentation for Developers](http://nharlow89.github.io/ShortSounds/developer.html)
 
