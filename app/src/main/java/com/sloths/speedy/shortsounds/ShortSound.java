@@ -18,7 +18,7 @@ public class ShortSound {
     private List<ShortSoundTrack> tracks;
     private String title;
     private long id;
-    private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
+    private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance( ShortSoundsApplication.getAppContext() );
 
     /**
      * Create a new empty ShortSound.
