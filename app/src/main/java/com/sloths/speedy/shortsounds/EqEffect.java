@@ -3,13 +3,7 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by caseympfischer on 4/28/15.
  */
-public class EqEffect extends ShortSoundTrackEffect {
-    private EffectName title;
-
-    public EqEffect() {
-        this.title = EffectName.EqEffect;
-    }
-
+public class EqEffect extends Effect {
     public String encodeParameters() {
         return null;
     }

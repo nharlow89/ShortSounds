@@ -3,15 +3,24 @@ package com.sloths.speedy.shortsounds;
 /**
  * Created by joel on 4/25/2015.
  */
+import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,13 +55,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         // set the adapter for the RecyclerView, passing in the data
         mAdapter = new RecyclerViewAdapter(trackNames, this);
         mRecyclerView.setAdapter(mAdapter);
-//
-//        mRecyclerView.setRecyclerListener(new RecyclerView.RecyclerListener() {
-//            @Override
-//            public void onViewRecycled(RecyclerView.ViewHolder viewHolder) {
-//
-//            }
-//        });
+
         return rootView;
 
     }
@@ -72,8 +75,46 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     }
 
     @Override
-    public void onItemClicked(View v, int position) {
-
-
+    public void onButtonClicked(View v, int track, String effect) {
+        loadEffectDialog(track, effect);
     }
+
+    private void loadEffectDialog(final int track, final String effect) {
+        final AlertDialog.Builder imageDialog = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+
+        View layout = inflater.inflate(R.layout.effect_view,
+                (ViewGroup) getActivity().findViewById(R.id.parentEffectPanel));
+
+        ((TextView) layout.findViewById(R.id.effectNameTitle)).setText(effect);
+        imageDialog.setView(layout);
+
+        final AlertDialog dialog = imageDialog.create();
+
+        layout.findViewById(R.id.saveEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                showToast("Effects saved", Toast.LENGTH_SHORT);
+            }
+        });
+        layout.findViewById(R.id.cancelEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showToast("Effect cleared", Toast.LENGTH_SHORT);
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    private void showToast(String text, int length) {
+        Toast toast = Toast.makeText(getActivity(), text, length);
+        LinearLayout layout =(LinearLayout)toast.getView();
+        TextView textView = ((TextView)layout.getChildAt(0));
+        textView.setTextSize(20);
+        textView.setGravity(Gravity.CENTER);
+        toast.show();
+    }
+
 }
