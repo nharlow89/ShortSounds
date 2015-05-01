@@ -4,7 +4,7 @@ package com.sloths.speedy.shortsounds;
  * Created by caseympfischer on 4/28/15.
  */
 public abstract class Effect {
-    private boolean active;
+    protected boolean active;
     private EffectName title;
     private long id;
     public enum EffectName {EqEffect, Reverb, BitCrush, Distortion};
