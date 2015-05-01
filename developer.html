@@ -48,19 +48,37 @@
       <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
       Directory Structure
     </h3>
-    <p>TODO: What/where the important directories are and what files are in them.</p>
+    <p>
+      Directory Structure (of the master branch)<br>
+      app/src/: Contains all the source code for the app.<br>
+      main/: Contains all the source code for the main app.<br>
+      java/com/sloths/speedy/shortsounds: Contains all the Java source code for the main app.<br>
+      res/: Contains various resources necessary for the main app (image files, XML files of the layout etc.<br>
+      AndroidManifest.xml: XML file containing some information about the app including its version number.<br>
+      androidTest/java/com/sloths/speedy/shortsounds/: Contains all the Java source code for the tests.<br>
+      README.md: Contains a link to the development webpage and documentation for both users and developers.
+    </p>
 
     <h3>
       <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
       Build Instructions
     </h3>
-    <p>TODO: How to build our app.</p>
+    <p>
+      These instructions assume you’re using Android Studio which can be downloaded here: <a href="https://developer.android.com/sdk/index.html">https://developer.android.com/sdk/index.html</a><br>
+      After you’ve opened up the project, click on the Build tab and click Generate Signed APK…. Follow along with the Generate Signed APK Wizard that appears and an APK file will be generated in the destination folder you selected.
+    </p>
 
     <h3>
       <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
       Testing
     </h3>
-    <p>TODO: How to run any test suites.</p>
+    <p>
+      All unit tests will be designed and implemented by the developers as they develop. It’s been recommended for everyone to use test driven development, so that the tests our written before the implementations. However, if they choose not to use test driven development, it’s expected that unit tests will be written closely after the code is.
+    </p><p>
+      System tests will be written after major feature modules are implemented, to insure that they interact as expected. The teams which created the modules will be responsible for writing the system tests.
+    </p><p>
+      We have decided against implementing a full automated testing suite due to the circumstances of the project. Tests must be run manually.
+    </p>
 
 
     <h3>
@@ -73,13 +91,23 @@
       <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
       Release
     </h3>
-    <p>TODO: How to release a new version of your software.</p>
+    <p>
+      <ol>
+        <li>Increment the version number in AndroidManifest.xml.</li>
+        <li>Push the commit and tag the commit as a new version/release.</li>
+        <li>Create a .zip and a .tar.gz of the source code and replace the ones on the development site.</li>
+        <li>Build a new executable using the build instructions above and replace the .apk file in the Google drive.</li>
+        <li>Test all download links to make sure they refer to the new version.</li>
+      </ol>
+    </p>
     
     <h3>
       <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
       Bugs
     </h3>
-    <p>TODO: How to access bugs.</p>
+    <p>
+      A list of bugs (both current and resolved) can be found in the repository page linked to above by clicking on the Issues tab on the side. To resolve a bug, you can either do it via commit messages (https://help.github.com/articles/closing-issues-via-commit-messages/)or through Pull Requests (https://github.com/blog/1506-closing-issues-via-pull-requests).
+    </p>
 
     <footer class="site-footer">
       <span class="site-footer-owner"><a href="https://github.com/nharlow89/ShortSounds">Shortsounds</a> is maintained by <a href="https://github.com/nharlow89">nharlow89</a>.</span>
