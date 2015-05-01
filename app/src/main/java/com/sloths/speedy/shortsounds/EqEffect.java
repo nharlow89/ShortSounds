@@ -25,4 +25,8 @@ public class EqEffect extends Effect {
     public short getBandLevel(short band) {
         return 0;
     }
+
+    public String getTitleString() {
+        return "Equalizer";
+    }
 }

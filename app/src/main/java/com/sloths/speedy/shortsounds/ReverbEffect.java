@@ -33,6 +33,10 @@ public class ReverbEffect extends Effect {
 
     }
 
+    public String getTitleString() {
+        return "Reverb";
+    }
+
     /**
      * Gets the delay time between reflections
      * @return Delay time in milliseconds
