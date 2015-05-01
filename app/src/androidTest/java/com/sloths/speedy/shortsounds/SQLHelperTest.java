@@ -61,4 +61,18 @@ public class SQLHelperTest extends AndroidTestCase {
         assertTrue( found );
     }
 
+    /**
+     * Test that we can create a ShortSound and then remove it from the database.
+     */
+    public void testCreateShortSoundAndRemove() {
+        assertTrue("TODO", false);
+    }
+
+    /**
+     * Test that we can create a ShortSoundTrack and fetch it from the database.
+     */
+    public void testCreateShortSoundTrack() {
+        assertTrue("TODO", false);
+    }
+
 }
