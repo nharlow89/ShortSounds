@@ -3,6 +3,9 @@ package com.sloths.speedy.shortsounds;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
+import com.sloths.speedy.shortsounds.model.ShortSound;
+import com.sloths.speedy.shortsounds.model.ShortSoundSQLHelper;
+
 import java.util.List;
 
 /**
