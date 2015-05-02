@@ -70,6 +70,24 @@
 
     <h3>
       <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+      Run Instructions
+    </h3>
+    <p>
+      In Android Studio, click the Run ‘app’ button or hit Shift+F10. This also builds the app so there is no need to build it beforehand. To run in an emulator, make sure Launch emulator is selected, select a virtual device to run it on, and click OK.
+    </p>
+    <p>
+      To run on an actual Android device:
+      <ol>
+        <li>Follow the Build Instructions to generate the .apk file</li>
+        <li>Connect your android device to your computer via USB</li>
+        <li>Move the application (.apk file) onto your Android. http://developer.servalproject.org/dokuwiki/doku.php?id=content:android:tips:install_apk Instructions if needed</li>
+        <li>Once the application is on your device, locate it using a file manager and click on it to install.</li>
+        <li>Once installed, locate the app and run it!</li>
+      </ol>
+    </p>
+
+    <h3>
+      <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
       Testing
     </h3>
     <p>
@@ -79,13 +97,42 @@
     </p><p>
       We have decided against implementing a full automated testing suite due to the circumstances of the project. Tests must be run manually.
     </p>
+    <p>
+      Unit tests will require packages that do not come standard with Android Studio. If you are getting dependency errors, follow these instructions:
+      <ol>
+        <li>Start the Android SDK Manager.</li>
+        <li>In the SDK Manager window, scroll to the end of the Packages list, find the Extras folder and, if necessary, expand to show its contents.</li>
+        <li>Select the Android Support Repository item.</li>
+        <li>Click the Install packages... button</li>
+      </ol>
+      To run a test in Android Studio, hit Alt+Shift+F10 and choose the option that matches the name of the test. Make sure to choose the one with the android icon since that means it’s being run as an AndroidTest rather than a JUnit test. Running the test re quires opening up an emulator which may be an issue if you’re using something other than Android Studio.
+    </p>
 
 
     <h3>
       <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
-      Automated build and test
+      Automated Build and Test
     </h3>
-    <p>TODO: How to set up an automated daily (or more frequent) build and test.</p>
+    <p>
+    To set up an automated build, a Short Sounds team member need only log into the dedicated Jenkin’s web server, located at DNS:
+    ec2-52-11-7-187.us-west-2.compute.amazonaws.com:8080
+    </p><p>
+    * Cse 403 staff can login and view the Jenkin’s dashboard and the Short Sounds job with: username: cse_403_staff
+    password: emina
+    </p><p>
+    If a Short Sounds team member has not previously created an account with Jenkins and logged in, they need to create an account and send their newly created username to Joel at the email:
+    sigoj@cs.washington.edu<br>
+    Joel will respond when they have been given the credentials to access the count.
+    Upon successfully logging in, creating a new automated build is as simple as click the Short Sounds job and hitting Build Now, located on the left.
+    </p><p>
+    In order to set up the daily build and test system, I first launched an EC2 instance on Amazon AWS that runs an Ubuntu server. I installed Jenkins on the Ubuntu server. In order to get Jenkins to pull the Short Sounds master branch repository I installed the Git and GitHub plugins on Jenkins and then configured it with the repository information. Short Sounds utilizes AndroidJUnitRunner to run its unit tests. In order to run tests utilizing that framework, as well as most of Android’s testing frameworks, an Android emulator must be launched. For this reason, I installed the Android Emulator Plugin. This enables Jenkins to launch a pre-defined emulator before it performs its build steps. I also installed the Gradle Build plugin so that we can perform Gradle builds, which is what Short Sounds utilizes. After installing the required plugins, I set up Jenkins to run 1 build and test a day automatically, as well as when changes are pushed to master. I created build steps that include:
+    <ol>
+      <li>update the Android SDK to use Build Tools 21.1.2.</li>
+      <li>Invoke a Gradle script that performs a full build of the Short Sounds application.</li>
+      <li>Perform a shell command that runs all of the tests that utilize AndroidJUnitRunner. I configured Jenkins to send out emails to all Short Sounds team members when a build or test fails. This was done by creating a Gmail account especially for the purpose. I then added that email account as the SMTP host on Jenkins. Having it send out the emails for failed builds was as simple as adding a post-build step for emailing users on failed builds and inputting Short Sounds teammates emails into the box.</li>
+    </ol>
+    * On occasion the Android Emulator on Jenkins will not fully bootup during a build. In this instance, the build eventually times out. It does not include it as a failed build, but as status ‘Not Built’. This is a currently unresolved issue which is documented on Jenkins.com. It has to do with the abd server failing to start. See link for more information: https://issues.jenkins-ci.org/browse/JENKINS-27456.
+    </p>
     
     <h3>
       <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
@@ -93,7 +140,6 @@
     </h3>
     <p>
       <ol>
-        <li>Increment the version number in AndroidManifest.xml.</li>
         <li>Push the commit and tag the commit as a new version/release.</li>
         <li>Create a .zip and a .tar.gz of the source code and replace the ones on the development site.</li>
         <li>Build a new executable using the build instructions above and replace the .apk file in the Google drive.</li>
