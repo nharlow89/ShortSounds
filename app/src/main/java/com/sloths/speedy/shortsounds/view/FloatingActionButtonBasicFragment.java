@@ -26,8 +26,6 @@ public class FloatingActionButtonBasicFragment extends Fragment implements Float
         // Make this {@link Fragment} listen for changes in both FABs.
         FloatingActionButton fab1 = (FloatingActionButton) rootView.findViewById(R.id.fab_1);
         fab1.setOnCheckedChangeListener(this);
-        FloatingActionButton fab2 = (FloatingActionButton) rootView.findViewById(R.id.fab_2);
-        fab2.setOnCheckedChangeListener(this);
         return rootView;
     }
 
@@ -38,9 +36,6 @@ public class FloatingActionButtonBasicFragment extends Fragment implements Float
         switch (fabView.getId()){
             case R.id.fab_1:
                 //Log.d(TAG, String.format("FAB 1 was %s.", isChecked ? "checked" : "unchecked"));
-                break;
-            case R.id.fab_2:
-                //Log.d(TAG, String.format("FAB 2 was %s.", isChecked ? "checked" : "unchecked"));
                 break;
             default:
                 break;

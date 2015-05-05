@@ -1,6 +1,7 @@
 package com.sloths.speedy.shortsounds.view;
 
-
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -22,7 +23,7 @@ import com.sloths.speedy.shortsounds.model.ShortSound;
 import java.util.List;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
     private String[] mShortSounds;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -42,6 +43,11 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
+
+        FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
+        FloatingActionButtonBasicFragment fragment = new FloatingActionButtonBasicFragment();
+        transaction.replace(R.id.sample_content_fragment, fragment);
+        transaction.commit();
     }
 
     /**
