@@ -122,6 +122,31 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     }
 
     /**
+     * Get A single ShortSound by id.
+     * @param id
+     * @return ShortSound
+     */
+    public ShortSound queryShortSoundById(long id) {
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE id = " + id, null);
+        if (cursor.moveToFirst()) {
+            do {
+                HashMap<String, String> map = new HashMap<String, String>();
+                for( int i=0; i< cursor.getColumnCount(); i++ ) {
+                    map.put(cursor.getColumnName(i), cursor.getString(i));
+                }
+                ShortSound ss = new ShortSound( map );
+                // Now we need to populate the tracks
+                List<ShortSoundTrack> tracks = getShortSoundTracks( ss.getId() );
+                ss.setTracks( tracks );
+                cursor.close();
+                return ss;
+            } while (cursor.moveToNext());
+        }
+        cursor.close();  // Shouldnt hit this statement
+        return null;
+    }
+
+    /**
      * Insert a ShortSound into the DB
      * @param ss
      * @return {long} The id of the new ShortSound
@@ -295,5 +320,6 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Shouldn't have to worry about this??
     }
+
 }
 
