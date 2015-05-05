@@ -16,13 +16,14 @@
             android:id="@+id/track_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            >
+            android:layout_weight="1">
 
         </RelativeLayout>
 
         <!-- This is the bottom toolbar -->
-        <FrameLayout android:id="@+id/footer" android:layout_width="fill_parent"
+        <FrameLayout
+            android:id="@+id/footer"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             style="@android:style/ButtonBar"
