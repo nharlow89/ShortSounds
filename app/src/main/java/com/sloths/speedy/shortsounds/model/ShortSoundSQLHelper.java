@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,14 +17,17 @@ import java.util.List;
 
 
 /**
- * TODO: make singleton
+ * This is our helper class for interacting with the database. Note that it is
+ * a singleton. Also note, this class will seed the database on the first
+ * time the application is ran (or anytime the database does not exist).
  */
 public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     private SQLiteDatabase db;
+    private static ShortSoundSQLHelper instance = new ShortSoundSQLHelper( ShortSoundsApplication.getAppContext() );
 
     private static final int DATABASE_VERSION = 2;
-    private static final String DATABASE_NAME = "ShortSounds.db";
+    public static final String DATABASE_NAME = "ShortSounds.db";
     private static final String TABLE_NAME = "short_sounds";
     private static final String TRACK_TABLE_NAME = "short_sound_tracks";
 
@@ -54,10 +59,28 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                     KEY_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
                     KEY_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP);";
 
-    public ShortSoundSQLHelper(Context context) {
+    private ShortSoundSQLHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        //  context.deleteDatabase(DATABASE_NAME);  // TODO: remove, only for clearing the db
         db = getWritableDatabase();
+    }
+
+
+    public static ShortSoundSQLHelper getInstance() {
+        if ( instance == null ) {
+            instance = new ShortSoundSQLHelper( ShortSoundsApplication.getAppContext() );
+            return instance;
+        } else {
+            return instance;
+        }
+    }
+
+    /**
+     * Might be frowned upon, but had to make this to get around singleton for testing.
+     * Basically, the singleton prevented the tests from recreating a new db each test.
+     */
+    public static ShortSoundSQLHelper getTestInstance( Context context ) {
+        instance = new ShortSoundSQLHelper( context );
+        return instance;
     }
 
     /**
@@ -66,6 +89,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      * @return List<ShortSound>
      */
     public List<ShortSound> queryAllShortSounds() {
+        if ( !db.isOpen() ) db = getWritableDatabase();
         Log.d("DB_TEST", "ShortSoundSQLHelper:queryAllShortSounds()");
         List<ShortSound> shortSounds = new ArrayList<ShortSound>();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
@@ -79,23 +103,11 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                 shortSounds.add( ss );
             } while (cursor.moveToNext());
         }
+        cursor.close();
         // We now have a List of ShortSound objects populated from the database.
         for (int i = 0; i < shortSounds.size(); i++) {
             ShortSound ss = shortSounds.get( i );
-            List<ShortSoundTrack> tracks = new ArrayList<ShortSoundTrack>();
-            // Query for all tracks related to this ShortSound
-            Cursor trackCursor = db.rawQuery("SELECT * FROM " + TRACK_TABLE_NAME + " WHERE " +
-                                             KEY_SHORT_SOUND_ID + "=" + ss.getId(), null);
-            if (trackCursor.moveToFirst()) {
-                do {
-                    HashMap<String, String> map = new HashMap<String, String>();
-                    for( int j=0; j < trackCursor.getColumnCount(); j++ ) {
-                        map.put(trackCursor.getColumnName(j), trackCursor.getString(j));
-                    }
-                    ShortSoundTrack track = new ShortSoundTrack( map );
-                    tracks.add( track );
-                } while (trackCursor.moveToNext());
-            }
+            List<ShortSoundTrack> tracks = getShortSoundTracks( ss.getId() );
             // We now have all the ShortSoundTracks associated with this ShortSound
             ss.setTracks( tracks );
         }
@@ -108,6 +120,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      * @return {long} The id of the new ShortSound
      */
     public long insertShortSound( ShortSound ss ) {
+        if ( !db.isOpen() ) db = getWritableDatabase();
         Log.d("DB_TEST", "ShortSoundSQLHelper:insertShortSound()");
         ContentValues values = new ContentValues();
         values.put( KEY_TITLE, ss.getTitle() );
@@ -119,6 +132,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      * @param ss
      */
     public void updateShortSound( ShortSound ss ) {
+        if ( !db.isOpen() ) db = getWritableDatabase();
         String strFilter = KEY_ID + "=" + ss.getId();  // Query for the specific row with SS id.
         ContentValues args = new ContentValues();
         args.put( KEY_TITLE, ss.getTitle() );
@@ -127,8 +141,37 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         Log.d("DB_TEST", "Updated ShortSound: " + ss.toString() );
     }
 
+    /**
+     * Remove a ShortSound from the database and removes any associated ShortSoundTracks.
+     * @param ss
+     */
     public void removeShortSound( ShortSound ss ) {
-        // TODO:
+        // TODO
+    }
+
+    /**
+     * Get a list of ShortSoundTracks associated with a given ShortSound.
+     * @param shortSoundId
+     * @return a list of tracks
+     */
+    public List<ShortSoundTrack> getShortSoundTracks( long shortSoundId ) {
+        if ( !db.isOpen() ) db = getWritableDatabase();
+        List<ShortSoundTrack> tracks = new ArrayList<ShortSoundTrack>();
+        // Query for all tracks related to this ShortSound
+        Cursor trackCursor = db.rawQuery("SELECT * FROM " + TRACK_TABLE_NAME + " WHERE " +
+                KEY_SHORT_SOUND_ID + "=" + shortSoundId, null);
+        if (trackCursor.moveToFirst()) {
+            do {
+                HashMap<String, String> map = new HashMap<String, String>();
+                for( int j=0; j < trackCursor.getColumnCount(); j++ ) {
+                    map.put(trackCursor.getColumnName(j), trackCursor.getString(j));
+                }
+                ShortSoundTrack track = new ShortSoundTrack( map );
+                tracks.add( track );
+            } while (trackCursor.moveToNext());
+        }
+        trackCursor.close();
+        return tracks;
     }
 
     /**
@@ -140,6 +183,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      * @return The
      */
     public long insertShortSoundTrack(ShortSoundTrack track, long id) {
+        if ( !db.isOpen() ) db = getWritableDatabase();
         Log.d("DB_TEST", "ShortSoundSQLHelper:insertShortSoundTrack("+id+")");
         ContentValues values = new ContentValues();
         values.put( KEY_TITLE, track.getTitle() );
@@ -162,7 +206,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      * @param track
      */
     public void removeShortSoundTrack( ShortSoundTrack track ) {
-        // TODO
+        // TODO remove from db and delete any files
     }
 
 

@@ -23,14 +23,22 @@
         <!-- If the client uses a customTitle, it will be added here. -->
     </LinearLayout>
 
-    <View
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:id="@+id/effect_content"
         android:layout_weight=".8"
-        android:gravity="center">
-
-    </View>
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView android:id="@+id/effectsComingSoon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Effects Coming Soon..."
+            android:textSize="20dp"
+            android:minHeight="30dp">
+        </TextView>
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"

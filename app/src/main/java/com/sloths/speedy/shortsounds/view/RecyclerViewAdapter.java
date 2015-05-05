@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.EqEffect;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;

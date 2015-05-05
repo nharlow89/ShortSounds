@@ -81,7 +81,7 @@
 
                 <!-- Equalizer -->
                 <RelativeLayout
-                    android:layout_width="220dp"
+                    android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:id="@+id/eq_layout"
                     android:gravity="center">
@@ -98,16 +98,15 @@
                         android:id="@+id/eq_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="false"
-                        android:layout_alignParentTop="true"
                         android:layout_toRightOf="@+id/eq_button"
-                        android:gravity="right"/>
+                        android:layout_toEndOf="@+id/eq_button"
+                        android:gravity="center"/>
 
                 </RelativeLayout>
 
                 <!-- Distortion -->
                 <RelativeLayout
-                    android:layout_width="220dp"
+                    android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:id="@+id/dist_layout"
                     android:gravity="center"
@@ -125,15 +124,14 @@
                         android:id="@+id/dist_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="false"
-                        android:layout_alignParentTop="true"
                         android:layout_toRightOf="@+id/dist_button"
-                        android:gravity="center_vertical"/>
+                        android:layout_toEndOf="@+id/dist_button"
+                        android:gravity="center"/>
                  </RelativeLayout>
 
                 <!-- Reverb -->
                 <RelativeLayout
-                    android:layout_width="220dp"
+                    android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:id="@+id/reverb_layout"
                     android:gravity="center"
@@ -151,16 +149,15 @@
                         android:id="@+id/reverb_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="false"
-                        android:layout_alignParentTop="true"
                         android:layout_toRightOf="@+id/reverb_button"
-                        android:gravity="center_vertical"/>
+                        android:layout_toEndOf="@+id/reverb_button"
+                        android:gravity="center"/>
 
                 </RelativeLayout>
 
                 <!-- BitCrush -->
                 <RelativeLayout
-                    android:layout_width="220dp"
+                    android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:id="@+id/bit_layout"
                     android:gravity="center"
@@ -179,15 +176,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="false"
-                        android:layout_alignParentTop="true"
                         android:layout_toRightOf="@+id/bit_button"
-                        android:gravity="center_vertical"/>
+                        android:gravity="center"/>
 
                 </RelativeLayout>
-
-
-
-
             </RelativeLayout>
         </LinearLayout>
     </RelativeLayout>

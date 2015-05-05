@@ -25,10 +25,6 @@ public abstract class Effect {
      * Returns the name of the effect
      * @return The name of the effect
      */
-    public EffectName getTitle() {
-        return title;
-    }
-
     public abstract String getTitleString();
 
     /**

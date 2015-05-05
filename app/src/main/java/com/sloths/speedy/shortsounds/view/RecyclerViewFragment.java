@@ -15,9 +15,10 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.model.ShortSound;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
-
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -29,6 +30,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     protected RecyclerView mRecyclerView;
     protected RecyclerViewAdapter mAdapter;
     protected String[] trackNames;
+    private ShortSound sound;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,7 +52,13 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         // set the adapter for the RecyclerView, passing in the data
         mAdapter = new RecyclerViewAdapter(trackNames, this);
         mRecyclerView.setAdapter(mAdapter);
-
+//
+//        mRecyclerView.setRecyclerListener(new RecyclerView.RecyclerListener() {
+//            @Override
+//            public void onViewRecycled(RecyclerView.ViewHolder viewHolder) {
+//
+//            }
+//        });
         return rootView;
 
     }
@@ -61,13 +69,28 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
      * from a local content provider or remote server.
      */
     private void initDataset() {
-        int sound_num = getArguments().getInt(ARG_SOUND_NUMBER);
-        String sound = getResources().getStringArray(R.array.shortsounds_array)[sound_num];
-        getActivity().setTitle(sound);
+//        String sound = getResources().getStringArray(R.array.shortsounds_array)[sound_num];
+//        getActivity().setTitle(sound);
+
         // Populate array of tracks
-        List<String> trackTitles = Arrays.asList(getResources().getStringArray(R.array.track_array));
-        trackNames = (String[]) trackTitles.toArray();
+//        List<String> trackTitles = Arrays.asList(getResources().getStringArray(R.array.track_array));
+        int sound_num = getArguments().getInt(ARG_SOUND_NUMBER);
+        String[] trackTitles = getTracks(sound_num);
+        trackNames = trackTitles;
     }
+
+    private String[] getTracks(int position) {
+        List<ShortSound> sounds = ShortSound.getAll();
+        ShortSound thisSound = sounds.get(position);
+        List<ShortSoundTrack> tracks = thisSound.getTracks();
+        String[] tracksNames = new String[tracks.size()];
+        for (int i = 0; i < tracks.size(); i++) {
+            tracksNames[i] = tracks.get(i).getTitle();
+        }
+        return tracksNames;
+    }
+
+
 
     @Override
     public void onButtonClicked(View v, int track, String effect) {
@@ -111,5 +134,4 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         textView.setGravity(Gravity.CENTER);
         toast.show();
     }
-
 }
