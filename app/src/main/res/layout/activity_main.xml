@@ -21,6 +21,7 @@
 
         </RelativeLayout>
 
+        <!-- This is the record button -->
         <FrameLayout
             android:id="@+id/sample_content_fragment"
             android:layout_weight="0.21"

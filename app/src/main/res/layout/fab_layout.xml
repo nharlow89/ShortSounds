@@ -11,7 +11,8 @@
             android:elevation="@dimen/fab_elevation"
             android:background="@drawable/fab_background"
             android:stateListAnimator="@animator/fab_anim"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="right|top"
+        android:layout_marginRight="16dp">
 
         <ImageView
                 android:layout_width="@dimen/fab_icon_size"
