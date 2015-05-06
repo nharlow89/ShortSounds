@@ -33,7 +33,7 @@
                 android:id="@+id/imageButtonPlay"
                 android:src="@drawable/ic_action_play"
                 android:layout_gravity="left|center_vertical"
-                style="@android:style/Widget.Holo.ActionButton" />
+                style="@android:style/Widget.Material.ActionButton" />
 
             <SeekBar
                 android:layout_width="219dp"

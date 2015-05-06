@@ -3,7 +3,7 @@
         android:enterFadeDuration="@android:integer/config_shortAnimTime">
 
     <item android:state_checked="true">
-        <bitmap android:src="@drawable/ic_action_mic" android:tint="@android:color/white" />
+        <bitmap android:src="@drawable/ic_action_stop" android:tint="#f44336" />
     </item>
 
     <item>
