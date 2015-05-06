@@ -3,6 +3,7 @@ package com.sloths.speedy.shortsounds.view;
 /**
  * Created by joel on 4/25/2015.
  */
+
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -18,9 +19,6 @@ import android.widget.Toast;
 
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
-import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
-
-import java.util.List;
 
 
 public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapter.RVListener {
@@ -30,15 +28,13 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     protected RecyclerView.LayoutManager mLayoutManager;
     protected RecyclerView mRecyclerView;
     protected RecyclerViewAdapter mAdapter;
-    protected String[] trackNames;
-    private ShortSound sound;
+    private ShortSound mShortSound;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         long sound_id = getArguments().getLong(ARG_SOUND_ID);
-        sound = ShortSound.getById( sound_id );
-        trackNames = getTrackTitles();
+        mShortSound = ShortSound.getById( sound_id );
     }
 
     @Override
@@ -53,7 +49,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         // set the LayoutManager for the RecyclerView
         mRecyclerView.setLayoutManager(mLayoutManager);
         // set the adapter for the RecyclerView, passing in the data
-        mAdapter = new RecyclerViewAdapter(trackNames, this);
+        mAdapter = new RecyclerViewAdapter(mShortSound, this);
         mRecyclerView.setAdapter(mAdapter);
 //
 //        mRecyclerView.setRecyclerListener(new RecyclerView.RecyclerListener() {
@@ -65,21 +61,6 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         return rootView;
 
     }
-
-    /**
-     * Helper method for getting an array of track titles to populate the list.
-     * @return Track names
-     */
-    private String[] getTrackTitles() {
-        List<ShortSoundTrack> tracks = sound.getTracks();
-        String[] tracksNames = new String[tracks.size()];
-        for (int i = 0; i < tracks.size(); i++) {
-            tracksNames[i] = tracks.get(i).getTitle();
-        }
-        return tracksNames;
-    }
-
-
 
     @Override
     public void onButtonClicked(View v, int track, String effect) {
