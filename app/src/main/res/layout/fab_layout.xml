@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<FrameLayout android:orientation="vertical" xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout android:orientation="vertical" xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
-             android:layout_height="match_parent" >
+             android:layout_height="match_parent">
 
     <com.sloths.speedy.shortsounds.view.FloatingActionButton
             android:id="@+id/fab_1"
             android:layout_width="@dimen/fab_size"
             android:layout_height="@dimen/fab_size"
-            android:layout_marginTop="16dp"
-            android:elevation="@dimen/fab_elevation"
+        android:elevation="@dimen/fab_elevation"
             android:background="@drawable/fab_background"
             android:stateListAnimator="@animator/fab_anim"
             android:layout_gravity="right|top"
-        android:layout_marginRight="16dp">
+            android:layout_marginRight="28dp"
+        android:layout_marginEnd="27dp"
+        android:layout_marginBottom="28dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
 
         <ImageView
                 android:layout_width="@dimen/fab_icon_size"
@@ -22,4 +26,4 @@
                 android:duplicateParentState="true"/>
 
     </com.sloths.speedy.shortsounds.view.FloatingActionButton>
-</FrameLayout>
+</RelativeLayout>

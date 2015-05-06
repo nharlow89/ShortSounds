@@ -43,7 +43,13 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
+        setUpFloatingActionButton();
+    }
 
+    /**
+     * Sets up the floating action button used as record button.
+     */
+    private void setUpFloatingActionButton() {
         FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
         FloatingActionButtonBasicFragment fragment = new FloatingActionButtonBasicFragment();
         transaction.replace(R.id.sample_content_fragment, fragment);
@@ -162,6 +168,7 @@ public class MainActivity extends FragmentActivity {
 
         mDrawerLayout.closeDrawer(mDrawerList);
         setTitle(mShortSounds[position]);
+        setUpFloatingActionButton();
     }
 
     @Override

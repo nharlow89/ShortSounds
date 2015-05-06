@@ -4,6 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+
+
     <!-- The main content view -->
     <LinearLayout
         android:id="@+id/content_frame"
@@ -16,41 +19,41 @@
             android:id="@+id/track_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            >
-
+            android:layout_weight="2">
         </RelativeLayout>
-
-        <!-- This is the record button -->
-        <FrameLayout
-            android:id="@+id/sample_content_fragment"
-            android:layout_weight="0.21"
-            android:layout_width="match_parent"
-            android:layout_height="0px" />
 
         <!-- This is the bottom toolbar -->
         <FrameLayout android:id="@+id/footer" android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:orientation="horizontal"
             style="@android:style/ButtonBar"
+            android:weightSum="1"
+            android:background="#ff212121">
 
-            android:weightSum="1">
             <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="78dp"
+                android:layout_height="61dp"
                 android:id="@+id/imageButtonPlay"
                 android:src="@drawable/ic_action_play"
-                android:layout_gravity="left|top" />
+                android:layout_gravity="left|center_vertical"
+                android:background="@color/material_bar" />
 
-            <ImageButton
-                android:layout_width="wrap_content"
+            <SeekBar
+                android:layout_width="219dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/imageButtonRecord"
-                android:src="@drawable/ic_action_mic"
-                android:layout_gravity="right|top" />
+                android:id="@+id/seekBar"
+                android:layout_gravity="center" />
+
         </FrameLayout>
 
     </LinearLayout>
+
+    <!-- This is the record button -->
+    <FrameLayout
+        android:id="@+id/sample_content_fragment"
+        android:layout_weight="0.21"
+        android:layout_width="match_parent"
+        android:layout_height="0px" />
 
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"

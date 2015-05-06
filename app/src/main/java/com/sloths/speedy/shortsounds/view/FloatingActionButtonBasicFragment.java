@@ -23,6 +23,7 @@ public class FloatingActionButtonBasicFragment extends Fragment implements Float
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fab_layout, container, false);
 
+
         // Make this {@link Fragment} listen for changes in both FABs.
         FloatingActionButton fab1 = (FloatingActionButton) rootView.findViewById(R.id.fab_1);
         fab1.setOnCheckedChangeListener(this);
