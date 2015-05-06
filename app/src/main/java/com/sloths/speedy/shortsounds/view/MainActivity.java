@@ -1,8 +1,9 @@
 package com.sloths.speedy.shortsounds.view;
 
-
+import android.os.Build;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -15,14 +16,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
-
 import java.util.List;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
     private String[] mShortSounds;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -42,6 +41,20 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setUpFloatingActionButton();
+        }
+    }
+
+    /**
+     * Sets up the floating action button used as record button. Will
+     * only be called for Android SDK >= LOLLIPOP
+     */
+    private void setUpFloatingActionButton() {
+        FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
+        FloatingActionButtonBasicFragment fragment = new FloatingActionButtonBasicFragment();
+        transaction.replace(R.id.sample_content_fragment, fragment);
+        transaction.commit();
     }
 
     /**
