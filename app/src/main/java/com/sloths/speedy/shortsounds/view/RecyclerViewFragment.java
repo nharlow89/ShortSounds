@@ -9,10 +9,12 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +31,8 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     protected RecyclerView mRecyclerView;
     protected RecyclerViewAdapter mAdapter;
     private ShortSound mShortSound;
+    private ImageButton mGlobalPlayButton;
+    private LinearLayout mParentLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,6 +44,8 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Save the parent container for later reference (targeting the global play button)
+        mParentLayout = (LinearLayout) container.getParent();
         // grab the root view of the layout for recycler view
         View rootView = inflater.inflate(R.layout.recycler_view_frag, container, false);
         // grab the RecyclerView component from the layout
@@ -51,6 +57,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         // set the adapter for the RecyclerView, passing in the data
         mAdapter = new RecyclerViewAdapter(mShortSound, this);
         mRecyclerView.setAdapter(mAdapter);
+        setGlobalPlayButtonClickHandler();
 //
 //        mRecyclerView.setRecyclerListener(new RecyclerView.RecyclerListener() {
 //            @Override
@@ -59,7 +66,29 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
 //            }
 //        });
         return rootView;
+    }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // We need to cleanup the audio stuff from this ShortSound
+        mAdapter.stopAllTracks();
+        // TODO: should probably release all the tracks as well.
+    }
+
+    /**
+     * Now that we have a selected ShortSound in focus we need to update the Global Play
+     * button's click handler to play all tracks associated with this ShortSound.
+     */
+    private void setGlobalPlayButtonClickHandler() {
+        mGlobalPlayButton = (ImageButton)mParentLayout.findViewById(R.id.imageButtonPlay);
+        Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
+        mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAdapter.playAllTracks();
+            }
+        });
     }
 
     @Override

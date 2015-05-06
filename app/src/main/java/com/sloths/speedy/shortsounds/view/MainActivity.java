@@ -1,23 +1,26 @@
 package com.sloths.speedy.shortsounds.view;
 
-import android.os.Build;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
+
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
+
 import java.util.List;
 
 
@@ -30,6 +33,7 @@ public class MainActivity extends FragmentActivity {
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
     private List<ShortSound> sounds;
+    private ImageButton mGlobalPlayButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,14 +41,31 @@ public class MainActivity extends FragmentActivity {
         sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
         mShortSoundsTitles = getShortSoundTitles(sounds);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setUpGlobalPlayButton();
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setUpFloatingActionButton();
         }
+    }
+
+    /**
+     * This sets up the Global Play button and attaches the default click
+     * handler. Note that when no ShortSound is loaded, this button should
+     * be disabled.
+     */
+    private void setUpGlobalPlayButton() {
+        mGlobalPlayButton = (ImageButton) findViewById(R.id.imageButtonPlay);
+        Log.e("DEBUG", mGlobalPlayButton.toString());
+        mGlobalPlayButton.setAlpha(0.3f); // TODO: Disable until ShortSound is loaded.
+        mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("DEBUG", "The Global Play button is disabled.");
+            }
+        });
     }
 
     /**
@@ -178,7 +199,6 @@ public class MainActivity extends FragmentActivity {
         mTitle = title;
         getActionBar().setTitle(mTitle);
     }
-
 
     // ---------------------------------------------------------------
     // Don't know if this stuff is needed, it's copied code
