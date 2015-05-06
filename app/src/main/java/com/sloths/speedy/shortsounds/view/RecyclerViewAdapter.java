@@ -25,6 +25,7 @@ import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provide views to RecyclerView with data from mDataSet.
@@ -80,6 +81,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private final TextView vTitle;
         private final LinearLayout controller;
         private Button mPlayTrackButton;
+        private Map<Long, MediaPlayer> mMediaPlayerPool;
         private MediaPlayer mMediaPlayer;
         private Boolean mMediaPlayerPrepared = false;
         private ShortSoundTrack mShortSoundTrack;
@@ -101,9 +103,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             distButton = ((Button) v.findViewById(R.id.dist_button));
             bitButton = ((Button) v.findViewById(R.id.bit_button));
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
-            setPlayClickHandler();
             setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
 
+            setPlayClickHandler();
             controller.setVisibility(View.GONE);
 
             // Populate effects in the effects list the track keeps
@@ -124,11 +126,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private void setPlayClickHandler() {
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    // Perform action on click
-                    if ( mMediaPlayerPrepared ) {
-                        mMediaPlayer.start();
-                        Log.d("DEBUG", "play track[" + mShortSoundTrack.getTitle() + "]");
-                    }
+                // Perform action on click
+                if ( mMediaPlayerPrepared ) {
+                    mMediaPlayer.start();
+                    Log.d("DEBUG", "play track[" + mShortSoundTrack.getTitle() + "]");
+                }
                 }
             });
         }
