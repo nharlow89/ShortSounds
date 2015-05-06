@@ -7,8 +7,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -112,6 +119,31 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
             ss.setTracks( tracks );
         }
         return shortSounds;
+    }
+
+    /**
+     * Get A single ShortSound by id.
+     * @param id
+     * @return ShortSound
+     */
+    public ShortSound queryShortSoundById(long id) {
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE id = " + id, null);
+        if (cursor.moveToFirst()) {
+            do {
+                HashMap<String, String> map = new HashMap<String, String>();
+                for( int i=0; i< cursor.getColumnCount(); i++ ) {
+                    map.put(cursor.getColumnName(i), cursor.getString(i));
+                }
+                ShortSound ss = new ShortSound( map );
+                // Now we need to populate the tracks
+                List<ShortSoundTrack> tracks = getShortSoundTracks( ss.getId() );
+                ss.setTracks( tracks );
+                cursor.close();
+                return ss;
+            } while (cursor.moveToNext());
+        }
+        cursor.close();  // Shouldnt hit this statement
+        return null;
     }
 
     /**
@@ -229,12 +261,17 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         db.execSQL(SHORT_SOUND_TRACK_TABLE_CREATE);
         // Seed the DB
         String ssSeed1 = "INSERT INTO " + TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + ") VALUES(1,\"Sample ShortSound\")";
-        String trackSeed1 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + ") VALUES(1,\"Guitar\",1)";
-        String trackSeed2 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + ") VALUES(2,\"Vocals\",1)";
-        String trackSeed3 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + ") VALUES(3,\"Drums\",1)";
+        String trackSeed1 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(1,\"Guitar\",1,\"ss1-track1.mp3\",\"ss1-track1-modified.mp3\")";
+        String trackSeed2 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(2,\"Vocals\",1,\"ss1-track2.mp3\",\"ss1-track2-modified.mp3\")";
+        String trackSeed3 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(3,\"Drums\",1,\"ss1-track3.mp3\",\"ss1-track3-modified.mp3\")";
+//        String trackSeed1 = "INSERT INTO " + TRACK_TABLE_NAME + " VALUES(1,\"Guitar\",1,\"ss1-track1.mp3\",\"ss1-track1-modified.mp3\")";
+//        String trackSeed2 = "INSERT INTO " + TRACK_TABLE_NAME + " VALUES(2,\"Vocals\",1,\"ss1-track2.mp3\",\"ss1-track2-modified.mp3\")";
+//        String trackSeed3 = "INSERT INTO " + TRACK_TABLE_NAME + " VALUES(3,\"Drums\",1,\"ss1-track3.mp3\",\"ss1-track3-modified.mp3\")";
         String ssSeed2 = "INSERT INTO " + TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + ") VALUES(2,\"My First ShortSound\")";
-        String trackSeed4 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + ") VALUES(4,\"Guitar\",2)";
-        String trackSeed5 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + ") VALUES(5,\"Vocals\",2)";
+        String trackSeed4 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(4,\"Guitar\",2,\"ss2-track1.mp3\",\"ss2-track1-modified.mp3\")";
+        String trackSeed5 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(5,\"Vocals\",2,\"ss2-track2.mp3\",\"ss2-track2-modified.mp3\")";
+//        String trackSeed4 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + ") VALUES(4,\"Guitar\",2)";
+//        String trackSeed5 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + ") VALUES(5,\"Vocals\",2)";
         db.execSQL( ssSeed1 );
         db.execSQL( ssSeed2 );
         db.execSQL( trackSeed1 );
@@ -242,11 +279,47 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         db.execSQL( trackSeed3 );
         db.execSQL( trackSeed4 );
         db.execSQL( trackSeed5 );
+        // Seed the internal storage with given audio files
+        seedSampleAudioFile(R.raw.test1, "ss1-track1.mp3");
+        seedSampleAudioFile(R.raw.test1, "ss1-track1-modified.mp3");
+        seedSampleAudioFile(R.raw.test2, "ss1-track2.mp3");
+        seedSampleAudioFile(R.raw.test2, "ss1-track2-modified.mp3");
+        seedSampleAudioFile(R.raw.test2, "ss1-track3.mp3");
+        seedSampleAudioFile(R.raw.test2, "ss1-track3-modified.mp3");
+        seedSampleAudioFile(R.raw.test1, "ss2-track1.mp3");
+        seedSampleAudioFile(R.raw.test1, "ss2-track1-modified.mp3");
+        seedSampleAudioFile(R.raw.test2, "ss2-track2.mp3");
+        seedSampleAudioFile(R.raw.test2, "ss2-track2-modified.mp3");
+    }
+
+    private void seedSampleAudioFile( int rawId, String outputFileName ) {
+        Context context = ShortSoundsApplication.getAppContext();
+        InputStream inputStream = context.getResources().openRawResource( rawId );
+        try {
+            File outputFile = new File( context.getFilesDir(), outputFileName );
+            OutputStream outputStream = new FileOutputStream( outputFile );
+            int i;
+            try {
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = inputStream.read(buf)) > 0) {
+                    outputStream.write(buf, 0, len);
+                }
+                inputStream.close();
+                outputStream.flush();
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Shouldn't have to worry about this??
     }
+
 }
 

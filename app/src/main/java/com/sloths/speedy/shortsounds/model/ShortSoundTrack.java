@@ -114,6 +114,19 @@ public class ShortSoundTrack {
     public long getParentId() {
         return this.parentId;
     }
+
+    /**
+     * Get the filename associated with this track.
+     * @return filename
+     */
+    public String getFile() { return this.file; }
+
+    /**
+     * Get this tracks id.
+     * @return
+     */
+    public long getId() { return this.id; }
+
     /**
      * This is the representation invarient of the ShortSoundTrack model.
      * The main thing here is that a ShortSoundTrack becomes invalid if the files

@@ -3,8 +3,11 @@ package com.sloths.speedy.shortsounds.view;
 /**
  * Created by joel on 4/25/2015.
  */
+
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,30 +19,31 @@ import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.EqEffect;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;
+import com.sloths.speedy.shortsounds.model.ShortSound;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provide views to RecyclerView with data from mDataSet.
  */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
     private static final String TAG = "RecyclerViewAdapter";
-    private String[] mDataSet;
+    private ShortSound mShortSound;
     private Context context;
     private RVListener listener;
-
 
     /**
      * Initialize the dataset of the Adapter.
      *
-     * @param trackNames String[] containing the data to populate views to be used by RecyclerView.
      */
-    public RecyclerViewAdapter(String[] trackNames, RecyclerViewFragment rvf) {
-        mDataSet = trackNames;
+    public RecyclerViewAdapter(ShortSound sound, RecyclerViewFragment rvf) {
+        mShortSound = sound;
         this.context = rvf.getActivity();
         listener = rvf;
-
     }
 
     // Create new views (invoked by the layout manager)
@@ -54,22 +58,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return vh;
     }
 
-    public String[] getTrackNames() {
-        return mDataSet;
-    }
-
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
         viewHolder.setTitleView(position);
+        viewHolder.setShortSoundTrack( mShortSound.getTracks().get(position) );
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return mDataSet.length;
+        return mShortSound.getTracks().size();
     }
 
 
@@ -79,6 +80,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
         private final LinearLayout controller;
+        private Button mPlayTrackButton;
+        private Map<Long, MediaPlayer> mMediaPlayerPool;
+        private MediaPlayer mMediaPlayer;
+        private Boolean mMediaPlayerPrepared = false;
+        private ShortSoundTrack mShortSoundTrack;
         final Button eqButton;
         final Button reverbButton;
         final Button distButton;
@@ -96,9 +102,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             reverbButton = ((Button) v.findViewById(R.id.reverb_button));
             distButton = ((Button) v.findViewById(R.id.dist_button));
             bitButton = ((Button) v.findViewById(R.id.bit_button));
-
+            mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
             setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
 
+            setPlayClickHandler();
             controller.setVisibility(View.GONE);
 
             // Populate effects in the effects list the track keeps
@@ -113,8 +120,48 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         }
 
+        /**
+         * Set the event handler for the Play button on a given track.
+         */
+        private void setPlayClickHandler() {
+            mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                // Perform action on click
+                if ( mMediaPlayerPrepared ) {
+                    mMediaPlayer.start();
+                    Log.d("DEBUG", "play track[" + mShortSoundTrack.getTitle() + "]");
+                }
+                }
+            });
+        }
+
         public void setTitleView(int position) {
-            vTitle.setText(mDataSet[position]);
+            vTitle.setText(mShortSound.getTracks().get(position).getTitle());
+        }
+
+        /**
+         * Set the ShortSoundTrack that this view corresponds to. We also setup the
+         * MediaPlayer for this particular track.
+         * @param track
+         */
+        public void setShortSoundTrack( ShortSoundTrack track ) {
+            mShortSoundTrack = track;
+            mMediaPlayer = new MediaPlayer();
+            Context context = ShortSoundsApplication.getAppContext();
+            String path = context.getFilesDir().getAbsolutePath();
+            try {
+                mMediaPlayer.setDataSource(path + "/" + mShortSoundTrack.getFile());
+                mMediaPlayer.prepare();
+                mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        mMediaPlayerPrepared = true;
+                        Log.d("DEBUG", "MediaPlayer prepared["+mShortSoundTrack.getTitle()+"]");
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         private List<Effect> getEffects() {
@@ -144,6 +191,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private class TrackListener implements View.OnClickListener  {
             @Override
             public void onClick(View v) {
+
                 //listener.onButtonClicked(v, getPosition());
                 if (!trackExpanded) {
                     // Expand track

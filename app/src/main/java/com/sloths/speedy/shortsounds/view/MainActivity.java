@@ -21,8 +21,9 @@ import com.sloths.speedy.shortsounds.model.ShortSound;
 import java.util.List;
 
 
+
 public class MainActivity extends FragmentActivity {
-    private String[] mShortSounds;
+    private String[] mShortSoundsTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -33,9 +34,9 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("DB_TEST", "MainActivity:onCreate()");
-        List<ShortSound> sounds = ShortSound.getAll();
+        sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
-        mShortSounds = getShortSoundTitles(sounds);
+        mShortSoundsTitles = getShortSoundTitles(sounds);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -87,7 +88,7 @@ public class MainActivity extends FragmentActivity {
         // Set the adapter for the list view
         //  ==> This connects the listview to the actual sounds
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mShortSounds));
+                R.layout.drawer_list_item, mShortSoundsTitles));
         // Set the list's click listener
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
@@ -157,7 +158,8 @@ public class MainActivity extends FragmentActivity {
         Fragment fragment = new RecyclerViewFragment();
         // Sets it to the correct ShortSound
         Bundle args = new Bundle();
-        args.putInt(RecyclerViewFragment.ARG_SOUND_NUMBER, position);
+        long targetShortSoundId = sounds.get( position ).getId();
+        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
         fragment.setArguments(args);
 
         // Replaces the main content screen w/ Short sound
@@ -168,7 +170,7 @@ public class MainActivity extends FragmentActivity {
         mDrawerList.setItemChecked(position, true);
 
         mDrawerLayout.closeDrawer(mDrawerList);
-        setTitle(mShortSounds[position]);
+        setTitle(mShortSoundsTitles[position]);
     }
 
     @Override

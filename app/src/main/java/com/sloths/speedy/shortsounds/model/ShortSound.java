@@ -2,8 +2,6 @@ package com.sloths.speedy.shortsounds.model;
 
 import android.util.Log;
 
-import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +54,14 @@ public class ShortSound {
      */
     public static List<ShortSound> getAll() {
         return sqlHelper.queryAllShortSounds();
+    }
+
+    /**
+     * Fetch a single ShortSound by id
+     * @return ShortSound
+     */
+    public static ShortSound getById( long id ) {
+        return sqlHelper.queryShortSoundById( id );
     }
 
     /**

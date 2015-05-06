@@ -3,9 +3,10 @@ package com.sloths.speedy.shortsounds.view;
 /**
  * Created by joel on 4/25/2015.
  */
+
 import android.app.AlertDialog;
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
@@ -15,27 +16,25 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
-import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
-
-import java.util.List;
 
 
 public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapter.RVListener {
 
-    public static final String ARG_SOUND_NUMBER = "sound_number";
+    public static final String ARG_SOUND_ID = "short_sound_id";
     private static final String TAG = "RecyclerViewFragment";
     protected RecyclerView.LayoutManager mLayoutManager;
     protected RecyclerView mRecyclerView;
     protected RecyclerViewAdapter mAdapter;
-    protected String[] trackNames;
-    private ShortSound sound;
+    private ShortSound mShortSound;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initDataset();
+        long sound_id = getArguments().getLong(ARG_SOUND_ID);
+        mShortSound = ShortSound.getById( sound_id );
     }
 
     @Override
@@ -50,7 +49,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         // set the LayoutManager for the RecyclerView
         mRecyclerView.setLayoutManager(mLayoutManager);
         // set the adapter for the RecyclerView, passing in the data
-        mAdapter = new RecyclerViewAdapter(trackNames, this);
+        mAdapter = new RecyclerViewAdapter(mShortSound, this);
         mRecyclerView.setAdapter(mAdapter);
 //
 //        mRecyclerView.setRecyclerListener(new RecyclerView.RecyclerListener() {
@@ -62,35 +61,6 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         return rootView;
 
     }
-
-
-    /**
-     * Generates Strings for RecyclerView's adapter. This data would usually come
-     * from a local content provider or remote server.
-     */
-    private void initDataset() {
-//        String sound = getResources().getStringArray(R.array.shortsounds_array)[sound_num];
-//        getActivity().setTitle(sound);
-
-        // Populate array of tracks
-//        List<String> trackTitles = Arrays.asList(getResources().getStringArray(R.array.track_array));
-        int sound_num = getArguments().getInt(ARG_SOUND_NUMBER);
-        String[] trackTitles = getTracks(sound_num);
-        trackNames = trackTitles;
-    }
-
-    private String[] getTracks(int position) {
-        List<ShortSound> sounds = ShortSound.getAll();
-        ShortSound thisSound = sounds.get(position);
-        List<ShortSoundTrack> tracks = thisSound.getTracks();
-        String[] tracksNames = new String[tracks.size()];
-        for (int i = 0; i < tracks.size(); i++) {
-            tracksNames[i] = tracks.get(i).getTitle();
-        }
-        return tracksNames;
-    }
-
-
 
     @Override
     public void onButtonClicked(View v, int track, String effect) {
