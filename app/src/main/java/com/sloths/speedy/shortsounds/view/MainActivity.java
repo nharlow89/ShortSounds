@@ -17,6 +17,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.support.v7.widget.ShareActionProvider;
+import android.support.v4.view.MenuItemCompat;
+import android.content.Intent;
 
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
@@ -34,6 +37,7 @@ public class MainActivity extends FragmentActivity {
     private CharSequence mTitle;
     private List<ShortSound> sounds;
     private ImageButton mGlobalPlayButton;
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +160,9 @@ public class MainActivity extends FragmentActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-        menu.findItem(R.id.action_settings).setVisible(!drawerOpen);
+        menu.findItem(R.id.action_save).setVisible(!drawerOpen);
+        menu.findItem(R.id.action_new).setVisible(!drawerOpen);
+        menu.findItem(R.id.action_share).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -207,7 +213,20 @@ public class MainActivity extends FragmentActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.action_share);
+
+        // Fetch and store ShareActionProvider
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private void setShareIntent(Intent shareIntent) {
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
     }
 
     @Override
