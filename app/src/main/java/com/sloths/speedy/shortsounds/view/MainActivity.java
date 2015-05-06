@@ -185,4 +185,13 @@ public class MainActivity extends Activity {
         // Handle your other action bar items...
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * Begins the recording process.
+     *
+     * 
+     */
+    public void beginRecording() {
+
+    }
 }
