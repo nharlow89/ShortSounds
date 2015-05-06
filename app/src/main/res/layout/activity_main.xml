@@ -41,16 +41,15 @@
                 android:id="@+id/seekBar"
                 android:layout_gravity="center" />
 
+            <ImageButton
+                android:layout_width="78dp"
+                android:layout_height="61dp"
+                android:id="@+id/imageButtonRecord"
+                android:src="@drawable/ic_action_mic"
+                android:layout_gravity="right|center_vertical"
+                style="@android:style/Widget.Holo.ActionButton" />
         </FrameLayout>
-
     </LinearLayout>
-
-    <!-- This is the record button -->
-    <FrameLayout
-        android:id="@+id/sample_content_fragment"
-        android:layout_weight="0.21"
-        android:layout_width="match_parent"
-        android:layout_height="0px" />
 
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"

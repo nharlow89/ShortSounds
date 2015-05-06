@@ -1,5 +1,4 @@
 package com.sloths.speedy.shortsounds.view;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Outline;
