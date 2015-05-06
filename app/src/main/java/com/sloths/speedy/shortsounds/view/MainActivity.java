@@ -219,7 +219,19 @@ public class MainActivity extends FragmentActivity {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        // Handle your other action bar items...
-        return super.onOptionsItemSelected(item);
+
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                //TODO: Add delete functionality
+                return true;
+            case R.id.action_new:
+                //TODO: Add new shortsound functionality
+                return true;
+            case R.id.action_save:
+                //TODO: Add saving functionality
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
