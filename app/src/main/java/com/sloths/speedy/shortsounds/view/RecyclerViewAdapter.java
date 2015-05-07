@@ -128,10 +128,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     if ( mShortSoundTrack.isPlaying() ) {
+                        // If the track was playing then stop it.
                         mShortSoundTrack.stop();
                         mShortSoundTrack.prepareAsync();
                         mPlayTrackButton.setBackground( context.getResources().getDrawable(R.drawable.ic_action_play) );
-                    } else if ( mShortSoundTrack.isPrepared() ) {
+                    } else {
+                        // The track was not playing, stop any other tracks and play this one.
                         mShortSound.stopAllTracks();
                         mShortSoundTrack.play();
                         mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_stop));

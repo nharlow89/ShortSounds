@@ -79,7 +79,7 @@ public class ShortSoundTrack {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mState = MediaState.PREPARED;
-                    Log.d(TAG, "prepared track ["+id+"]");
+                    Log.d(TAG, "prepared track [" + id + "]");
                 }
             });
         } catch (IOException e) {
@@ -92,9 +92,17 @@ public class ShortSoundTrack {
      */
     public void play() {
         if ( mState == MediaState.PREPARED ) {
-            Log.d(TAG, "play track ["+this.getId()+"]");
+            Log.d(TAG, "play prepared track ["+this.getId()+"]");
             player.start();
             mState = MediaState.STARTED;
+        } else if ( mState == MediaState.STOPPED ) {
+            try {
+                Log.d(TAG, "play stopped track ["+this.getId()+"]");
+                player.prepare();
+                player.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
