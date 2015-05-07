@@ -1,6 +1,7 @@
 package com.sloths.speedy.shortsounds.view;
 
 
+import android.media.MediaRecorder;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -19,6 +20,7 @@ import android.widget.ListView;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -30,6 +32,7 @@ public class MainActivity extends Activity {
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
     private List<ShortSound> sounds;
+    private MediaRecorder trackRecorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,12 +189,27 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Begins the recording process.
-     *
-     * 
-     */
+    /** Begins the recording process. */
     public void beginRecording() {
+        trackRecorder = new MediaRecorder();
+        trackRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        trackRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+        trackRecorder.setOutputFile(""); // TODO: determine where to store tracks in file system
+        trackRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 
+        try {
+            trackRecorder.prepare();
+        } catch (IOException e) {
+            // TODO: Figure out what to do if prepare() fails
+        }
+
+        trackRecorder.start();
+    }
+
+    /** Ends the recording process. */
+    public void endRecording() {
+        trackRecorder.stop();
+        trackRecorder.release();
+        trackRecorder = null;
     }
 }
