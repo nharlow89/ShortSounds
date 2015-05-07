@@ -5,8 +5,10 @@ package com.sloths.speedy.shortsounds.view;
  */
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.support.v4.util.Pair;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +42,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public Map<Long, Pair<MediaPlayer, MediaState>> mMediaPlayerPool;
     private Context context;
     private RVListener listener;
+    private ArrayList<Color> mColorPallete;
+
 
     /**
      * Initialize the dataset of the Adapter.
@@ -50,6 +54,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         mMediaPlayerPool = new HashMap<>();
         this.context = rvf.getActivity();
         listener = rvf;
+
+
     }
 
     // Create new views (invoked by the layout manager)
@@ -60,7 +66,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click listener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
-
         return vh;
     }
 
@@ -70,7 +75,63 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
         viewHolder.setTitleView(position);
-        viewHolder.setShortSoundTrack( mShortSound.getTracks().get(position) );
+        viewHolder.setShortSoundTrack(mShortSound.getTracks().get(position));
+        dynamicallySetCardColor(viewHolder, position);
+    }
+
+    /**
+     * Sets the background color of cards. Will pull from collection of
+     * preselected colors.
+     * @param viewHolder The view to be affected
+     * @param position The position in the RecyclerView
+     */
+    private void dynamicallySetCardColor(ViewHolder viewHolder, int position) {
+        // There are 6 different card colors
+        // so position 0-5
+        View currentView = viewHolder.getViewHoldersView();
+        int num_colors = 6;
+        switch(position % num_colors) {
+            case 0:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.purple_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.purple_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 1:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.teal_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.teal_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 2:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.deep_orange_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.deep_orange_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 3:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.pink_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.pink_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 4:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.yellow_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.yellow_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 5:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.indigo_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.indigo_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            default:
+                // something went wrong
+                break;
+        }
+    }
+
+    private void setColorOnView(ViewHolder viewHolder, View currentView) {
+        View track_parent = currentView.findViewById(R.id.track_parent);
+        track_parent.setBackgroundColor(viewHolder.mPrimaryColor);
+        View track_child = currentView.findViewById(R.id.track_child);
+        track_child.setBackgroundColor(viewHolder.mPrimaryColor);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -87,6 +148,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private final LinearLayout controller;
         private Button mPlayTrackButton;
         private ShortSoundTrack mShortSoundTrack;
+        private View vView;
+        private int mPrimaryColor;
+        private int mSecondaryColor;
         final Button eqButton;
         final Button reverbButton;
         final Button distButton;
@@ -97,8 +161,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(new TrackListener());
-
             vTitle = (TextView) v.findViewById(R.id.track_title);
+            vView = v;
             controller = (LinearLayout) v.findViewById(R.id.track_child);
             eqButton = ((Button) v.findViewById(R.id.eq_button));
             reverbButton = ((Button) v.findViewById(R.id.reverb_button));
@@ -106,7 +170,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             bitButton = ((Button) v.findViewById(R.id.bit_button));
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
             setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
-
             setPlayClickHandler();
             controller.setVisibility(View.GONE);
 
@@ -119,6 +182,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
 //            effectsList.setAdapter(effectsAdapter);
             trackExpanded = false;
+        }
+
+        /**
+         * Returns the View associated with this ViewHolder.
+         * @return View The View associated with this ViewHolder
+         */
+        public View getViewHoldersView() {
+            return vView;
         }
 
         /**
