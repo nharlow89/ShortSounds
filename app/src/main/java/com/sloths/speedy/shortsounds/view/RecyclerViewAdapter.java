@@ -5,7 +5,9 @@ package com.sloths.speedy.shortsounds.view;
  */
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +26,7 @@ import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +38,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ShortSound mShortSound;
     private Context context;
     private RVListener listener;
+    private HashMap<ViewHolder,View> mViewHolders;
 
     /**
      * Initialize the dataset of the Adapter.
@@ -54,8 +58,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click listener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
-
         return vh;
+    }
+
+    /**
+     * Sets the background color of cards. Will pull from collection of
+     * preselected colors.
+     * @param v The view to be affected
+     */
+    private void dynamicallySetCardColor(View v, int position) {
+        View track_parent = v.findViewById(R.id.track_parent);
+        track_parent.setBackgroundColor(Color.BLUE);
+        View track_child = v.findViewById(R.id.track_child);
+        track_child.setBackgroundColor(Color.BLUE);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -65,6 +80,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // with that element
         viewHolder.setTitleView(position);
         viewHolder.setShortSoundTrack( mShortSound.getTracks().get(position) );
+        View currentView = viewHolder.getViewHoldersView();
+        dynamicallySetCardColor(currentView, position);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -85,6 +102,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private MediaPlayer mMediaPlayer;
         private Boolean mMediaPlayerPrepared = false;
         private ShortSoundTrack mShortSoundTrack;
+        private View vView;
         final Button eqButton;
         final Button reverbButton;
         final Button distButton;
@@ -95,8 +113,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(new TrackListener());
-
             vTitle = (TextView) v.findViewById(R.id.track_title);
+            vView = v;
             controller = (LinearLayout) v.findViewById(R.id.track_child);
             eqButton = ((Button) v.findViewById(R.id.eq_button));
             reverbButton = ((Button) v.findViewById(R.id.reverb_button));
@@ -104,7 +122,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             bitButton = ((Button) v.findViewById(R.id.bit_button));
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
             setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
-
             setPlayClickHandler();
             controller.setVisibility(View.GONE);
 
@@ -117,7 +134,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
 //            effectsList.setAdapter(effectsAdapter);
             trackExpanded = false;
+        }
 
+        /**
+         * Returns the View associated with this ViewHolder.
+         * @return View The View associated with this ViewHolder
+         */
+        public View getViewHoldersView() {
+            return vView;
         }
 
         /**
