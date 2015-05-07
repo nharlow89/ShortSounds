@@ -72,8 +72,8 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     public void onDestroyView() {
         super.onDestroyView();
         // We need to cleanup the audio stuff from this ShortSound
-        mAdapter.stopAllTracks();
-        // TODO: should probably release all the tracks as well.
+        mShortSound.stopAllTracks();
+        mShortSound.releaseAllTracks();
     }
 
     /**
@@ -86,7 +86,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAdapter.playAllTracks();
+                mShortSound.playAllTracks();
             }
         });
     }

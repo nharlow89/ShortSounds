@@ -1,6 +1,13 @@
 package com.sloths.speedy.shortsounds.model;
 
+import android.content.Context;
+import android.media.MediaPlayer;
+import android.util.Log;
+
+import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -15,12 +22,15 @@ public class ShortSoundTrack {
     public static final int BUFFER_SIZE = 2000;  // TODO: make buffer size with respect to TRACK_LENGTH
     public static final String DEFAULT_TITLE = "Untitled Track";
 
+    private static final String TAG = "Track";
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
     private final String originalFile;
     private final String file;
     private long id;
     private String title;
     private final long parentId;
+    private MediaPlayer player;
+    private MediaState mState = MediaState.INITIALIZED;
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -36,6 +46,7 @@ public class ShortSoundTrack {
         this.parentId = shortSoundId;
         // TODO: create a copy of the original file that will be our "working" copy
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
+        setUpMediaPlayer();
     }
 
     /**
@@ -54,6 +65,97 @@ public class ShortSoundTrack {
         this.originalFile = map.get( sqlHelper.KEY_TRACK_FILENAME_ORIGINAL );
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
+        this.player = new MediaPlayer();
+        setUpMediaPlayer();
+    }
+
+    private void setUpMediaPlayer() {
+        this.player = new MediaPlayer();
+        Context context = ShortSoundsApplication.getAppContext();
+        String path = context.getFilesDir().getAbsolutePath();
+        try {
+            this.player.setDataSource( path + "/" + this.file );
+            this.player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mState = MediaState.PREPARED;
+                    Log.d(TAG, "prepared track ["+id+"]");
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Play the audio track associated with this ShortSound.
+     */
+    public void play() {
+        if ( mState == MediaState.PREPARED ) {
+            Log.d(TAG, "play track ["+this.getId()+"]");
+            player.start();
+            mState = MediaState.STARTED;
+        }
+    }
+
+    /**
+     * Stop playing this track and reset its position to the beginning of the audio file.
+     */
+    public void stop() {
+        if ( player.isPlaying() ) {
+            Log.d(TAG, "stop track ["+this.getId()+"]");
+            player.stop();
+            player.prepareAsync();
+            mState = MediaState.PREPARING;
+        }
+    }
+
+    /**
+     * Prepare this track for playing. Note: must be called after stopping the track or after init
+     * of the MediaPlayer.
+     */
+    public void prepare() {
+        if ( mState == MediaState.STOPPED || mState == MediaState.INITIALIZED ) {
+            try {
+                Log.d(TAG, "prepare track ["+this.getId()+"]");
+                player.prepare();
+                mState = MediaState.PREPARED;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Release this track from the MediaPlayer when no longer in use.
+     */
+    public void release() {
+        player.release();
+    }
+
+    /**
+     * Return whether the current track is playing or not.
+     */
+    public boolean isPlaying() {
+        return player.isPlaying();
+    }
+
+    /**
+     * Prepare this track asynchronously.
+     */
+    public void prepareAsync() {
+        if ( mState == MediaState.INITIALIZED || mState == MediaState.STOPPED ) {
+            Log.d(TAG, "prepareAsync track ["+this.getId()+"]");
+            player.prepareAsync();
+            mState = MediaState.PREPARING;
+        }
+    }
+
+    /**
+     * Return whether or not this track has been prepared and is ready to play.
+     */
+    public boolean isPrepared() {
+        return mState == MediaState.PREPARED;
     }
 
     public void addEffect() {

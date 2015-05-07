@@ -8,7 +8,6 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,6 @@ import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,59 +80,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     /**
-     * Stop all currently playing tracks in the pool.
-     */
-    public void stopAllTracks() {
-        for( Map.Entry<Long, Pair<MediaPlayer,MediaState>> entry: mMediaPlayerPool.entrySet() ) {
-            MediaPlayer player = entry.getValue().first;
-            if ( player.isPlaying() ) {
-                player.stop();
-                player.prepareAsync();
-                Log.d("DEBUG", "stop track["+entry.getKey()+"]");
-            }
-        }
-    }
-
-    /**
-     * Play all the tracks that are in the audio pool.
-     */
-    public void playAllTracks() {
-        // Loop through each track, make sure it is prepared, and then play.
-        for( Map.Entry<Long, Pair<MediaPlayer,MediaState>> entry: mMediaPlayerPool.entrySet() ) {
-            MediaPlayer player = entry.getValue().first;
-            MediaState state = entry.getValue().second;
-            if ( state.currentState == MediaState.STARTED ) {
-                player.stop();
-                state.currentState = MediaState.STOPPED;
-            }
-            if ( state.currentState != MediaState.PREPARED ) {
-                try {
-                    player.prepare();
-                    state.currentState = MediaState.PREPARED;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        // Now that all the tracks are prepared, play them
-        for( Map.Entry<Long, Pair<MediaPlayer,MediaState>> entry: mMediaPlayerPool.entrySet() ) {
-            MediaPlayer player = entry.getValue().first;
-            MediaState state = entry.getValue().second;
-            player.start();
-            state.currentState = MediaState.STARTED;
-        }
-
-    }
-
-    /**
      * Provide a reference to the type of views that you are using (custom ViewHolder)
      */
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
         private final LinearLayout controller;
         private Button mPlayTrackButton;
-        private MediaPlayer mMediaPlayer;
-        private MediaState mMediaState;
         private ShortSoundTrack mShortSoundTrack;
         final Button eqButton;
         final Button reverbButton;
@@ -176,19 +127,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private void setPlayClickHandler() {
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                if ( mMediaPlayer.isPlaying() ) {
-                    mMediaPlayer.stop();
-                    mMediaState.currentState = MediaState.STOPPED;
-                    mMediaPlayer.prepareAsync();
-                    mPlayTrackButton.setBackground( context.getResources().getDrawable(R.drawable.ic_action_play) );
-                    Log.d("DEBUG", "stop track[" + mShortSoundTrack.getId() + "]");
-                } else if ( mMediaState.currentState == MediaState.PREPARED ) {
-                    stopAllTracks();
-                    mMediaPlayer.start();
-                    mMediaState.currentState = MediaState.STARTED;
-                    mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_stop));
-                    Log.d("DEBUG", "play track[" + mShortSoundTrack.getId() + "]");
-                }
+                    if ( mShortSoundTrack.isPlaying() ) {
+                        mShortSoundTrack.stop();
+                        mShortSoundTrack.prepareAsync();
+                        mPlayTrackButton.setBackground( context.getResources().getDrawable(R.drawable.ic_action_play) );
+                    } else if ( mShortSoundTrack.isPrepared() ) {
+                        mShortSound.stopAllTracks();
+                        mShortSoundTrack.play();
+                        mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_stop));
+                    }
                 }
             });
         }
@@ -204,24 +151,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          */
         public void setShortSoundTrack( ShortSoundTrack track ) {
             mShortSoundTrack = track;
-            mMediaPlayer = new MediaPlayer();
-            mMediaState = new MediaState();
-            Context context = ShortSoundsApplication.getAppContext();
-            String path = context.getFilesDir().getAbsolutePath();
-            try {
-                mMediaPlayer.setDataSource(path + "/" + mShortSoundTrack.getFile());
-                mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        mMediaState.currentState = MediaState.PREPARED;
-                        Log.d("DEBUG", "MediaPlayer prepared["+mShortSoundTrack.getId()+"]");
-                    }
-                });
-                // Add this to the Audio Pool
-                mMediaPlayerPool.put(track.getId(), new Pair(mMediaPlayer, mMediaState));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
         private List<Effect> getEffects() {
@@ -257,21 +186,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     // Expand a track
                     controller.setVisibility(View.VISIBLE);
                     trackExpanded = true;
-                    // Upon selecting a track we need to prepare the MediaPlayer (this only needs
-                    // to happen once per track).
-                    if ( mMediaState.currentState != MediaState.PREPARED ) {
-                        mMediaPlayer.prepareAsync();
-                    }
+                    // Upon selecting a track we need to prepare the track for playing.
+                    mShortSoundTrack.prepareAsync();
                 } else {
                     // Close the current open track
                     controller.setVisibility(View.GONE);
                     trackExpanded = false;
-                    // Stop the MediaPlayer if it was active
-                    if ( mMediaPlayer.isPlaying() ) {
-                        mMediaPlayer.stop();
-                        mMediaState.currentState = MediaState.STOPPED;
-                        Log.d("DEBUG", "stop track["+mShortSoundTrack.getId()+"]");
-                    }
+                    // Stop the track (just in case it was playing)
+                    mShortSoundTrack.stop();
                 }
             }
         }

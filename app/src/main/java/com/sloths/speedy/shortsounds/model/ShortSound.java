@@ -48,6 +48,38 @@ public class ShortSound {
         repInvariant();
     }
 
+
+    /**
+     * Play all the tracks associated with this ShortSound.
+     */
+    public void playAllTracks() {
+        for( ShortSoundTrack track: this.tracks ) {
+            track.stop();  // Just in case.
+            track.prepare();  // Note this prepare is synchronous.
+        }
+        for( ShortSoundTrack track: this.tracks ) {
+            track.play();
+        }
+    }
+
+    /**
+     * Stop any currently playing tracks within this ShortSound.
+     */
+    public void stopAllTracks() {
+        for( ShortSoundTrack track: this.tracks ) {
+            track.stop();
+        }
+    }
+
+    /**
+     * Release all the tracks to free up memory (called when done working with this ShortSound).
+     */
+    public void releaseAllTracks() {
+        for( ShortSoundTrack track: this.tracks ) {
+            track.release();
+        }
+    }
+
     /**
      * Fetch all available ShortSounds stored in the database.
      * @return List<ShortSound>
