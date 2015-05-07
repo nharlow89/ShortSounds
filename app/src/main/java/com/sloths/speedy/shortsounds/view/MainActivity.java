@@ -39,6 +39,8 @@ public class MainActivity extends FragmentActivity {
     private List<ShortSound> sounds;
     private MediaRecorder trackRecorder;
     private ImageButton mGlobalPlayButton;
+    private ImageButton mRecordButton;
+    private boolean isRecording;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,7 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpGlobalPlayButton();
+        setUpRecordButton();
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -65,6 +68,27 @@ public class MainActivity extends FragmentActivity {
         mGlobalPlayButton = (ImageButton) findViewById(R.id.imageButtonPlay);
         Log.e("DEBUG", mGlobalPlayButton.toString());
         mGlobalPlayButton.setEnabled(false);  // Default to disabled when ShortSound has not been clicked.
+    }
+
+    /**
+     * This sets up the Record button and attaches the click handler which gives it the record
+     * functionality.
+     */
+    private void setUpRecordButton() {
+        mRecordButton = (ImageButton) findViewById(R.id.imageButtonRecord);
+        mRecordButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isRecording) {
+                    endRecording();
+                } else {
+                    beginRecording();
+                }
+                isRecording = !isRecording;
+            }
+        });
+        isRecording = false;
+        Log.e("DEBUG", mRecordButton.toString());
     }
 
     /**
@@ -221,7 +245,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     /** Begins the recording process. */
-    public void beginRecording() {
+    private void beginRecording() {
         trackRecorder = new MediaRecorder();
         trackRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         trackRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
@@ -238,7 +262,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     /** Ends the recording process. */
-    public void endRecording() {
+    private void endRecording() {
         trackRecorder.stop();
         trackRecorder.release();
         trackRecorder = null;
