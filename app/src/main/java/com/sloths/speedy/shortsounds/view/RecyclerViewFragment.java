@@ -3,44 +3,49 @@ package com.sloths.speedy.shortsounds.view;
 /**
  * Created by joel on 4/25/2015.
  */
+
 import android.app.AlertDialog;
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
-import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
-
-import java.util.List;
 
 
 public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapter.RVListener {
 
-    public static final String ARG_SOUND_NUMBER = "sound_number";
+    public static final String ARG_SOUND_ID = "short_sound_id";
     private static final String TAG = "RecyclerViewFragment";
     protected RecyclerView.LayoutManager mLayoutManager;
     protected RecyclerView mRecyclerView;
     protected RecyclerViewAdapter mAdapter;
-    protected String[] trackNames;
-    private ShortSound sound;
+    private ShortSound mShortSound;
+    private ImageButton mGlobalPlayButton;
+    private LinearLayout mParentLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initDataset();
+        long sound_id = getArguments().getLong(ARG_SOUND_ID);
+        mShortSound = ShortSound.getById( sound_id );
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Save the parent container for later reference (targeting the global play button)
+        mParentLayout = (LinearLayout) container.getParent();
         // grab the root view of the layout for recycler view
         View rootView = inflater.inflate(R.layout.recycler_view_frag, container, false);
         // grab the RecyclerView component from the layout
@@ -50,8 +55,9 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         // set the LayoutManager for the RecyclerView
         mRecyclerView.setLayoutManager(mLayoutManager);
         // set the adapter for the RecyclerView, passing in the data
-        mAdapter = new RecyclerViewAdapter(trackNames, this);
+        mAdapter = new RecyclerViewAdapter(mShortSound, this);
         mRecyclerView.setAdapter(mAdapter);
+        setGlobalPlayButtonClickHandler();
 //
 //        mRecyclerView.setRecyclerListener(new RecyclerView.RecyclerListener() {
 //            @Override
@@ -60,37 +66,46 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
 //            }
 //        });
         return rootView;
-
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // We need to cleanup the audio stuff from this ShortSound
+        mShortSound.stopAllTracks();
+        mShortSound.releaseAllTracks();
+    }
 
     /**
-     * Generates Strings for RecyclerView's adapter. This data would usually come
-     * from a local content provider or remote server.
+     * Now that we have a selected ShortSound in focus we need to update the Global Play
+     * button's click handler to play all tracks associated with this ShortSound.
      */
-    private void initDataset() {
-//        String sound = getResources().getStringArray(R.array.shortsounds_array)[sound_num];
-//        getActivity().setTitle(sound);
+    private void setGlobalPlayButtonClickHandler() {
+        mGlobalPlayButton = (ImageButton)mParentLayout.findViewById(R.id.imageButtonPlay);
+        mGlobalPlayButton.setEnabled(true);
+        Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
+        mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: we need to handle the case when the ShortSound finishes playing!
+                if ( mShortSound.isPlaying() ) {
+                    // The ShortSound is already playing, stop it.
+                    mShortSound.pauseAllTracks();
+                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                } else {
+                    if ( mShortSound.isPaused() ) {
+                        // The ShortSound was previously playing, unpause it.
+                        mShortSound.unPauseAllTracks();
+                    } else {
+                        // The ShortSound is not playing yet, play it.
+                        mShortSound.playAllTracks();
+                    }
+                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
+                }
 
-        // Populate array of tracks
-//        List<String> trackTitles = Arrays.asList(getResources().getStringArray(R.array.track_array));
-        int sound_num = getArguments().getInt(ARG_SOUND_NUMBER);
-        String[] trackTitles = getTracks(sound_num);
-        trackNames = trackTitles;
+            }
+        });
     }
-
-    private String[] getTracks(int position) {
-        List<ShortSound> sounds = ShortSound.getAll();
-        ShortSound thisSound = sounds.get(position);
-        List<ShortSoundTrack> tracks = thisSound.getTracks();
-        String[] tracksNames = new String[tracks.size()];
-        for (int i = 0; i < tracks.size(); i++) {
-            tracksNames[i] = tracks.get(i).getTitle();
-        }
-        return tracksNames;
-    }
-
-
 
     @Override
     public void onButtonClicked(View v, int track, String effect) {

@@ -1,6 +1,13 @@
 package com.sloths.speedy.shortsounds.model;
 
+import android.content.Context;
+import android.media.MediaPlayer;
+import android.util.Log;
+
+import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -9,18 +16,25 @@ import java.util.HashMap;
  * file. A ShortSoundTrack should belong to a single ShortSound at any given time.
  */
 public class ShortSoundTrack {
+    /**
+     * Please note that the internal state of a ShortSoundTrack attempts to follow the state
+     * machine found here in the MediaPlayer class: http://developer.android.com/reference/android/media/MediaPlayer.html
+     */
 
     public static final String AUDIO_FORMAT = "";  // TODO: format/encoding?
     public static final int TRACK_LENGTH = 30;  // Track length in seconds
     public static final int BUFFER_SIZE = 2000;  // TODO: make buffer size with respect to TRACK_LENGTH
     public static final String DEFAULT_TITLE = "Untitled Track";
 
+    private static final String TAG = "Track";
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
     private final String originalFile;
     private final String file;
     private long id;
     private String title;
     private final long parentId;
+    private MediaPlayer player;
+    private MediaState mState = MediaState.INITIALIZED;
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -36,6 +50,7 @@ public class ShortSoundTrack {
         this.parentId = shortSoundId;
         // TODO: create a copy of the original file that will be our "working" copy
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
+        setUpMediaPlayer();
     }
 
     /**
@@ -54,6 +69,114 @@ public class ShortSoundTrack {
         this.originalFile = map.get( sqlHelper.KEY_TRACK_FILENAME_ORIGINAL );
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
+        this.player = new MediaPlayer();
+        setUpMediaPlayer();
+    }
+
+    private void setUpMediaPlayer() {
+        this.player = new MediaPlayer();
+        Context context = ShortSoundsApplication.getAppContext();
+        String path = context.getFilesDir().getAbsolutePath();
+        try {
+            this.player.setDataSource( path + "/" + this.file );
+            this.player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mState = MediaState.PREPARED;
+                    Log.d(TAG, "prepared track [" + id + "]");
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Play the audio track associated with this ShortSound.
+     */
+    public void play() {
+        if ( mState == MediaState.PREPARED || mState == MediaState.PAUSED ) {
+            Log.d(TAG, "play track ["+this.getId()+"]");
+            player.start();
+            mState = MediaState.STARTED;
+        } else if ( mState == MediaState.STOPPED ) {
+            try {
+                Log.d(TAG, "play stopped track ["+this.getId()+"]");
+                player.prepare();
+                player.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Stop playing this track and reset its position to the beginning of the audio file.
+     */
+    public void stop() {
+        if ( player.isPlaying() || mState == MediaState.STARTED || mState == MediaState.PAUSED ) {
+            Log.d(TAG, "stop track ["+this.getId()+"]");
+            player.stop();
+            player.prepareAsync();
+            mState = MediaState.PREPARING;
+        }
+    }
+
+    public void pause() {
+        if ( mState == MediaState.STARTED || player.isPlaying() ) {
+            Log.d(TAG, "pause track ["+this.getId()+"]");
+            player.pause();
+            mState = MediaState.PAUSED;
+        }
+    }
+
+    /**
+     * Prepare this track for playing. Note: must be called after stopping the track or after init
+     * of the MediaPlayer.
+     */
+    public void prepare() {
+        if ( mState == MediaState.STOPPED || mState == MediaState.INITIALIZED ) {
+            try {
+                Log.d(TAG, "prepare track ["+this.getId()+"]");
+                player.prepare();
+                mState = MediaState.PREPARED;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Release this track from the MediaPlayer when no longer in use.
+     */
+    public void release() {
+        player.release();
+    }
+
+    /**
+     * Return whether the current track is playing or not.
+     */
+    public boolean isPlaying() {
+        return player.isPlaying();
+    }
+
+    /**
+     * Prepare this track asynchronously.
+     */
+    public void prepareAsync() {
+        if ( mState == MediaState.INITIALIZED || mState == MediaState.STOPPED ) {
+            Log.d(TAG, "prepareAsync track ["+this.getId()+"]");
+            player.prepareAsync();
+            mState = MediaState.PREPARING;
+        }
+    }
+
+    /**
+     * Set the onCompletionListener for this ShortSoundTrack.
+     * @param listener
+     */
+    public void setOnPlayCompleteListener( MediaPlayer.OnCompletionListener listener ) {
+        player.setOnCompletionListener( listener );
     }
 
     public void addEffect() {
@@ -114,6 +237,19 @@ public class ShortSoundTrack {
     public long getParentId() {
         return this.parentId;
     }
+
+    /**
+     * Get the filename associated with this track.
+     * @return filename
+     */
+    public String getFile() { return this.file; }
+
+    /**
+     * Get this tracks id.
+     * @return
+     */
+    public long getId() { return this.id; }
+
     /**
      * This is the representation invarient of the ShortSoundTrack model.
      * The main thing here is that a ShortSoundTrack becomes invalid if the files

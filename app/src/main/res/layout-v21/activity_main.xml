@@ -16,8 +16,7 @@
             android:id="@+id/track_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
-
+            android:layout_weight="2">
         </RelativeLayout>
 
         <!-- This is the bottom toolbar -->
@@ -34,7 +33,7 @@
                 android:id="@+id/imageButtonPlay"
                 android:src="@drawable/ic_action_play"
                 android:layout_gravity="left|center_vertical"
-                style="@android:style/Widget.Holo.ActionButton" />
+                style="@android:style/Widget.Material.ActionButton" />
 
             <SeekBar
                 android:layout_width="219dp"
@@ -42,15 +41,16 @@
                 android:id="@+id/seekBar"
                 android:layout_gravity="center" />
 
-            <ImageButton
-                android:layout_width="78dp"
-                android:layout_height="61dp"
-                android:id="@+id/imageButtonRecord"
-                android:src="@drawable/ic_action_mic"
-                android:layout_gravity="right|center_vertical"
-                style="@android:style/Widget.Holo.ActionButton" />
         </FrameLayout>
+
     </LinearLayout>
+
+    <!-- This is the record button -->
+    <FrameLayout
+        android:id="@+id/sample_content_fragment"
+        android:layout_weight="0.21"
+        android:layout_width="match_parent"
+        android:layout_height="0px" />
 
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"

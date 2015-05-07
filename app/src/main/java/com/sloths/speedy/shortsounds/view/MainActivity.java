@@ -1,20 +1,24 @@
 package com.sloths.speedy.shortsounds.view;
 
-
 import android.media.MediaRecorder;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.sloths.speedy.shortsounds.R;
@@ -24,8 +28,9 @@ import java.io.IOException;
 import java.util.List;
 
 
-public class MainActivity extends Activity {
-    private String[] mShortSounds;
+
+public class MainActivity extends FragmentActivity {
+    private String[] mShortSoundsTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -33,18 +38,44 @@ public class MainActivity extends Activity {
     private CharSequence mTitle;
     private List<ShortSound> sounds;
     private MediaRecorder trackRecorder;
+    private ImageButton mGlobalPlayButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("DB_TEST", "MainActivity:onCreate()");
-        List<ShortSound> sounds = ShortSound.getAll();
+        sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
-        mShortSounds = getShortSoundTitles(sounds);
-
+        mShortSoundsTitles = getShortSoundTitles(sounds);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setUpGlobalPlayButton();
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setUpFloatingActionButton();
+        }
+    }
+
+    /**
+     * This sets up the Global Play button and attaches the default click
+     * handler. Note that when no ShortSound is loaded, this button should
+     * be disabled.
+     */
+    private void setUpGlobalPlayButton() {
+        mGlobalPlayButton = (ImageButton) findViewById(R.id.imageButtonPlay);
+        Log.e("DEBUG", mGlobalPlayButton.toString());
+        mGlobalPlayButton.setEnabled(false);  // Default to disabled when ShortSound has not been clicked.
+    }
+
+    /**
+     * Sets up the floating action button used as record button. Will
+     * only be called for Android SDK >= LOLLIPOP
+     */
+    private void setUpFloatingActionButton() {
+        FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
+        FloatingActionButtonBasicFragment fragment = new FloatingActionButtonBasicFragment();
+        transaction.replace(R.id.sample_content_fragment, fragment);
+        transaction.commit();
     }
 
     /**
@@ -77,7 +108,7 @@ public class MainActivity extends Activity {
         // Set the adapter for the list view
         //  ==> This connects the listview to the actual sounds
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mShortSounds));
+                R.layout.drawer_list_item, mShortSoundsTitles));
         // Set the list's click listener
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
@@ -147,7 +178,8 @@ public class MainActivity extends Activity {
         Fragment fragment = new RecyclerViewFragment();
         // Sets it to the correct ShortSound
         Bundle args = new Bundle();
-        args.putInt(RecyclerViewFragment.ARG_SOUND_NUMBER, position);
+        long targetShortSoundId = sounds.get( position ).getId();
+        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
         fragment.setArguments(args);
 
         // Replaces the main content screen w/ Short sound
@@ -158,7 +190,7 @@ public class MainActivity extends Activity {
         mDrawerList.setItemChecked(position, true);
 
         mDrawerLayout.closeDrawer(mDrawerList);
-        setTitle(mShortSounds[position]);
+        setTitle(mShortSoundsTitles[position]);
     }
 
     @Override
@@ -166,7 +198,6 @@ public class MainActivity extends Activity {
         mTitle = title;
         getActionBar().setTitle(mTitle);
     }
-
 
     // ---------------------------------------------------------------
     // Don't know if this stuff is needed, it's copied code
