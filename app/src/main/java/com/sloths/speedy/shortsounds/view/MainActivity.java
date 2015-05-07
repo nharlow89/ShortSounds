@@ -59,13 +59,7 @@ public class MainActivity extends FragmentActivity {
     private void setUpGlobalPlayButton() {
         mGlobalPlayButton = (ImageButton) findViewById(R.id.imageButtonPlay);
         Log.e("DEBUG", mGlobalPlayButton.toString());
-        mGlobalPlayButton.setAlpha(0.3f); // TODO: Disable until ShortSound is loaded.
-        mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("DEBUG", "The Global Play button is disabled.");
-            }
-        });
+        mGlobalPlayButton.setEnabled(false);  // Default to disabled when ShortSound has not been clicked.
     }
 
     /**

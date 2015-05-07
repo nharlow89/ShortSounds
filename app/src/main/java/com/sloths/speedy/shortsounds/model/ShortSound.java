@@ -19,6 +19,8 @@ public class ShortSound {
     private String title;
     private long id;
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
+    private boolean isPlaying = false;
+    private boolean isPaused = false;
 
     /**
      * Create a new empty ShortSound.
@@ -60,6 +62,19 @@ public class ShortSound {
         for( ShortSoundTrack track: this.tracks ) {
             track.play();
         }
+        isPlaying = true;
+        isPaused = false;
+    }
+
+    /**
+     * UnPause all tracks.
+     */
+    public void unPauseAllTracks() {
+        for( ShortSoundTrack track: this.tracks ) {
+            track.play();
+        }
+        isPlaying = true;
+        isPaused = false;
     }
 
     /**
@@ -69,6 +84,19 @@ public class ShortSound {
         for( ShortSoundTrack track: this.tracks ) {
             track.stop();
         }
+        isPlaying = false;
+        isPaused = false;
+    }
+
+    /**
+     * Pause all the ShortSound tracks at their current position.
+     */
+    public void pauseAllTracks() {
+        for( ShortSoundTrack track: this.tracks ) {
+            track.pause();
+        }
+        isPlaying = false;
+        isPaused = true;
     }
 
     /**
@@ -78,6 +106,20 @@ public class ShortSound {
         for( ShortSoundTrack track: this.tracks ) {
             track.release();
         }
+    }
+
+    /**
+     * Return whether or not the current ShortSound is playing.
+     */
+    public boolean isPlaying() {
+        return this.isPlaying;
+    }
+
+    /**
+     * Return whether or not the ShortSound is in a paused state.
+     */
+    public boolean isPaused() {
+        return this.isPaused;
     }
 
     /**

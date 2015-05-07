@@ -9,5 +9,6 @@ public enum MediaState {
     PREPARED,
     PREPARING,
     STARTED,
-    STOPPED
+    STOPPED,
+    PAUSED
 }

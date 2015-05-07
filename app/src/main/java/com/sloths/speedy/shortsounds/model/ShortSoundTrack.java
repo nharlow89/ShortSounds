@@ -16,6 +16,10 @@ import java.util.HashMap;
  * file. A ShortSoundTrack should belong to a single ShortSound at any given time.
  */
 public class ShortSoundTrack {
+    /**
+     * Please note that the internal state of a ShortSoundTrack attempts to follow the state
+     * machine found here in the MediaPlayer class: http://developer.android.com/reference/android/media/MediaPlayer.html
+     */
 
     public static final String AUDIO_FORMAT = "";  // TODO: format/encoding?
     public static final int TRACK_LENGTH = 30;  // Track length in seconds
@@ -91,8 +95,8 @@ public class ShortSoundTrack {
      * Play the audio track associated with this ShortSound.
      */
     public void play() {
-        if ( mState == MediaState.PREPARED ) {
-            Log.d(TAG, "play prepared track ["+this.getId()+"]");
+        if ( mState == MediaState.PREPARED || mState == MediaState.PAUSED ) {
+            Log.d(TAG, "play track ["+this.getId()+"]");
             player.start();
             mState = MediaState.STARTED;
         } else if ( mState == MediaState.STOPPED ) {
@@ -110,11 +114,19 @@ public class ShortSoundTrack {
      * Stop playing this track and reset its position to the beginning of the audio file.
      */
     public void stop() {
-        if ( player.isPlaying() ) {
+        if ( player.isPlaying() || mState == MediaState.STARTED || mState == MediaState.PAUSED ) {
             Log.d(TAG, "stop track ["+this.getId()+"]");
             player.stop();
             player.prepareAsync();
             mState = MediaState.PREPARING;
+        }
+    }
+
+    public void pause() {
+        if ( mState == MediaState.STARTED || player.isPlaying() ) {
+            Log.d(TAG, "pause track ["+this.getId()+"]");
+            player.pause();
+            mState = MediaState.PAUSED;
         }
     }
 
@@ -160,10 +172,11 @@ public class ShortSoundTrack {
     }
 
     /**
-     * Return whether or not this track has been prepared and is ready to play.
+     * Set the onCompletionListener for this ShortSoundTrack.
+     * @param listener
      */
-    public boolean isPrepared() {
-        return mState == MediaState.PREPARED;
+    public void setOnPlayCompleteListener( MediaPlayer.OnCompletionListener listener ) {
+        player.setOnCompletionListener( listener );
     }
 
     public void addEffect() {

@@ -82,11 +82,27 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
      */
     private void setGlobalPlayButtonClickHandler() {
         mGlobalPlayButton = (ImageButton)mParentLayout.findViewById(R.id.imageButtonPlay);
+        mGlobalPlayButton.setEnabled(true);
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mShortSound.playAllTracks();
+                // TODO: we need to handle the case when the ShortSound finishes playing!
+                if ( mShortSound.isPlaying() ) {
+                    // The ShortSound is already playing, stop it.
+                    mShortSound.pauseAllTracks();
+                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                } else {
+                    if ( mShortSound.isPaused() ) {
+                        // The ShortSound was previously playing, unpause it.
+                        mShortSound.unPauseAllTracks();
+                    } else {
+                        // The ShortSound is not playing yet, play it.
+                        mShortSound.playAllTracks();
+                    }
+                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
+                }
+
             }
         });
     }
