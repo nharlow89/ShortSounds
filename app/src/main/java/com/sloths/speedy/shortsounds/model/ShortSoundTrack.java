@@ -43,13 +43,13 @@ public class ShortSoundTrack {
      * @postcondition This ShortSoundTrack will be stored in the database and a
      *      copy of the file referenced by filename will be made.
      */
-    public ShortSoundTrack( String filename, long shortSoundId ) {
+    public ShortSoundTrack( long shortSoundId ) {
         this.title = DEFAULT_TITLE;
-        this.originalFile = filename;
-        this.file = filename + "-ss";  // May need to change?
         this.parentId = shortSoundId;
         // TODO: create a copy of the original file that will be our "working" copy
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
+        this.originalFile = "ss" + shortSoundId + "-track" + id;
+        this.file = originalFile + "-modified";  // May need to change?
         setUpMediaPlayer();
     }
 

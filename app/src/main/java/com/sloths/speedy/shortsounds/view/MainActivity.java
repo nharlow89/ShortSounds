@@ -1,11 +1,9 @@
 package com.sloths.speedy.shortsounds.view;
 
-import android.media.MediaRecorder;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -23,6 +21,7 @@ import android.widget.ListView;
 
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,6 +38,7 @@ public class MainActivity extends FragmentActivity {
     private List<ShortSound> sounds;
     private MediaRecorder trackRecorder;
     private ImageButton mGlobalPlayButton;
+    private ShortSound mActiveShortSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +54,7 @@ public class MainActivity extends FragmentActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setUpFloatingActionButton();
         }
+        beginRecording();
     }
 
     /**
@@ -174,6 +175,7 @@ public class MainActivity extends FragmentActivity {
      * @param position int the position of the drawer item clicked
      */
     private void selectShortSoundFromDrawer(int position) {
+        mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
         // Grabs the ShortSound and populates the screen with it
         Fragment fragment = new RecyclerViewFragment();
         // Sets it to the correct ShortSound
@@ -222,19 +224,36 @@ public class MainActivity extends FragmentActivity {
 
     /** Begins the recording process. */
     public void beginRecording() {
-        trackRecorder = new MediaRecorder();
-        trackRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        trackRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
-        trackRecorder.setOutputFile(""); // TODO: determine where to store tracks in file system
-        trackRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 
+        if ( mActiveShortSound == null ) {
+            // Case 1. There is no active ShortSound, create one and continue.
+            Log.d("DEBUG", "Began recording, no active ShortSound");
+            // Create the new ShortSound and add it the list.
+            ShortSound newSound = new ShortSound();
+            sounds.add( newSound );
+            // Update the sidebar with the new ShortSound.
+            mShortSoundsTitles = getShortSoundTitles(sounds);
+            ArrayAdapter drawerListAdapter = (ArrayAdapter) mDrawerList.getAdapter();
+            drawerListAdapter.notifyDataSetChanged();
+            // Select the new ShortSound to be active.
+            selectShortSoundFromDrawer( sounds.size() - 1 );
+        } else {
+            Log.d("DEBUG", "Began recording with active ShortSound["+mActiveShortSound.getTitle()+"]");
+        }
+        // Create the new ShortSoundTrack (that this will record to)
+        ShortSoundTrack newTrack = new ShortSoundTrack( mActiveShortSound.getId() );
+        // Setup the MediaRecorder
+        trackRecorder = new MediaRecorder();
+        trackRecorder.setAudioSource( MediaRecorder.AudioSource.MIC );
+        trackRecorder.setOutputFormat( MediaRecorder.OutputFormat.DEFAULT );
+        trackRecorder.setOutputFile( newTrack.getFile() ); // TODO: determine where to store tracks in file system
+        trackRecorder.setAudioEncoder( MediaRecorder.AudioEncoder.DEFAULT );
         try {
             trackRecorder.prepare();
+            trackRecorder.start();
         } catch (IOException e) {
             // TODO: Figure out what to do if prepare() fails
         }
-
-        trackRecorder.start();
     }
 
     /** Ends the recording process. */
