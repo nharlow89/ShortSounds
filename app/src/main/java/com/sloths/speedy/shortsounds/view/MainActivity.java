@@ -1,5 +1,6 @@
 package com.sloths.speedy.shortsounds.view;
 
+import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
@@ -11,6 +12,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -99,8 +101,11 @@ public class MainActivity extends FragmentActivity {
      * Enables the action bar icon for the nav drawer that opens the library.
      */
     private void enableActionBarLibraryToggleButton() {
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+
+
     }
 
     /**
@@ -163,6 +168,7 @@ public class MainActivity extends FragmentActivity {
         menu.findItem(R.id.action_save).setVisible(!drawerOpen);
         menu.findItem(R.id.action_new).setVisible(!drawerOpen);
         menu.findItem(R.id.action_share).setVisible(!drawerOpen);
+        menu.findItem(R.id.action_delete).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -212,15 +218,16 @@ public class MainActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
 
         // Locate MenuItem with ShareActionProvider
-        MenuItem item = menu.findItem(R.id.action_share);
+        MenuItem shareItem = menu.findItem(R.id.action_share);
 
         // Fetch and store ShareActionProvider
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
 
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     private void setShareIntent(Intent shareIntent) {
