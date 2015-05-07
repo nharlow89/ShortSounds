@@ -38,7 +38,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ShortSound mShortSound;
     private Context context;
     private RVListener listener;
-    private HashMap<ViewHolder,View> mViewHolders;
+    private ArrayList<Color> mColorPallete;
+
 
     /**
      * Initialize the dataset of the Adapter.
@@ -48,6 +49,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         mShortSound = sound;
         this.context = rvf.getActivity();
         listener = rvf;
+
+
     }
 
     // Create new views (invoked by the layout manager)
@@ -61,27 +64,69 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return vh;
     }
 
-    /**
-     * Sets the background color of cards. Will pull from collection of
-     * preselected colors.
-     * @param v The view to be affected
-     */
-    private void dynamicallySetCardColor(View v, int position) {
-        View track_parent = v.findViewById(R.id.track_parent);
-        track_parent.setBackgroundColor(Color.BLUE);
-        View track_child = v.findViewById(R.id.track_child);
-        track_child.setBackgroundColor(Color.BLUE);
-    }
-
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
         viewHolder.setTitleView(position);
-        viewHolder.setShortSoundTrack( mShortSound.getTracks().get(position) );
+        viewHolder.setShortSoundTrack(mShortSound.getTracks().get(position));
+        dynamicallySetCardColor(viewHolder, position);
+    }
+
+    /**
+     * Sets the background color of cards. Will pull from collection of
+     * preselected colors.
+     * @param viewHolder The view to be affected
+     * @param position The position in the RecyclerView
+     */
+    private void dynamicallySetCardColor(ViewHolder viewHolder, int position) {
+        // There are 6 different card colors
+        // so position 0-5
         View currentView = viewHolder.getViewHoldersView();
-        dynamicallySetCardColor(currentView, position);
+        int num_colors = 6;
+        switch(position % num_colors) {
+            case 0:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.purple_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.purple_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 1:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.teal_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.teal_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 2:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.deep_orange_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.deep_orange_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 3:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.pink_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.pink_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 4:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.yellow_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.yellow_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 5:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.indigo_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.indigo_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            default:
+                // something went wrong
+                break;
+        }
+    }
+
+    private void setColorOnView(ViewHolder viewHolder, View currentView) {
+        View track_parent = currentView.findViewById(R.id.track_parent);
+        track_parent.setBackgroundColor(viewHolder.mPrimaryColor);
+        View track_child = currentView.findViewById(R.id.track_child);
+        track_child.setBackgroundColor(viewHolder.mPrimaryColor);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -103,6 +148,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private Boolean mMediaPlayerPrepared = false;
         private ShortSoundTrack mShortSoundTrack;
         private View vView;
+        private int mPrimaryColor;
+        private int mSecondaryColor;
         final Button eqButton;
         final Button reverbButton;
         final Button distButton;
