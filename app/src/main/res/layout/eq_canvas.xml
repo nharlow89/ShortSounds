@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
 xmlns:android="http://schemas.android.com/apk/res/android"
-android:id="@+id/canvasParent"
+android:id="@+id/eqCanvasParent"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:orientation="vertical">
@@ -30,8 +30,8 @@ android:orientation="vertical">
     android:layout_weight=".8"
     android:gravity="center"
     android:orientation="vertical">
-    <com.sloths.speedy.shortsounds.view.EffectCanvas
-        android:id="@+id/signature_canvas"
+    <com.sloths.speedy.shortsounds.view.EQCanvas
+        android:id="@+id/effect_canvas"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="2"

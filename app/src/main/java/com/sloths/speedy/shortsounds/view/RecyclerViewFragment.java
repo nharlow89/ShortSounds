@@ -20,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.sloths.speedy.shortsounds.R;
@@ -109,12 +108,50 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         if (effect.equals("EQ")) {
             loadEQDialog(track, effect);
         } else if (effect.equals("Reverb")) {
-            // Load reverb
+            loadReverbEffectDialog(track, effect);
         } else {
             loadGeneralEffectDialog(track, effect);
         }
     }
 
+    // Helper method for loading a reverb effect popup
+    private void loadReverbEffectDialog(final int track, final String effect) {
+        final AlertDialog.Builder imageDialog = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+
+        View layout = getEffectCanvas(effect);
+        imageDialog.setView(layout);
+        final AlertDialog dialog = imageDialog.create();
+
+        // TODO: Set reverb values in here
+        ReverbCanvas reverbCanvas = (ReverbCanvas) layout.findViewById(R.id.effect_canvas);
+        // effectCanvas.setReverbVals(initEQValues);
+
+        // Shows a text popup that the effect was saved or cleared
+        layout.findViewById(R.id.saveEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                // Grab values from Reverb Canvas to save here
+                // TODO: Implement backend for saving current Reverb effect
+                // eqVals = reverbCanvas.getReverbVals();
+                // saveReverb(reverbVals);
+                // grab values from ReverbCanvas here, to save
+                showToast(effect + " saved", Toast.LENGTH_SHORT);
+            }
+        });
+        layout.findViewById(R.id.cancelEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showToast(effect + "  cleared", Toast.LENGTH_SHORT);
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    // Helper method for loading a general effect popup (holder until we get functionality
+    // for new effects)
     private void loadGeneralEffectDialog(final int track, final String effect) {
         final AlertDialog.Builder imageDialog = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -144,6 +181,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         dialog.show();
     }
 
+    // Helper method for loading a specific EQ popup
     private void loadEQDialog(final int track, final String effect) {
         Activity activity = getActivity();
         final AlertDialog.Builder imageDialog = new AlertDialog.Builder(activity);
@@ -152,10 +190,18 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         imageDialog.setView(layout);
         final AlertDialog dialog = imageDialog.create();
 
+        // TODO: Here we can populate initial effect values from backend
+        EQCanvas effectCanvas = (EQCanvas) layout.findViewById(R.id.effect_canvas);
+        // effectCanvas.setEQVals(initEQValues);
+
         // Shows a text popup that the effect was saved or cleared
         layout.findViewById(R.id.saveEffectButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Grab values from EQ Canvas to save here
+                // TODO: Implement backend for saving current EQ effect
+                // eqVals = effectCanvas.getEQVals();
+                // saveEQ(eqVals);
                 dialog.dismiss();
                 showToast(effect+ " saved", Toast.LENGTH_SHORT);
             }
@@ -171,12 +217,18 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         dialog.show();
     }
 
+    // Currently returns EQ canvas or reverb canvas view
     private View getEffectCanvas(String effect) {
         Activity activity = getActivity();
         LayoutInflater inflater = activity.getLayoutInflater();
-
-        View layout = inflater.inflate(R.layout.effect_canvas,
-                (ViewGroup) activity.findViewById(R.id.canvasParent), false);
+        View layout = null;
+        if (effect.equals("EQ")) {
+            layout = inflater.inflate(R.layout.eq_canvas,
+                    (ViewGroup) activity.findViewById(R.id.eqCanvasParent), false);
+        } else {
+            layout = inflater.inflate(R.layout.reverb_canvas,
+                    (ViewGroup) activity.findViewById(R.id.eqCanvasParent), false);
+        }
         // Here we can set the specific effect values
         return layout;
     }
