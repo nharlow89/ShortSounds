@@ -127,7 +127,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     /**
-     * Provide a reference to the type of views that you are using (custom ViewHolder)
+     * This view holder holds the views for a track that will be part of a short sound
+     * in the recycler view.  This includes holding the track's buttons, effects, etc.
      */
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
@@ -277,6 +278,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
+    // The button clicking implementation is actually implemented in the RecyclerViewFragment
+    // It holds the logic for populating an effect popup
     public interface RVListener {
         public void onButtonClicked(View v, int track, String name);
     }

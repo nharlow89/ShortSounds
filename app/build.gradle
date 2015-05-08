@@ -34,4 +34,5 @@ dependencies {
     androidTestCompile 'com.android.support.test:runner:0.2'
     // Set this dependency to use JUnit 4 rules
     androidTestCompile 'com.android.support.test:rules:0.2'
+    compile 'com.jjoe64:graphview:4.0.1'
 }

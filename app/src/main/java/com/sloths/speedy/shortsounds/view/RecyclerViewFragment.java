@@ -4,6 +4,7 @@ package com.sloths.speedy.shortsounds.view;
  * Created by joel on 4/25/2015.
  */
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -19,8 +20,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
+
+import java.util.Random;
 
 
 public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapter.RVListener {
@@ -33,6 +39,12 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     private ShortSound mShortSound;
     private ImageButton mGlobalPlayButton;
     private LinearLayout mParentLayout;
+    double mLastRandom = 2;
+    Random mRand = new Random();
+    private double getRandom() {
+        return mLastRandom += mRand.nextDouble()*0.5 - 0.25;
+    }
+    private LineGraphSeries<DataPoint> series;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,12 +103,19 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         });
     }
 
+    // This is used for loading the popup when clicking a specific effect
     @Override
     public void onButtonClicked(View v, int track, String effect) {
-        loadEffectDialog(track, effect);
+        if (effect.equals("EQ")) {
+            loadEQDialog(track, effect);
+        } else if (effect.equals("Reverb")) {
+            // Load reverb
+        } else {
+            loadGeneralEffectDialog(track, effect);
+        }
     }
 
-    private void loadEffectDialog(final int track, final String effect) {
+    private void loadGeneralEffectDialog(final int track, final String effect) {
         final AlertDialog.Builder imageDialog = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
@@ -123,6 +142,43 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
             }
         });
         dialog.show();
+    }
+
+    private void loadEQDialog(final int track, final String effect) {
+        Activity activity = getActivity();
+        final AlertDialog.Builder imageDialog = new AlertDialog.Builder(activity);
+
+        View layout = getEffectCanvas(effect);
+        imageDialog.setView(layout);
+        final AlertDialog dialog = imageDialog.create();
+
+        // Shows a text popup that the effect was saved or cleared
+        layout.findViewById(R.id.saveEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                showToast(effect+ " saved", Toast.LENGTH_SHORT);
+            }
+        });
+        layout.findViewById(R.id.cancelEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showToast(effect + "  cleared", Toast.LENGTH_SHORT);
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private View getEffectCanvas(String effect) {
+        Activity activity = getActivity();
+        LayoutInflater inflater = activity.getLayoutInflater();
+
+        View layout = inflater.inflate(R.layout.effect_canvas,
+                (ViewGroup) activity.findViewById(R.id.canvasParent), false);
+        // Here we can set the specific effect values
+        return layout;
     }
 
     private void showToast(String text, int length) {
