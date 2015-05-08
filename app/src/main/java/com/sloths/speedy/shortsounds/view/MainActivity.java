@@ -3,7 +3,6 @@ package com.sloths.speedy.shortsounds.view;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
-import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -20,10 +19,11 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.List;
 
 
@@ -36,11 +36,10 @@ public class MainActivity extends FragmentActivity {
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
     private List<ShortSound> sounds;
-    private MediaRecorder trackRecorder;
     private ImageButton mGlobalPlayButton;
     private ShortSound mActiveShortSound;
-    private ImageButton mRecordButton;
-    private boolean isRecording;
+    private AudioRecorder mAudioRecorder;
+    private FloatingActionButtonBasicFragment mActionBarFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +47,16 @@ public class MainActivity extends FragmentActivity {
         sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
         mShortSoundsTitles = getShortSoundTitles(sounds);
+        mAudioRecorder = new AudioRecorder( getCacheDir() );
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpGlobalPlayButton();
-        setUpRecordButton();
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setUpFloatingActionButton();
+        } else {
+            setUpRecordButton();
         }
     }
 
@@ -66,7 +67,6 @@ public class MainActivity extends FragmentActivity {
      */
     private void setUpGlobalPlayButton() {
         mGlobalPlayButton = (ImageButton) findViewById(R.id.imageButtonPlay);
-        Log.e("DEBUG", mGlobalPlayButton.toString());
         mGlobalPlayButton.setEnabled(false);  // Default to disabled when ShortSound has not been clicked.
     }
 
@@ -75,20 +75,33 @@ public class MainActivity extends FragmentActivity {
      * functionality.
      */
     private void setUpRecordButton() {
-        mRecordButton = (ImageButton) findViewById(R.id.imageButtonRecord);
-        mRecordButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isRecording) {
-                    endRecording();
-                } else {
-                    beginRecording();
+        // Looks a little ugly, but we have to account for the FAB because it uses a different view
+        // element.
+        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+            FloatingActionButton button = mActionBarFragment.getActionButton();
+            button.setOnCheckedChangeListener(new FloatingActionButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(FloatingActionButton fabView, boolean isChecked) {
+                    if ( !isChecked ) {
+                        endRecording();
+                    } else {
+                        beginRecording();
+                    }
                 }
-                isRecording = !isRecording;
-            }
-        });
-        isRecording = false;
-        Log.e("DEBUG", mRecordButton.toString());
+            });
+        } else {
+            ImageButton recordButton = (ImageButton) findViewById(R.id.imageButtonRecord);
+            recordButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if ( mAudioRecorder.isRecording() ) {
+                        endRecording();
+                    } else {
+                        beginRecording();
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -97,8 +110,14 @@ public class MainActivity extends FragmentActivity {
      */
     private void setUpFloatingActionButton() {
         FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
-        FloatingActionButtonBasicFragment fragment = new FloatingActionButtonBasicFragment();
-        transaction.replace(R.id.sample_content_fragment, fragment);
+        mActionBarFragment = new FloatingActionButtonBasicFragment();
+        mActionBarFragment.setOnLoadListener( new FloatingActionButtonBasicFragment.OnFragmentLoadedListener() {
+            @Override
+            public void didLoad() {
+                setUpRecordButton();
+            }
+        });
+        transaction.replace(R.id.sample_content_fragment, mActionBarFragment);
         transaction.commit();
     }
 
@@ -247,10 +266,17 @@ public class MainActivity extends FragmentActivity {
 
     /** Begins the recording process. */
     private void beginRecording() {
+        // Setup the MediaRecorder
+        mAudioRecorder.start();
+    }
+
+    /** Ends the recording process. */
+    private void endRecording() {
+
+        File recordedFile = mAudioRecorder.end();
 
         if ( mActiveShortSound == null ) {
             // Case 1. There is no active ShortSound, create one and continue.
-            Log.d("DEBUG", "Began recording, no active ShortSound");
             // Create the new ShortSound and add it the list.
             ShortSound newSound = new ShortSound();
             sounds.add( newSound );
@@ -259,30 +285,11 @@ public class MainActivity extends FragmentActivity {
             ArrayAdapter drawerListAdapter = (ArrayAdapter) mDrawerList.getAdapter();
             drawerListAdapter.notifyDataSetChanged();
             // Select the new ShortSound to be active.
-            selectShortSoundFromDrawer( sounds.size() - 1 );
-        } else {
-            Log.d("DEBUG", "Began recording with active ShortSound["+mActiveShortSound.getTitle()+"]");
+            selectShortSoundFromDrawer(sounds.size() - 1);
         }
+        Log.d("DEBUG", "Finished Recording new track to ShortSound["+mActiveShortSound.getId()+"]");
         // Create the new ShortSoundTrack (that this will record to)
-        ShortSoundTrack newTrack = new ShortSoundTrack( mActiveShortSound.getId() );
-        // Setup the MediaRecorder
-        trackRecorder = new MediaRecorder();
-        trackRecorder.setAudioSource( MediaRecorder.AudioSource.MIC );
-        trackRecorder.setOutputFormat( MediaRecorder.OutputFormat.DEFAULT );
-        trackRecorder.setOutputFile( newTrack.getFile() ); // TODO: determine where to store tracks in file system
-        trackRecorder.setAudioEncoder( MediaRecorder.AudioEncoder.DEFAULT );
-        try {
-            trackRecorder.prepare();
-            trackRecorder.start();
-        } catch (IOException e) {
-            // TODO: Figure out what to do if prepare() fails
-        }
-    }
-
-    /** Ends the recording process. */
-    private void endRecording() {
-        trackRecorder.stop();
-        trackRecorder.release();
-        trackRecorder = null;
+        ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
+        mActiveShortSound.addTrack( newTrack );
     }
 }
