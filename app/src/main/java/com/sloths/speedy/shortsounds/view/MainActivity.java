@@ -1,6 +1,5 @@
 package com.sloths.speedy.shortsounds.view;
 
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -40,6 +39,7 @@ public class MainActivity extends FragmentActivity {
     private ShortSound mActiveShortSound;
     private AudioRecorder mAudioRecorder;
     private FloatingActionButtonBasicFragment mActionBarFragment;
+    private RecyclerViewFragment mMainFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,16 +219,17 @@ public class MainActivity extends FragmentActivity {
     private void selectShortSoundFromDrawer(int position) {
         mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
         // Grabs the ShortSound and populates the screen with it
-        Fragment fragment = new RecyclerViewFragment();
+        mMainFragment = new RecyclerViewFragment();
         // Sets it to the correct ShortSound
-        Bundle args = new Bundle();
-        long targetShortSoundId = sounds.get( position ).getId();
-        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
-        fragment.setArguments(args);
+        mMainFragment.setDataSource( mActiveShortSound );
+//        Bundle args = new Bundle();
+//        long targetShortSoundId = sounds.get( position ).getId();
+//        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
+//        mMainFragment.setArguments(args);
 
         // Replaces the main content screen w/ Short sound
         FragmentManager fragmentManager = this.getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.track_list, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.track_list, mMainFragment).commit();
 
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
@@ -272,25 +273,32 @@ public class MainActivity extends FragmentActivity {
 
     /** Ends the recording process. */
     private void endRecording() {
-
         File recordedFile = mAudioRecorder.end();
         Log.d("DEBUG", "endRecording() recordedFile: " + recordedFile.getAbsolutePath());
 
-        if ( mActiveShortSound == null ) {
+        boolean isNewShortSound = mActiveShortSound == null;
+        if ( isNewShortSound ) {
             // Case 1. There is no active ShortSound, create one and continue.
             // Create the new ShortSound and add it the list.
-            ShortSound newSound = new ShortSound();
-            sounds.add( newSound );
+            mActiveShortSound = new ShortSound();
+            sounds.add( mActiveShortSound );
             // Update the sidebar with the new ShortSound.
             mShortSoundsTitles = getShortSoundTitles(sounds);
             ArrayAdapter drawerListAdapter = (ArrayAdapter) mDrawerList.getAdapter();
             drawerListAdapter.notifyDataSetChanged();
-            // Select the new ShortSound to be active.
-            selectShortSoundFromDrawer(sounds.size() - 1);
         }
         Log.d("DEBUG", "Finished Recording new track to ShortSound["+mActiveShortSound.getId()+"]");
         // Create the new ShortSoundTrack (that this will record to)
         ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
         mActiveShortSound.addTrack( newTrack );
+
+        if ( isNewShortSound ) {
+            // Select the new ShortSound to be active.
+            selectShortSoundFromDrawer(sounds.size() - 1);
+        } else {
+            // Update the existing fragment manager to add new track to list
+            mMainFragment.notifyTrackAdded( mActiveShortSound.getTracks().size() - 1 );
+        }
+        mAudioRecorder.reset();  // Have to reset for the next recording
     }
 }

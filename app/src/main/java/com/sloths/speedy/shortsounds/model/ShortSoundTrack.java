@@ -50,9 +50,10 @@ public class ShortSoundTrack {
         this.parentId = shortSoundId;
         // TODO: create a copy of the original file that will be our "working" copy
         this.originalFile = "ss" + shortSoundId + "-track" + id;
-        this.file = originalFile + "-modified";  // May need to change?
-        this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
+        this.file = originalFile + "-modified";
+        this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
         initFiles( audioFile );
+        setUpMediaPlayer();
     }
 
     /**
@@ -77,10 +78,11 @@ public class ShortSoundTrack {
 
     private void setUpMediaPlayer() {
         this.player = new MediaPlayer();
+
         Context context = ShortSoundsApplication.getAppContext();
         String path = context.getFilesDir().getAbsolutePath();
         try {
-            Log.d("DEBUG", "setUpMediaPlayer() file path is: " + path + "/" + this.file);
+            Log.d("DEBUG", "setDataSource(" + path + "/" + this.file + ")");
             this.player.setDataSource( path + "/" + this.file );
             mState = MediaState.INITIALIZED;
             this.player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -118,7 +120,7 @@ public class ShortSoundTrack {
      * Stop playing this track and reset its position to the beginning of the audio file.
      */
     public void stop() {
-        if ( player.isPlaying() || mState == MediaState.STARTED || mState == MediaState.PAUSED ) {
+        if ( mState == MediaState.STARTED || mState == MediaState.PAUSED ) {
             Log.d(TAG, "stop track ["+this.getId()+"]");
             player.stop();
             player.prepareAsync();
@@ -238,6 +240,7 @@ public class ShortSoundTrack {
     }
 
     private void copyFile(File src, File dst) throws IOException {
+        Log.d("DEBUG", "Copy file [" + src.getPath() + "] to ["+ dst.getPath() +"]");
         FileChannel inChannel = new FileInputStream(src).getChannel();
         FileChannel outChannel = new FileOutputStream(dst).getChannel();
         try {
@@ -302,5 +305,9 @@ public class ShortSoundTrack {
         if ( !originalFile.exists() ) throw new AssertionError("File does not exist: " + originalFile);
         File file = new File( this.file );
         if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
+    }
+
+    public String getOriginalFile() {
+        return originalFile;
     }
 }
