@@ -47,7 +47,11 @@ public class AudioRecorder {
         return mTempAudioFile;
     }
 
+    /**
+     * Reset the AudioRecorder. This method needs to be called after each recording.
+     */
     public void reset() {
+        // TODO: cleanup resources from previous recording? temp file?
         setup();
     }
 

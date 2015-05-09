@@ -37,8 +37,12 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        long sound_id = getArguments().getLong(ARG_SOUND_ID);
-        mShortSound = ShortSound.getById( sound_id );
+//        long sound_id = getArguments().getLong(ARG_SOUND_ID);
+//        mShortSound = ShortSound.getById( sound_id );
+    }
+
+    public void setDataSource( ShortSound sound ) {
+        mShortSound = sound;
     }
 
     @Override
@@ -110,6 +114,15 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     @Override
     public void onButtonClicked(View v, int track, String effect) {
         loadEffectDialog(track, effect);
+    }
+
+    /**
+     * Notify the Fragment adapter that a track has been added to this
+     * ShortSound.
+     */
+    public void notifyTrackAdded( int index ) {
+//        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemInserted( index );
     }
 
     private void loadEffectDialog(final int track, final String effect) {

@@ -216,12 +216,12 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      */
     public long insertShortSoundTrack(ShortSoundTrack track, long id) {
         if ( !db.isOpen() ) db = getWritableDatabase();
-        Log.d("DB_TEST", "ShortSoundSQLHelper:insertShortSoundTrack("+id+")");
+        Log.d("DB_TEST", "ShortSoundSQLHelper:insertShortSoundTrack[file:"+track.getFile()+"][originalFile:"+track.getOriginalFile()+"]");
         ContentValues values = new ContentValues();
         values.put( KEY_TITLE, track.getTitle() );
         values.put( KEY_SHORT_SOUND_ID, id );
-        values.put( KEY_TRACK_FILENAME_ORIGINAL, "" );
-        values.put( KEY_TRACK_FILENAME_MODIFIED, "" );
+        values.put( KEY_TRACK_FILENAME_ORIGINAL, track.getOriginalFile() );
+        values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFile() );
         return db.insert( TRACK_TABLE_NAME, null, values );  // Returns the new entry id
     }
 
@@ -230,7 +230,13 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      * @param track
      */
     public void updateShortSoundTrack( ShortSoundTrack track ) {
-        // TODO
+        if ( !db.isOpen() ) db = getWritableDatabase();
+        Log.d("DB_TEST", "ShortSoundSQLHelper:updateShortSoundTrack[file:"+track.getFile()+"][originalFile:"+track.getOriginalFile()+"]");
+        ContentValues values = new ContentValues();
+        values.put( KEY_TITLE, track.getTitle() );
+        values.put( KEY_TRACK_FILENAME_ORIGINAL, track.getOriginalFile() );
+        values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFile() );
+        db.update( TRACK_TABLE_NAME, values, "id=" + track.getId(), null );  // Returns the new entry id
     }
 
     /**
