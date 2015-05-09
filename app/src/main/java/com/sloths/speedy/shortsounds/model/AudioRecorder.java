@@ -40,6 +40,7 @@ public class AudioRecorder {
         if ( mTrackRecorder != null && mIsRecording ) {
             Log.d("DEBUG", "Attempt to stop recording!");
             mTrackRecorder.stop();
+            mTrackRecorder.reset();
             mTrackRecorder.release();
             mTrackRecorder = null;
             mIsRecording = false;
