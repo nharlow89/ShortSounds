@@ -42,12 +42,14 @@ public class ShortSoundTrack {
     /**
      * Create a ShortSoundTrack provided an existing audio file.
      * @param shortSoundId The id of the ShortSound that this track belongs to.
+     * @param id The id of the track within its ShortSound.
      * @postcondition This ShortSoundTrack will be stored in the database and a
      *      copy of the file referenced by filename will be made.
      */
-    public ShortSoundTrack( File audioFile, long shortSoundId ) {
+    public ShortSoundTrack( File audioFile, long shortSoundId, long id ) {
         this.title = DEFAULT_TITLE;
         this.parentId = shortSoundId;
+        this.id = id;
         // TODO: create a copy of the original file that will be our "working" copy
         this.originalFile = "ss" + shortSoundId + "-track" + id;
         this.file = originalFile + "-modified";

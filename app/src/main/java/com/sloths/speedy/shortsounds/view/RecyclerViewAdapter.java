@@ -216,6 +216,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 public void onCompletion(MediaPlayer mp) {
                     mShortSoundTrack.stop();  // Make sure the state is updated with ShortSoundTrack
                     mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_play));
+                    mShortSound.updateShortSound();
                 }
             });
         }

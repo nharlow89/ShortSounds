@@ -289,7 +289,7 @@ public class MainActivity extends FragmentActivity {
         }
         Log.d("DEBUG", "Finished Recording new track to ShortSound["+mActiveShortSound.getId()+"]");
         // Create the new ShortSoundTrack (that this will record to)
-        ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
+        ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId(), mActiveShortSound.getTracks().size() );
         mActiveShortSound.addTrack( newTrack );
 
         if ( isNewShortSound ) {
