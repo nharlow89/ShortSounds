@@ -221,7 +221,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         values.put( KEY_TITLE, track.getTitle() );
         values.put( KEY_SHORT_SOUND_ID, id );
         values.put( KEY_TRACK_FILENAME_ORIGINAL, "" );
-        values.put( KEY_TRACK_FILENAME_MODIFIED, "" );
+        values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFile());
         return db.insert( TRACK_TABLE_NAME, null, values );  // Returns the new entry id
     }
 

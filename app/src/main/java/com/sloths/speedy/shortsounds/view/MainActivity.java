@@ -274,6 +274,7 @@ public class MainActivity extends FragmentActivity {
     private void endRecording() {
 
         File recordedFile = mAudioRecorder.end();
+        Log.d("DEBUG", "endRecording() recordedFile: " + recordedFile.getAbsolutePath());
 
         if ( mActiveShortSound == null ) {
             // Case 1. There is no active ShortSound, create one and continue.

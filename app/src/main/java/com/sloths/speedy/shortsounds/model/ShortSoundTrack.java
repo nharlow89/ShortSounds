@@ -49,9 +49,9 @@ public class ShortSoundTrack {
         this.title = DEFAULT_TITLE;
         this.parentId = shortSoundId;
         // TODO: create a copy of the original file that will be our "working" copy
-        this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         this.originalFile = "ss" + shortSoundId + "-track" + id;
         this.file = originalFile + "-modified";  // May need to change?
+        this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         initFiles( audioFile );
     }
 
@@ -80,6 +80,7 @@ public class ShortSoundTrack {
         Context context = ShortSoundsApplication.getAppContext();
         String path = context.getFilesDir().getAbsolutePath();
         try {
+            Log.d("DEBUG", "setUpMediaPlayer() file path is: " + path + "/" + this.file);
             this.player.setDataSource( path + "/" + this.file );
             mState = MediaState.INITIALIZED;
             this.player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
