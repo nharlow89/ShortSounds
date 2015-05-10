@@ -45,6 +45,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private Context context;
     private RVListener listener;
     private ArrayList<Color> mColorPallete;
+    private RecyclerViewFragment rvf;
 
 
     /**
@@ -55,6 +56,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         mShortSound = sound;
         mMediaPlayerPool = new HashMap<>();
         this.context = rvf.getActivity();
+        this.rvf = rvf;
         listener = rvf;
     }
 
@@ -200,13 +202,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 public void onClick(View v) {
 
                     // handle case for all tracks being played.
-                    if(mShortSound.isPlaying()) {
+                    if(mShortSound.isPlaying() || mShortSound.isPaused()) {
                         mShortSound.stopAllTracks();
-                        // TODO: Change mGlobalPlayButton to ic_action_play icon at this location.
+                        rvf.mGlobalPlayButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_action_play));
                     }
 
                     if ( mShortSoundTrack.isPlaying() ) {
                         // If the track was playing then stop it.
+                        mShortSoundTrack.stop();
                         mShortSoundTrack.prepareAsync();
                         mPlayTrackButton.setBackground( context.getResources().getDrawable(R.drawable.ic_action_play) );
                     } else {

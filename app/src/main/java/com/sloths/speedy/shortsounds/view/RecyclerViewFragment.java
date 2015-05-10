@@ -32,16 +32,14 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     protected RecyclerView mRecyclerView;
     protected RecyclerViewAdapter mAdapter;
     private ShortSound mShortSound;
-    private ImageButton mGlobalPlayButton;
+    public ImageButton mGlobalPlayButton;
     private LinearLayout mParentLayout;
-    private SeekBar mSeekBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         long sound_id = getArguments().getLong(ARG_SOUND_ID);
         mShortSound = ShortSound.getById( sound_id );
-        mSeekBar.setMax(mShortSound.getDuration());
     }
 
     @Override
@@ -105,7 +103,6 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
                     }
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
                 }
-
             }
         });
     }
