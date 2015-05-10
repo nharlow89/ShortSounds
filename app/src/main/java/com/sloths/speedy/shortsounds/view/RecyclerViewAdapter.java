@@ -10,10 +10,12 @@ import android.media.MediaPlayer;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -54,8 +56,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         mMediaPlayerPool = new HashMap<>();
         this.context = rvf.getActivity();
         listener = rvf;
-
-
     }
 
     // Create new views (invoked by the layout manager)
@@ -169,7 +169,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             distButton = ((Button) v.findViewById(R.id.dist_button));
             bitButton = ((Button) v.findViewById(R.id.bit_button));
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
-            setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
+            setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
             setPlayClickHandler();
             controller.setVisibility(View.GONE);
 
@@ -198,14 +198,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private void setPlayClickHandler() {
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+
+                    // handle case for all tracks being played.
+                    if(mShortSound.isPlaying()) {
+                        mShortSound.stopAllTracks();
+                        // TODO: Change mGlobalPlayButton to ic_action_play icon at this location.
+                    }
+
                     if ( mShortSoundTrack.isPlaying() ) {
                         // If the track was playing then stop it.
-                        mShortSoundTrack.stop();
                         mShortSoundTrack.prepareAsync();
                         mPlayTrackButton.setBackground( context.getResources().getDrawable(R.drawable.ic_action_play) );
                     } else {
-                        // The track was not playing, stop any other tracks and play this one.
-                        mShortSound.stopAllTracks();
+                        // The track was not playing, play this one
                         mShortSoundTrack.play();
                         mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_stop));
                     }
@@ -266,14 +271,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     // Expand a track
                     controller.setVisibility(View.VISIBLE);
                     trackExpanded = true;
+
                     // Upon selecting a track we need to prepare the track for playing.
-                    mShortSoundTrack.prepareAsync();
+                    mShortSoundTrack.prepare(); //Async?
+                    Log.d("Prepare",  "Track Listener");
                 } else {
                     // Close the current open track
                     controller.setVisibility(View.GONE);
                     trackExpanded = false;
                     // Stop the track (just in case it was playing)
                     mShortSoundTrack.stop();
+                    mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_play));
                 }
             }
         }

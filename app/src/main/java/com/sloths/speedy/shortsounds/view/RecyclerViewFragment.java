@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,12 +34,14 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     private ShortSound mShortSound;
     private ImageButton mGlobalPlayButton;
     private LinearLayout mParentLayout;
+    private SeekBar mSeekBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         long sound_id = getArguments().getLong(ARG_SOUND_ID);
         mShortSound = ShortSound.getById( sound_id );
+        mSeekBar.setMax(mShortSound.getDuration());
     }
 
     @Override
@@ -88,12 +91,12 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 // TODO: we need to handle the case when the ShortSound finishes playing!
-                if ( mShortSound.isPlaying() ) {
+                if (mShortSound.isPlaying()) {
                     // The ShortSound is already playing, stop it.
                     mShortSound.pauseAllTracks();
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
                 } else {
-                    if ( mShortSound.isPaused() ) {
+                    if (mShortSound.isPaused()) {
                         // The ShortSound was previously playing, unpause it.
                         mShortSound.unPauseAllTracks();
                     } else {
@@ -143,8 +146,8 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
 
     private void showToast(String text, int length) {
         Toast toast = Toast.makeText(getActivity(), text, length);
-        LinearLayout layout =(LinearLayout)toast.getView();
-        TextView textView = ((TextView)layout.getChildAt(0));
+        LinearLayout layout = (LinearLayout) toast.getView();
+        TextView textView = ((TextView) layout.getChildAt(0));
         textView.setTextSize(20);
         textView.setGravity(Gravity.CENTER);
         toast.show();
