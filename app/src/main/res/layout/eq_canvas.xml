@@ -16,8 +16,8 @@ android:orientation="vertical">
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="EQ"
-        android:textSize="20dp"
+        android:text="@string/EQ"
+        android:textSize="20sp"
         android:minHeight="30dp">
     </TextView>
     <!-- If the client uses a customTitle, it will be added here. -->
@@ -28,14 +28,14 @@ android:orientation="vertical">
     android:layout_height="0dp"
     android:id="@+id/effect_content"
     android:layout_weight=".8"
-    android:gravity="center"
-    android:orientation="vertical">
-    <com.sloths.speedy.shortsounds.view.EQCanvas
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <com.sloths.speedy.shortsounds.view.EQCanvas2
         android:id="@+id/effect_canvas"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:textColor="#FFFFFF" />
+        android:layout_height="match_parent"/>
+
 </LinearLayout>
 
 <RelativeLayout
@@ -48,7 +48,7 @@ android:orientation="vertical">
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cancel"
+        android:text="@string/Cancel"
         android:id="@+id/cancelEffectButton"
         android:layout_gravity="center_vertical"
         android:layout_toLeftOf="@+id/effectSpace"
@@ -58,7 +58,7 @@ android:orientation="vertical">
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Save"
+        android:text="@string/Save"
         android:id="@+id/saveEffectButton"
         android:layout_gravity="center_vertical"
         android:layout_alignBottom="@+id/cancelEffectButton"
@@ -67,8 +67,8 @@ android:orientation="vertical">
         android:layout_centerHorizontal="true" />
 
     <Space
-        android:layout_width="100px"
-        android:layout_height="20px"
+        android:layout_width="100dp"
+        android:layout_height="20dp"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:id="@+id/effectSpace" />
