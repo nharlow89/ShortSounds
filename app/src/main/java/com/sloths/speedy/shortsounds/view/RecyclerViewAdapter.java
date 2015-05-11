@@ -14,7 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.sloths.speedy.shortsounds.R;
@@ -152,10 +154,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private View vView;
         private int mPrimaryColor;
         private int mSecondaryColor;
-        final Button eqButton;
-        final Button reverbButton;
-        final Button distButton;
-        final Button bitButton;
         //        private final ListView effectsList;
         private boolean trackExpanded;
 
@@ -165,12 +163,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             vTitle = (TextView) v.findViewById(R.id.track_title);
             vView = v;
             controller = (LinearLayout) v.findViewById(R.id.track_child);
-            eqButton = ((Button) v.findViewById(R.id.eq_button));
-            reverbButton = ((Button) v.findViewById(R.id.reverb_button));
-            distButton = ((Button) v.findViewById(R.id.dist_button));
-            bitButton = ((Button) v.findViewById(R.id.bit_button));
+            Button eqButton = ((Button) v.findViewById(R.id.eq_button));
+            Button reverbButton = ((Button) v.findViewById(R.id.reverb_button));
+            Button distButton = ((Button) v.findViewById(R.id.dist_button));
+            Button bitButton = ((Button) v.findViewById(R.id.bit_button));
+            Switch eqToggle = ((Switch) v.findViewById(R.id.eq_switch));
+            Switch reverbToggle = ((Switch) v.findViewById(R.id.reverb_switch));
+            Switch distToggle = ((Switch) v.findViewById(R.id.dist_switch));
+            Switch bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
             setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
+            setUpToggle(new Switch[] {eqToggle, reverbToggle, distToggle, bitToggle});
             setPlayClickHandler();
             controller.setVisibility(View.GONE);
 
@@ -257,6 +260,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
 
+        // TODO implement effect toggle
+        private void setUpToggle(Switch[] sws) {
+            for (Switch sw : sws) {
+                sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            //effect on
+                        } else {
+                            //effect off
+                        }
+                    }
+                });
+            }
+        }
+
         /* The click listener for ListView in the navigation drawer */
         private class TrackListener implements View.OnClickListener  {
             @Override
@@ -283,6 +302,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // The button clicking implementation is actually implemented in the RecyclerViewFragment
     // It holds the logic for populating an effect popup
     public interface RVListener {
-        public void onButtonClicked(View v, int track, String name);
+        void onButtonClicked(View v, int track, String name);
     }
 }

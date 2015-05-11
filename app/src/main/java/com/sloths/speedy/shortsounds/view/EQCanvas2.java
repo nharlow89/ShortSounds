@@ -126,13 +126,14 @@ public class EQCanvas2 extends View {
             }
         }
 
-        PointF point = path.get(0);
-        linePath.moveTo(point.x, point.y);
+        PointF prev = path.get(0);
+        PointF point;
+        linePath.moveTo(prev.x, prev.y);
         for(int i = 1; i < path.size(); i++){
             point = path.get(i);
-            PointF prev = path.get(i - 1);
             linePath.cubicTo(prev.x + prev.dx, prev.y + prev.dy,
                              point.x - point.dx, point.y - point.dy, point.x, point.y);
+            prev = point;
         }
     }
 
