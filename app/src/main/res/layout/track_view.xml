@@ -43,42 +43,6 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight=".3"
-                android:id="@+id/upperTrackView"
-                android:layout_margin="20dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:id="@+id/controls"
-                    android:layout_centerVertical="true">
-
-                    <SeekBar
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".87"
-                        android:id="@+id/volumeSlider"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_gravity="center_vertical" />
-                    <Button
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".13"
-                        android:id="@+id/trackPlay"
-                        android:background="@android:drawable/ic_media_play"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_gravity="center_vertical" />
-                </LinearLayout>
-
-            </RelativeLayout>
-
-            <!-- This is all the effects stuff -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
                 android:layout_weight=".7"
                 android:gravity="center">
 
@@ -184,6 +148,43 @@
 
                 </RelativeLayout>
             </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".3"
+                android:id="@+id/upperTrackView"
+                android:layout_margin="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:id="@+id/controls"
+                    android:layout_centerVertical="true">
+
+                    <SeekBar
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".87"
+                        android:id="@+id/volumeSlider"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical" />
+                    <Button
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".13"
+                        android:id="@+id/trackPlay"
+                        android:background="@android:drawable/ic_media_play"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- This is all the effects stuff -->
         </LinearLayout>
     </RelativeLayout>
 </android.support.v7.widget.CardView>
