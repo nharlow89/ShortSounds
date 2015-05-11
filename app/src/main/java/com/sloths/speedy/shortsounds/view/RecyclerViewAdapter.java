@@ -309,8 +309,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         };
 
-        // .5 dp/ms
-        a.setDuration((int) (targetHeight / (2 * v.getContext().getResources().getDisplayMetrics().density)));
+        // 1 dp/ms
+        a.setDuration((int) (targetHeight / (v.getContext().getResources().getDisplayMetrics().density)));
         v.startAnimation(a);
     }
 
@@ -339,8 +339,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         };
 
-        // .5 dp/ms
-        a.setDuration((int)(initialHeight / (2 * v.getContext().getResources().getDisplayMetrics().density)));
+        // 1 dp/ms
+        a.setDuration((int)(initialHeight / (v.getContext().getResources().getDisplayMetrics().density)));
         v.startAnimation(a);
     }
 
