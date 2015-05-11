@@ -49,8 +49,8 @@ public class EQCanvas extends View {
     private boolean firstDraw;
 
     // Debug
-//    private Paint debugPaint;
-//    private List<PointF> debugPoints;
+    private Paint debugPaint;
+    private List<PointF> debugPoints;
 
     private float mX, mY;
 
@@ -79,12 +79,12 @@ public class EQCanvas extends View {
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
 
         // Debug paint
-//        debugPaint = new Paint();
-//        debugPaint.setAntiAlias(true);
-//        debugPaint.setColor(Color.MAGENTA);
-//        debugPaint.setStyle(Paint.Style.STROKE);
-//        debugPaint.setStrokeWidth(15f);
-//        debugPaint.setStrokeCap(Paint.Cap.ROUND);
+        debugPaint = new Paint();
+        debugPaint.setAntiAlias(true);
+        debugPaint.setColor(Color.MAGENTA);
+        debugPaint.setStyle(Paint.Style.STROKE);
+        debugPaint.setStrokeWidth(15f);
+        debugPaint.setStrokeCap(Paint.Cap.ROUND);
 
         // Initialize 2 points at random location
         // These will be set by effect values w/ backend connected
@@ -113,7 +113,7 @@ public class EQCanvas extends View {
                                     endPoint.x + RECTSIZE, endPoint.y + RECTSIZE);
         currentTouch = NONE;
 
-//        debugPoints = new ArrayList<PointF>();
+        debugPoints = new ArrayList<PointF>();
     }
 
     // override onSizeChanged
@@ -146,12 +146,12 @@ public class EQCanvas extends View {
         canvas.drawPoint(endPoint.x, endPoint.y, pointPaint);
 
 
-//        if (debugPoints.size() != 0) {
-//            for (int i = 0; i < debugPoints.size(); i++) {
-//                PointF point = debugPoints.get(i);
-//                canvas.drawPoint(point.x, point.y, debugPaint);
-//            }
-//        }
+        if (debugPoints.size() != 0) {
+            for (int i = 0; i < debugPoints.size(); i++) {
+                PointF point = debugPoints.get(i);
+                canvas.drawPoint(point.x, point.y, debugPaint);
+            }
+        }
     }
 
     // Private helper for drawing the line between all the points
@@ -182,7 +182,7 @@ public class EQCanvas extends View {
             }
         }
 
-//        debugPoints.clear();
+        debugPoints.clear();
         boolean first = true;
         for(int i = 0; i < allPoints.length; i++){
             PointF point = allPoints[i];
@@ -194,8 +194,8 @@ public class EQCanvas extends View {
                 PointF prev = allPoints[i - 1];
                 PointF debugPoint1 = new PointF((int) (prev.x + prev.dx) , (int) (prev.y + prev.dy));
                 PointF debugPoint2 = new PointF((int) (point.x - point.dx), (int) (point.y - point.dy));
-//                debugPoints.add(debugPoint1);
-//                debugPoints.add(debugPoint2);
+                debugPoints.add(debugPoint1);
+                debugPoints.add(debugPoint2);
                 linePath.cubicTo(prev.x + prev.dx, prev.y + prev.dy, point.x - point.dx, point.y - point.dy, point.x, point.y);
             }
         }
