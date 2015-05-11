@@ -1,26 +1,23 @@
 package com.sloths.speedy.shortsounds.model;
 
+import android.media.MediaPlayer;
+
 /**
  * Created by caseympfischer on 4/28/15.
  */
 public abstract class Effect {
     protected boolean active;
-    public android.media.audiofx.AudioEffect effect;
+    protected MediaPlayer player;
+    protected android.media.audiofx.AudioEffect effect;
 
     /**
      * Turns on the effect
      */
-    public void enable() {
-        active = true;
-    }
-
+    public abstract void enable();
     /**
      * Turns off the effect
      */
-    public void disable() {
-        active = false;
-    }
-
+    public abstract void disable();
     /**
      * Returns the name of the effect
      * @return The name of the effect

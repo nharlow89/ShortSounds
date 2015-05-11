@@ -1,5 +1,6 @@
 package com.sloths.speedy.shortsounds.model;
 
+import android.media.MediaPlayer;
 import com.sloths.speedy.shortsounds.model.Effect;
 
 /**
@@ -57,6 +58,14 @@ public class ReverbEffect extends Effect {
         this.reflectLevel = DEFAULT_REFLECTION_LEVEL;
         this.reflectDelay = DEFAULT_REFLECTION_DELAY;
         this.density = DEFAULT_DENSITY;
+    }
+
+    public void enable() {
+        effect.setEnabled(true);
+    }
+
+    public void disable() {
+        effect.setEnabled(false);
     }
 
     /**

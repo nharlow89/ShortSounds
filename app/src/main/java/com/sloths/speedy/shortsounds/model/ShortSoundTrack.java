@@ -181,6 +181,7 @@ public class ShortSoundTrack {
 
     public void addEffect() {
         // TODO
+
     }
 
     public void removeEffect() {

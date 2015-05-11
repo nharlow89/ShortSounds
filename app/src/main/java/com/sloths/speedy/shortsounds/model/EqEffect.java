@@ -1,6 +1,8 @@
 package com.sloths.speedy.shortsounds.model;
 
-import java.util.List;
+import android.media.MediaPlayer;
+import android.media.audiofx.AudioEffect;
+import android.media.audiofx.Equalizer;
 
 /**
  * Created by caseympfischer on 4/28/15.
@@ -11,7 +13,7 @@ public class EqEffect extends Effect {
     private static final int INDEX_ACTIVE = 1;
     private static final int INDEX_BAND_LEVELS = 2;
     private static final int NUM_BANDS = 2;
-    private static final int DEFAULT_BAND_LEVEL = 1; // TODO: this is not really a good default...
+    //private static final int DEFAULT_BAND_LEVEL = 1; // TODO: this is not really a good default...
 
     private short[] bandLevels;
 
@@ -28,24 +30,45 @@ public class EqEffect extends Effect {
         return retVal;
     }
 
-    public static Effect parseParameters(String[] parameters) {
-        EqEffect retVal = new EqEffect(parameters);
+    public static Effect parseParameters(String[] parameters, MediaPlayer player) {
+        EqEffect retVal = new EqEffect(parameters, player);
         return retVal;
     }
 
-    private EqEffect(String[] parameters) {
+    private EqEffect(String[] parameters, MediaPlayer player) {
+        this.player = player;
+        effect = new Equalizer(0, player.getAudioSessionId());
         this.active = parameters[INDEX_ACTIVE].equals("ON");
         for (int i = 0; i < NUM_BANDS; i++) {
             this.bandLevels[i] = Short.parseShort(parameters[INDEX_BAND_LEVELS + i]);
         }
+        initAudioEffect();
     }
 
-    public EqEffect() {
-        this.active = true;
+    private void initAudioEffect() {
+        for (int i = 0; i < bandLevels.length; i++){
+            // Honestly, I just don't understand why this method takes (short, short)
+            ((Equalizer)effect).setBandLevel((short)i, bandLevels[i]);
+        }
+    }
+
+    public EqEffect(MediaPlayer player) {
+        this.active = false;
+        this.player = player;
+        effect = new Equalizer(0, player.getAudioSessionId());
         bandLevels = new short[NUM_BANDS];
         for (int i = 0; i < NUM_BANDS; i++) {
-            bandLevels[i] = DEFAULT_BAND_LEVEL;
+            bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
         }
+        initAudioEffect();
+    }
+
+    public void enable() {
+        effect.setEnabled(true);
+    }
+
+    public void disable() {
+        effect.setEnabled(false);
     }
 
     /**
