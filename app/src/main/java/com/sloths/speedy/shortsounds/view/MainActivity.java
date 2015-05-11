@@ -267,6 +267,11 @@ public class MainActivity extends FragmentActivity {
 
     /** Begins the recording process. */
     private void beginRecording() {
+        // Play back other tracks if there are other tracks
+        if (mActiveShortSound != null) {
+            mActiveShortSound.playAllTracks();
+        }
+
         // Setup the MediaRecorder
         mAudioRecorder.start();
     }
@@ -286,6 +291,8 @@ public class MainActivity extends FragmentActivity {
             mShortSoundsTitles = getShortSoundTitles(sounds);
             ArrayAdapter drawerListAdapter = (ArrayAdapter) mDrawerList.getAdapter();
             drawerListAdapter.notifyDataSetChanged();
+        } else {
+            mActiveShortSound.stopAllTracks();
         }
         Log.d("DEBUG", "Finished Recording new track to ShortSound["+mActiveShortSound.getId()+"]");
         // Create the new ShortSoundTrack (that this will record to)
