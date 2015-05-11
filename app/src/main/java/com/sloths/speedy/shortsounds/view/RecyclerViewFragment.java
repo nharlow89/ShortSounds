@@ -83,8 +83,8 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     public void onDestroyView() {
         super.onDestroyView();
         // We need to cleanup the audio stuff from this ShortSound
-        mAdapter.stopAllTracks();
-        // TODO: should probably release all the tracks as well.
+        mShortSound.stopAllTracks();
+        mShortSound.releaseAllTracks();
     }
 
     /**
@@ -93,11 +93,27 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
      */
     private void setGlobalPlayButtonClickHandler() {
         mGlobalPlayButton = (ImageButton)mParentLayout.findViewById(R.id.imageButtonPlay);
+        mGlobalPlayButton.setEnabled(true);
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAdapter.playAllTracks();
+                // TODO: we need to handle the case when the ShortSound finishes playing!
+                if ( mShortSound.isPlaying() ) {
+                    // The ShortSound is already playing, stop it.
+                    mShortSound.pauseAllTracks();
+                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                } else {
+                    if ( mShortSound.isPaused() ) {
+                        // The ShortSound was previously playing, unpause it.
+                        mShortSound.unPauseAllTracks();
+                    } else {
+                        // The ShortSound is not playing yet, play it.
+                        mShortSound.playAllTracks();
+                    }
+                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
+                }
+
             }
         });
     }
@@ -125,6 +141,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
 
         // TODO: Set reverb values in here
         ReverbCanvas reverbCanvas = (ReverbCanvas) layout.findViewById(R.id.effect_canvas);
+
         // effectCanvas.setReverbVals(initEQValues);
 
         // Shows a text popup that the effect was saved or cleared
@@ -168,6 +185,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+
                 showToast("Effects saved", Toast.LENGTH_SHORT);
             }
         });
@@ -191,8 +209,9 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         final AlertDialog dialog = imageDialog.create();
 
         // TODO: Here we can populate initial effect values from backend
-        EQCanvas effectCanvas = (EQCanvas) layout.findViewById(R.id.effect_canvas);
-        // effectCanvas.setEQVals(initEQValues);
+        EQCanvas2 effectCanvas = (EQCanvas2) layout.findViewById(R.id.effect_canvas);
+        LinearLayout ll = (LinearLayout) layout.findViewById(R.id.effect_content);
+
 
         // Shows a text popup that the effect was saved or cleared
         layout.findViewById(R.id.saveEffectButton).setOnClickListener(new View.OnClickListener() {
@@ -203,7 +222,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
                 // eqVals = effectCanvas.getEQVals();
                 // saveEQ(eqVals);
                 dialog.dismiss();
-                showToast(effect+ " saved", Toast.LENGTH_SHORT);
+                showToast(effect + " saved", Toast.LENGTH_SHORT);
             }
         });
         layout.findViewById(R.id.cancelEffectButton).setOnClickListener(new View.OnClickListener() {
@@ -215,6 +234,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         });
 
         dialog.show();
+
     }
 
     // Currently returns EQ canvas or reverb canvas view

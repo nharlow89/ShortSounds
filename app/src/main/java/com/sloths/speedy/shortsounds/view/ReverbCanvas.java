@@ -6,8 +6,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -21,18 +23,18 @@ public class ReverbCanvas extends View {
 
 
     private static final String TAG = "EffectCanvas";
-    public int width;
-    public int height;
-    private Bitmap mBitmap;
-    private Canvas mCanvas;
     private Path xAxis;
     private Path yAxis;
-    Context context;
+    private Path linePath;
     private Paint linePaint;
     private Paint pointPaint;
-    private float echo;
-    private float decay;
-    private final float RECTSIZE = 10f;
+    private PointF left;
+    private PointF right;
+
+    private PointControl point;
+    private int YMIN, YMAX, XMIN,XMAX;
+
+    private final int MARGIN = 10;
     private final int NONE = -1, TOUCH_POINT = 0;
     private int currentTouch;
     private RectF pointTouch;
@@ -46,49 +48,38 @@ public class ReverbCanvas extends View {
 
     public ReverbCanvas(Context c, AttributeSet attrs) {
         super(c, attrs);
-        context = c;
         firstDraw = true;
 
-        // Path for x & y axis
+        // Path for y & x axis
         xAxis = new Path();
         yAxis = new Path();
+        linePath = new Path();
 
-        // Paint specs for line
         linePaint = new Paint();
+        pointPaint =  new Paint();
+
+        currentTouch = NONE;
+
+        left = new PointF();
+        right = new PointF();
+    }
+
+    void setStyles() {
+        // Paint specs for line
         linePaint.setAntiAlias(true);
-        linePaint.setColor(Color.WHITE);
+        linePaint.setColor(Color.BLUE);
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeJoin(Paint.Join.ROUND);
-        linePaint.setStrokeWidth(7f);
+        linePaint.setStrokeWidth(Math.max(getMeasuredWidth() / 50f, 20f));
 
         // Paint specs for points
-        pointPaint =  new Paint();
         pointPaint.setAntiAlias(true);
-        pointPaint.setColor(Color.GREEN);
+        pointPaint.setColor(Color.WHITE);
         pointPaint.setStyle(Paint.Style.STROKE);
-        pointPaint.setStrokeWidth(30f);
+        pointPaint.setStrokeWidth(getMeasuredWidth() / 16f);
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
-
-        // Initialize echo & decay at default locations
-        // These will be set by effect values w/ backend connected
-        echo = 325;
-        decay = 250;
-
-        // Initialize touch locations for points
-        pointTouch = new RectF(echo - RECTSIZE, decay - RECTSIZE,
-                                echo + RECTSIZE, decay + RECTSIZE);
-        currentTouch = NONE;
     }
 
-    // override onSizeChanged
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-
-        // your Canvas will draw onto the defined Bitmap
-        mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        mCanvas = new Canvas(mBitmap);
-    }
 
     // override onDraw
     @Override
@@ -96,21 +87,57 @@ public class ReverbCanvas extends View {
         super.onDraw(canvas);
         if (firstDraw) {
             // Draw the line between initial points
-            drawAxis();
+            setStyles();
+            setUpGraph();
             firstDraw = false;
         }
         canvas.drawPath(xAxis, linePaint);
         canvas.drawPath(yAxis, linePaint);
-        canvas.drawPoint(echo, decay, pointPaint);
+        canvas.drawPoint(point.x, point.y, pointPaint);
+        canvas.drawPoint(left.x, left.y, pointPaint);
+        canvas.drawPoint(right.x, right.y, pointPaint);
+        canvas.drawPath(linePath, linePaint);
     }
 
-    // Helper method for intially drawing out the x & y axis
-    private void drawAxis() {
-        xAxis.moveTo(10, 600);
-        yAxis.moveTo(10, 600);
+    // Helper method for intially drawing out the y & x axis
+    private void setUpGraph() {
+        YMAX = getMeasuredHeight() / 4;
+        YMIN = getMeasuredHeight() * 3 / 4;
+        XMIN = MARGIN;
+        XMAX = getMeasuredWidth() - MARGIN;
 
-        xAxis.lineTo(650, 600);
-        yAxis.lineTo(10, 10);
+        xAxis.moveTo(MARGIN, YMIN);
+        yAxis.moveTo(MARGIN, YMIN);
+        xAxis.lineTo(XMAX, YMIN);
+        yAxis.lineTo(MARGIN, YMAX);
+
+        left.x = XMIN;
+        right.x = XMAX;
+
+        point = new PointControl();
+        setLine();
+    }
+
+    private void setLine() {
+        float h0 = YMIN - (Math.abs(point.y - YMIN) * 3f  / 4);
+        float deltaH = 16f * XMIN / point.x;
+//        Log.d(TAG, "xmin / point.x: " + (float)XMIN / point.x);
+//        Log.d(TAG, "delta H: " + deltaH);
+        float h1 = h0 + (XMAX - XMIN) * deltaH;
+
+        if (h1 > YMIN) {
+            h1 = YMIN;
+            right.x = (YMIN - h0) / deltaH;
+        } else {
+            right.x = XMAX;
+        }
+
+        left.y = h0;
+        right.y = h1;
+
+        linePath.reset();
+        linePath.moveTo(left.x, left.y);
+        linePath.quadTo(point.x, point.y , right.x, right.y);
     }
 
     // This is where we will handle controlling points
@@ -118,56 +145,76 @@ public class ReverbCanvas extends View {
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
-
         switch (event.getAction()) {
             // First see which point user is touching
             case MotionEvent.ACTION_DOWN:
                 if (pointTouch.contains(x, y)) {
                     currentTouch = TOUCH_POINT;
                 }
-                return true;
+                break;
             // Drag points
             case MotionEvent.ACTION_MOVE:
                 if (currentTouch == TOUCH_POINT) {
-                        echo = x;
-                        decay = y;
-                        invalidate();
-                        return true;
+                    point.update(x, y);
+                    setLine();
+                    invalidate();
                 }
-                return false;
+                break;
             // If user lifts up --> set new touch area & draw line & point
             case MotionEvent.ACTION_UP:
                 if (currentTouch == TOUCH_POINT) {
-                        echo = x;
-                        decay = y;
-                        updateTouchArea(echo, decay, x, y);
+                    point.update(x, y);
                         invalidate();
                         currentTouch = NONE;
-                        return true;
                 }
-                return false;
+                break;
         }
         return true;
     }
 
-    // This is for setting the echo & decay values that will come
-    // from the database
-    public void setReverbVals(float echo, float decay) {
-        this.echo = echo;
-        this.decay = decay;
-    }
+//    // This is for setting the x & y values that will come
+//    // from the database
+//    public void setReverbVals(float x, float y) {
+//        this.x = x;
+//        this.y = y;
+//    }
+//
+//    public List<Float> getReverbVals() {
+//        List<Float> retList = new ArrayList<Float>();
+//        retList.add(x);
+//        retList.add(y);
+//        return retList;
+//    }
+//
 
-    public List<Float> getReverbVals() {
-        List<Float> retList = new ArrayList<Float>();
-        retList.add(echo);
-        retList.add(decay);
-        return retList;
-    }
 
+    class PointControl {
+        private final float RECTSIZE;
+        private float x;
+        private float y;
 
-    // Sets point as well as updates touch area
-    private void updateTouchArea(float echo, float decay, float x, float y) {
-        pointTouch.set(echo - RECTSIZE, decay - RECTSIZE,
-                echo + RECTSIZE, decay + RECTSIZE);
+        PointControl() {
+            RECTSIZE = getMeasuredWidth() / 16f;
+            // Initialize x & y at default locations
+            // These will be set by effect values w/ backend connected
+            x = getMeasuredWidth() / 2;
+            y = getMeasuredHeight() / 2;
+
+            // Initialize touch locations for points
+            pointTouch = new RectF(x - RECTSIZE, y - RECTSIZE,
+                                   x + RECTSIZE, y + RECTSIZE);
+        }
+
+        void update(float x, float y) {
+            if (x > XMIN + 4 * MARGIN && x < XMAX - 4 * MARGIN)
+                this.x = x;
+            if (y  < YMIN - 4 * MARGIN && y  > YMAX + 4 * MARGIN)
+                this.y = y;
+
+            // Initialize touch locations for points
+            pointTouch.set(this.x - RECTSIZE, this.y - RECTSIZE,
+                    this.x + RECTSIZE, this.y + RECTSIZE);
+        }
+
     }
 }

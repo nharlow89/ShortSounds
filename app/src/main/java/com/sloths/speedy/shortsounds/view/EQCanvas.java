@@ -75,7 +75,7 @@ public class EQCanvas extends View {
         pointPaint.setAntiAlias(true);
         pointPaint.setColor(Color.RED);
         pointPaint.setStyle(Paint.Style.STROKE);
-        pointPaint.setStrokeWidth(20f);
+        pointPaint.setStrokeWidth(40f);
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
 
         // Debug paint
@@ -99,6 +99,8 @@ public class EQCanvas extends View {
         allPoints[3] = highPoint;
         endPoint = new PointF(655, 450);
         allPoints[4] = endPoint;
+
+
 
         // Initialize touch locations for points
         basePointTouch = new RectF(basePoint.x - RECTSIZE, basePoint.y - RECTSIZE,
