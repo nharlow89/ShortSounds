@@ -8,11 +8,12 @@ import android.content.Context;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.support.v4.util.Pair;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -146,7 +147,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
-        private final LinearLayout controller;
+        private final LinearLayout vTrackChild;
         private Button mPlayTrackButton;
         private ShortSoundTrack mShortSoundTrack;
         private View vView;
@@ -164,7 +165,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             v.setOnClickListener(new TrackListener());
             vTitle = (TextView) v.findViewById(R.id.track_title);
             vView = v;
-            controller = (LinearLayout) v.findViewById(R.id.track_child);
+            vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             eqButton = ((Button) v.findViewById(R.id.eq_button));
             reverbButton = ((Button) v.findViewById(R.id.reverb_button));
             distButton = ((Button) v.findViewById(R.id.dist_button));
@@ -172,7 +173,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
             setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
             setPlayClickHandler();
-            controller.setVisibility(View.GONE);
+            vTrackChild.setVisibility(View.GONE);
 
             // Populate effects in the effects list the track keeps
             // TODO: Link the effects to the real ones in the database
@@ -257,7 +258,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
 
-        /* The click listener for ListView in the navigation drawer */
+        /**
+         * The listener for when a track is clicked on
+         */
         private class TrackListener implements View.OnClickListener  {
             @Override
             public void onClick(View v) {
@@ -265,19 +268,80 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //listener.onButtonClicked(v, getPosition());
                 if (!trackExpanded) {
                     // Expand a track
-                    controller.setVisibility(View.VISIBLE);
+                    expandTrackChildView(vTrackChild);
                     trackExpanded = true;
                     // Upon selecting a track we need to prepare the track for playing.
                     mShortSoundTrack.prepareAsync();
                 } else {
                     // Close the current open track
-                    controller.setVisibility(View.GONE);
+                    collapseTrackChildView(vTrackChild);
                     trackExpanded = false;
                     // Stop the track (just in case it was playing)
                     mShortSoundTrack.stop();
                 }
             }
         }
+    }
+
+    /**
+     * Uses animation to expand the child view of a track
+     * @param v The view to expand
+     */
+    public void expandTrackChildView(final View v) {
+        v.measure(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
+
+        v.getLayoutParams().height = 0;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? RecyclerView.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1 dp/ms
+        a.setDuration((int) (targetHeight / (v.getContext().getResources().getDisplayMetrics().density)));
+        v.startAnimation(a);
+    }
+
+    /**
+     * Uses animation to collapse the child view of a track
+     * @param v The view to collapse
+     */
+    public void collapseTrackChildView(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1 dp/ms
+        a.setDuration((int)(initialHeight / (v.getContext().getResources().getDisplayMetrics().density)));
+        v.startAnimation(a);
     }
 
     // The button clicking implementation is actually implemented in the RecyclerViewFragment
