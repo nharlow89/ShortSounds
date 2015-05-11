@@ -5,10 +5,11 @@ package com.sloths.speedy.shortsounds.view;
  */
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.support.v4.util.Pair;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,6 @@ import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +42,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public Map<Long, Pair<MediaPlayer, MediaState>> mMediaPlayerPool;
     private Context context;
     private RVListener listener;
+    private ArrayList<Color> mColorPallete;
+
 
     /**
      * Initialize the dataset of the Adapter.
@@ -52,6 +54,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         mMediaPlayerPool = new HashMap<>();
         this.context = rvf.getActivity();
         listener = rvf;
+
+
     }
 
     // Create new views (invoked by the layout manager)
@@ -62,7 +66,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click listener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
-
         return vh;
     }
 
@@ -72,58 +75,69 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
         viewHolder.setTitleView(position);
-        viewHolder.setShortSoundTrack( mShortSound.getTracks().get(position) );
+        viewHolder.setShortSoundTrack(mShortSound.getTracks().get(position));
+        dynamicallySetCardColor(viewHolder, position);
+    }
+
+    /**
+     * Sets the background color of cards. Will pull from collection of
+     * preselected colors.
+     * @param viewHolder The view to be affected
+     * @param position The position in the RecyclerView
+     */
+    private void dynamicallySetCardColor(ViewHolder viewHolder, int position) {
+        // There are 6 different card colors
+        // so position 0-5
+        View currentView = viewHolder.getViewHoldersView();
+        int num_colors = 6;
+        switch(position % num_colors) {
+            case 0:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.purple_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.purple_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 1:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.teal_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.teal_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 2:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.deep_orange_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.deep_orange_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 3:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.pink_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.pink_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 4:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.yellow_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.yellow_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            case 5:
+                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.indigo_500);
+                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.indigo_200);
+                setColorOnView(viewHolder, currentView);
+                break;
+            default:
+                // something went wrong
+                break;
+        }
+    }
+
+    private void setColorOnView(ViewHolder viewHolder, View currentView) {
+        View track_parent = currentView.findViewById(R.id.track_parent);
+        track_parent.setBackgroundColor(viewHolder.mPrimaryColor);
+        View track_child = currentView.findViewById(R.id.track_child);
+        track_child.setBackgroundColor(viewHolder.mPrimaryColor);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return mShortSound.getTracks().size();
-    }
-
-    /**
-     * Stop all currently playing tracks in the pool.
-     */
-    public void stopAllTracks() {
-        for( Map.Entry<Long, Pair<MediaPlayer,MediaState>> entry: mMediaPlayerPool.entrySet() ) {
-            MediaPlayer player = entry.getValue().first;
-            if ( player.isPlaying() ) {
-                player.stop();
-                player.prepareAsync();
-                Log.d("DEBUG", "stop track["+entry.getKey()+"]");
-            }
-        }
-    }
-
-    /**
-     * Play all the tracks that are in the audio pool.
-     */
-    public void playAllTracks() {
-        // Loop through each track, make sure it is prepared, and then play.
-        for( Map.Entry<Long, Pair<MediaPlayer,MediaState>> entry: mMediaPlayerPool.entrySet() ) {
-            MediaPlayer player = entry.getValue().first;
-            MediaState state = entry.getValue().second;
-            if ( state.currentState == MediaState.STARTED ) {
-                player.stop();
-                state.currentState = MediaState.STOPPED;
-            }
-            if ( state.currentState != MediaState.PREPARED ) {
-                try {
-                    player.prepare();
-                    state.currentState = MediaState.PREPARED;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        // Now that all the tracks are prepared, play them
-        for( Map.Entry<Long, Pair<MediaPlayer,MediaState>> entry: mMediaPlayerPool.entrySet() ) {
-            MediaPlayer player = entry.getValue().first;
-            MediaState state = entry.getValue().second;
-            player.start();
-            state.currentState = MediaState.STARTED;
-        }
-
     }
 
     /**
@@ -134,9 +148,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private final TextView vTitle;
         private final LinearLayout controller;
         private Button mPlayTrackButton;
-        private MediaPlayer mMediaPlayer;
-        private MediaState mMediaState;
         private ShortSoundTrack mShortSoundTrack;
+        private View vView;
+        private int mPrimaryColor;
+        private int mSecondaryColor;
         final Button eqButton;
         final Button reverbButton;
         final Button distButton;
@@ -147,8 +162,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(new TrackListener());
-
             vTitle = (TextView) v.findViewById(R.id.track_title);
+            vView = v;
             controller = (LinearLayout) v.findViewById(R.id.track_child);
             eqButton = ((Button) v.findViewById(R.id.eq_button));
             reverbButton = ((Button) v.findViewById(R.id.reverb_button));
@@ -156,7 +171,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             bitButton = ((Button) v.findViewById(R.id.bit_button));
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
             setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
-
             setPlayClickHandler();
             controller.setVisibility(View.GONE);
 
@@ -172,24 +186,30 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
         /**
+         * Returns the View associated with this ViewHolder.
+         * @return View The View associated with this ViewHolder
+         */
+        public View getViewHoldersView() {
+            return vView;
+        }
+
+        /**
          * Set the event handler for the Play button on a given track.
          */
         private void setPlayClickHandler() {
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                if ( mMediaPlayer.isPlaying() ) {
-                    mMediaPlayer.stop();
-                    mMediaState.currentState = MediaState.STOPPED;
-                    mMediaPlayer.prepareAsync();
-                    mPlayTrackButton.setBackground( context.getResources().getDrawable(R.drawable.ic_action_play) );
-                    Log.d("DEBUG", "stop track[" + mShortSoundTrack.getId() + "]");
-                } else if ( mMediaState.currentState == MediaState.PREPARED ) {
-                    stopAllTracks();
-                    mMediaPlayer.start();
-                    mMediaState.currentState = MediaState.STARTED;
-                    mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_stop));
-                    Log.d("DEBUG", "play track[" + mShortSoundTrack.getId() + "]");
-                }
+                    if ( mShortSoundTrack.isPlaying() ) {
+                        // If the track was playing then stop it.
+                        mShortSoundTrack.stop();
+                        mShortSoundTrack.prepareAsync();
+                        mPlayTrackButton.setBackground( context.getResources().getDrawable(R.drawable.ic_action_play) );
+                    } else {
+                        // The track was not playing, stop any other tracks and play this one.
+                        mShortSound.stopAllTracks();
+                        mShortSoundTrack.play();
+                        mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_stop));
+                    }
                 }
             });
         }
@@ -205,24 +225,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          */
         public void setShortSoundTrack( ShortSoundTrack track ) {
             mShortSoundTrack = track;
-            mMediaPlayer = new MediaPlayer();
-            mMediaState = new MediaState();
-            Context context = ShortSoundsApplication.getAppContext();
-            String path = context.getFilesDir().getAbsolutePath();
-            try {
-                mMediaPlayer.setDataSource(path + "/" + mShortSoundTrack.getFile());
-                mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        mMediaState.currentState = MediaState.PREPARED;
-                        Log.d("DEBUG", "MediaPlayer prepared["+mShortSoundTrack.getId()+"]");
-                    }
-                });
-                // Add this to the Audio Pool
-                mMediaPlayerPool.put(track.getId(), new Pair(mMediaPlayer, mMediaState));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mShortSoundTrack.setOnPlayCompleteListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mShortSoundTrack.stop();  // Make sure the state is updated with ShortSoundTrack
+                    mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_play));
+                }
+            });
         }
 
         private List<Effect> getEffects() {
@@ -258,21 +267,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     // Expand a track
                     controller.setVisibility(View.VISIBLE);
                     trackExpanded = true;
-                    // Upon selecting a track we need to prepare the MediaPlayer (this only needs
-                    // to happen once per track).
-                    if ( mMediaState.currentState != MediaState.PREPARED ) {
-                        mMediaPlayer.prepareAsync();
-                    }
+                    // Upon selecting a track we need to prepare the track for playing.
+                    mShortSoundTrack.prepareAsync();
                 } else {
                     // Close the current open track
                     controller.setVisibility(View.GONE);
                     trackExpanded = false;
-                    // Stop the MediaPlayer if it was active
-                    if ( mMediaPlayer.isPlaying() ) {
-                        mMediaPlayer.stop();
-                        mMediaState.currentState = MediaState.STOPPED;
-                        Log.d("DEBUG", "stop track["+mShortSoundTrack.getId()+"]");
-                    }
+                    // Stop the track (just in case it was playing)
+                    mShortSoundTrack.stop();
                 }
             }
         }
