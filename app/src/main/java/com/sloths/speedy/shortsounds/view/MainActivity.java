@@ -1,31 +1,43 @@
 package com.sloths.speedy.shortsounds.view;
 
+import android.app.ActionBar;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.support.v4.view.MenuItemCompat;
+import android.content.Intent;
+import android.widget.ShareActionProvider;
 
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 
+import java.io.File;
 import java.util.List;
 
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements NoticeDialogFragment.NoticeDialogListener{
     private String[] mShortSoundsTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -34,6 +46,8 @@ public class MainActivity extends FragmentActivity {
     private CharSequence mTitle;
     private List<ShortSound> sounds;
     private ImageButton mGlobalPlayButton;
+    private ShareActionProvider mShareActionProvider;
+    private int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +63,7 @@ public class MainActivity extends FragmentActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setUpFloatingActionButton();
         }
+        position = -1;
     }
 
     /**
@@ -89,8 +104,11 @@ public class MainActivity extends FragmentActivity {
      * Enables the action bar icon for the nav drawer that opens the library.
      */
     private void enableActionBarLibraryToggleButton() {
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+
+
     }
 
     /**
@@ -150,7 +168,17 @@ public class MainActivity extends FragmentActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-        menu.findItem(R.id.action_settings).setVisible(!drawerOpen);
+        if (position == -1) {
+            menu.findItem(R.id.action_rename).setVisible(false);
+            menu.findItem(R.id.action_delete).setVisible(false);
+            menu.findItem(R.id.action_share).setVisible(false);
+        } else {
+            menu.findItem(R.id.action_rename).setVisible(!drawerOpen);
+            menu.findItem(R.id.action_delete).setVisible(!drawerOpen);
+            menu.findItem(R.id.action_share).setVisible(!drawerOpen);
+        }
+        menu.findItem(R.id.action_new).setVisible(!drawerOpen);
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -186,6 +214,8 @@ public class MainActivity extends FragmentActivity {
 
         mDrawerLayout.closeDrawer(mDrawerList);
         setTitle(mShortSoundsTitles[position]);
+        this.position = position;
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -200,8 +230,32 @@ public class MainActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem shareItem = menu.findItem(R.id.action_share);
+
+        // Fetch and store ShareActionProvider
+        mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
+
+        mShareActionProvider.setShareIntent(createShareIntent());
+
         return true;
+    }
+
+    private Intent createShareIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        File absolutePath = new File(getFilesDir(), "ss1-track1.mp3");
+        Uri contentURI = FileProvider.getUriForFile(MainActivity.this, "com.sloths.speedy.shortsounds.fileprovider", absolutePath);
+
+        if (contentURI != null) {
+            shareIntent.putExtra(Intent.EXTRA_STREAM, contentURI);
+            shareIntent.setType("audio/mpeg3");
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+
+        return shareIntent;
     }
 
     @Override
@@ -211,7 +265,35 @@ public class MainActivity extends FragmentActivity {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        // Handle your other action bar items...
-        return super.onOptionsItemSelected(item);
+
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                //TODO: Add delete functionality
+                return true;
+            case R.id.action_new:
+                //TODO: Add new shortsound functionality
+                return true;
+            case R.id.action_rename:
+                //TODO: Add renaming functionality
+                rename();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void rename() {
+        FragmentManager fragmentManager = getFragmentManager();
+        NoticeDialogFragment inputNameDialog = new NoticeDialogFragment();
+        inputNameDialog.show(fragmentManager, "Input Dialog");
+    }
+
+    @Override
+    public void onOkay(String inputText) {
+        sounds.get(position).setTitle(inputText);
+        mShortSoundsTitles[position] = inputText;
+        setTitle(inputText);
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, mShortSoundsTitles));
     }
 }
