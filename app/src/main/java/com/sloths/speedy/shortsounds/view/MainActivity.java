@@ -30,7 +30,9 @@ import android.content.Intent;
 import android.widget.ShareActionProvider;
 
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.ShortSound;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.io.File;
 import java.util.List;
@@ -48,6 +50,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private ImageButton mGlobalPlayButton;
     private ShareActionProvider mShareActionProvider;
     private int position;
+    private ShortSound mActiveShortSound;
+    private AudioRecorder mAudioRecorder;
+    private FloatingActionButtonBasicFragment mActionBarFragment;
+    private RecyclerViewFragment mMainFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +61,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
         mShortSoundsTitles = getShortSoundTitles(sounds);
+        mAudioRecorder = new AudioRecorder( getCacheDir() );
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpGlobalPlayButton();
@@ -62,6 +69,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         enableActionBarLibraryToggleButton();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setUpFloatingActionButton();
+        } else {
+            setUpRecordButton();
         }
         position = -1;
     }
@@ -73,8 +82,41 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void setUpGlobalPlayButton() {
         mGlobalPlayButton = (ImageButton) findViewById(R.id.imageButtonPlay);
-        Log.e("DEBUG", mGlobalPlayButton.toString());
         mGlobalPlayButton.setEnabled(false);  // Default to disabled when ShortSound has not been clicked.
+    }
+
+    /**
+     * This sets up the Record button and attaches the click handler which gives it the record
+     * functionality.
+     */
+    private void setUpRecordButton() {
+        // Looks a little ugly, but we have to account for the FAB because it uses a different view
+        // element.
+        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+            FloatingActionButton button = mActionBarFragment.getActionButton();
+            button.setOnCheckedChangeListener(new FloatingActionButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(FloatingActionButton fabView, boolean isChecked) {
+                    if ( !isChecked ) {
+                        endRecording();
+                    } else {
+                        beginRecording();
+                    }
+                }
+            });
+        } else {
+            ImageButton recordButton = (ImageButton) findViewById(R.id.imageButtonRecord);
+            recordButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if ( mAudioRecorder.isRecording() ) {
+                        endRecording();
+                    } else {
+                        beginRecording();
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -83,8 +125,14 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void setUpFloatingActionButton() {
         FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
-        FloatingActionButtonBasicFragment fragment = new FloatingActionButtonBasicFragment();
-        transaction.replace(R.id.sample_content_fragment, fragment);
+        mActionBarFragment = new FloatingActionButtonBasicFragment();
+        mActionBarFragment.setOnLoadListener( new FloatingActionButtonBasicFragment.OnFragmentLoadedListener() {
+            @Override
+            public void didLoad() {
+                setUpRecordButton();
+            }
+        });
+        transaction.replace(R.id.sample_content_fragment, mActionBarFragment);
         transaction.commit();
     }
 
@@ -197,17 +245,19 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * @param position int the position of the drawer item clicked
      */
     private void selectShortSoundFromDrawer(int position) {
+        mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
         // Grabs the ShortSound and populates the screen with it
-        Fragment fragment = new RecyclerViewFragment();
+        mMainFragment = new RecyclerViewFragment();
         // Sets it to the correct ShortSound
-        Bundle args = new Bundle();
-        long targetShortSoundId = sounds.get( position ).getId();
-        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
-        fragment.setArguments(args);
+        mMainFragment.setDataSource( mActiveShortSound );
+//        Bundle args = new Bundle();
+//        long targetShortSoundId = sounds.get( position ).getId();
+//        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
+//        mMainFragment.setArguments(args);
 
         // Replaces the main content screen w/ Short sound
         FragmentManager fragmentManager = this.getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.track_list, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.track_list, mMainFragment).commit();
 
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
@@ -295,5 +345,49 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         setTitle(inputText);
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, mShortSoundsTitles));
+    }
+
+    /** Begins the recording process. */
+    private void beginRecording() {
+        // Play back other tracks if there are other tracks
+        if (mActiveShortSound != null) {
+            mActiveShortSound.playAllTracks();
+        }
+
+        // Setup the MediaRecorder
+        mAudioRecorder.start();
+    }
+
+    /** Ends the recording process. */
+    private void endRecording() {
+        File recordedFile = mAudioRecorder.end();
+        Log.d("DEBUG", "endRecording() recordedFile: " + recordedFile.getAbsolutePath());
+
+        boolean isNewShortSound = mActiveShortSound == null;
+        if ( isNewShortSound ) {
+            // Case 1. There is no active ShortSound, create one and continue.
+            // Create the new ShortSound and add it the list.
+            mActiveShortSound = new ShortSound();
+            sounds.add( mActiveShortSound );
+            // Update the sidebar with the new ShortSound.
+            mShortSoundsTitles = getShortSoundTitles(sounds);
+            ArrayAdapter drawerListAdapter = (ArrayAdapter) mDrawerList.getAdapter();
+            drawerListAdapter.notifyDataSetChanged();
+        } else {
+            mActiveShortSound.stopAllTracks();
+        }
+        Log.d("DEBUG", "Finished Recording new track to ShortSound["+mActiveShortSound.getId()+"]");
+        // Create the new ShortSoundTrack (that this will record to)
+        ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
+        mActiveShortSound.addTrack( newTrack );
+
+        if ( isNewShortSound ) {
+            // Select the new ShortSound to be active.
+            selectShortSoundFromDrawer(sounds.size() - 1);
+        } else {
+            // Update the existing fragment manager to add new track to list
+            mMainFragment.notifyTrackAdded( mActiveShortSound.getTracks().size() - 1 );
+        }
+        mAudioRecorder.reset();  // Have to reset for the next recording
     }
 }

@@ -7,8 +7,6 @@ package com.sloths.speedy.shortsounds.view;
 import android.content.Context;
 import android.graphics.Color;
 import android.media.MediaPlayer;
-import android.support.v4.util.Pair;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,15 +20,12 @@ import android.widget.TextView;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.EqEffect;
-import com.sloths.speedy.shortsounds.model.MediaState;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provide views to RecyclerView with data from mDataSet.
@@ -38,14 +33,9 @@ import java.util.Map;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
     private static final String TAG = "RecyclerViewAdapter";
     private ShortSound mShortSound;
-    // This is a pool of all the MediaPlayers for each track. The mapping is from ShortSoundTrack id
-    // to a pair containg the MediaPlayer and a boolean that describes if the MediaPlayer is currently
-    // prepared or not.
-    public Map<Long, Pair<MediaPlayer, MediaState>> mMediaPlayerPool;
     private Context context;
     private RVListener listener;
     private ArrayList<Color> mColorPallete;
-
 
     /**
      * Initialize the dataset of the Adapter.
@@ -53,11 +43,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     public RecyclerViewAdapter(ShortSound sound, RecyclerViewFragment rvf) {
         mShortSound = sound;
-        mMediaPlayerPool = new HashMap<>();
         this.context = rvf.getActivity();
         listener = rvf;
-
-
     }
 
     // Create new views (invoked by the layout manager)
@@ -234,6 +221,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 public void onCompletion(MediaPlayer mp) {
                     mShortSoundTrack.stop();  // Make sure the state is updated with ShortSoundTrack
                     mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_play));
+                    mShortSound.updateShortSound();
                 }
             });
         }
