@@ -154,6 +154,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private View vView;
         private int mPrimaryColor;
         private int mSecondaryColor;
+      
         //        private final ListView effectsList;
         private boolean trackExpanded;
 
@@ -226,7 +227,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          * MediaPlayer for this particular track.
          * @param track
          */
-        public void setShortSoundTrack( ShortSoundTrack track ) {
+        public void setShortSoundTrack(ShortSoundTrack track) {
             mShortSoundTrack = track;
             mShortSoundTrack.setOnPlayCompleteListener(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -259,7 +260,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 });
             }
         }
-
+        
         // TODO implement effect toggle
         private void setUpToggle(Switch[] sws) {
             for (Switch sw : sws) {
@@ -275,7 +276,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 });
             }
         }
-
+        
         /* The click listener for ListView in the navigation drawer */
         private class TrackListener implements View.OnClickListener  {
             @Override
@@ -302,6 +303,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // The button clicking implementation is actually implemented in the RecyclerViewFragment
     // It holds the logic for populating an effect popup
     public interface RVListener {
-        void onButtonClicked(View v, int track, String name);
+        public void onButtonClicked(View v, int track, String name);
     }
 }
