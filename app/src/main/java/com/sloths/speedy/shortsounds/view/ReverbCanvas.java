@@ -1,7 +1,6 @@
 package com.sloths.speedy.shortsounds.view;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -13,8 +12,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Created by shampson on 5/7/15.
@@ -26,12 +25,13 @@ public class ReverbCanvas extends View {
     private Path xAxis;
     private Path yAxis;
     private Path linePath;
+    private EchoGraphics echoG;
     private Paint linePaint;
     private Paint pointPaint;
     private PointF left;
     private PointF right;
 
-    private PointControl point;
+    private ControlPoint point;
     private int YMIN, YMAX, XMIN,XMAX;
 
     private final int MARGIN = 10;
@@ -62,6 +62,8 @@ public class ReverbCanvas extends View {
 
         left = new PointF();
         right = new PointF();
+
+
     }
 
     void setStyles() {
@@ -91,12 +93,16 @@ public class ReverbCanvas extends View {
             setUpGraph();
             firstDraw = false;
         }
+
+        echoG.draw(canvas);
+//        canvas.drawPoint(left.x, left.y, pointPaint);
+//        canvas.drawPoint(right.x, right.y, pointPaint);
+        linePaint.setColor(Color.BLUE);
+        canvas.drawPath(linePath, linePaint);
+        linePaint.setColor(Color.BLUE);
         canvas.drawPath(xAxis, linePaint);
         canvas.drawPath(yAxis, linePaint);
         canvas.drawPoint(point.x, point.y, pointPaint);
-        canvas.drawPoint(left.x, left.y, pointPaint);
-        canvas.drawPoint(right.x, right.y, pointPaint);
-        canvas.drawPath(linePath, linePaint);
     }
 
     // Helper method for intially drawing out the y & x axis
@@ -114,8 +120,10 @@ public class ReverbCanvas extends View {
         left.x = XMIN;
         right.x = XMAX;
 
-        point = new PointControl();
+        point = new ControlPoint();
         setLine();
+        echoG = new EchoGraphics();
+        echoG.setEchos();
     }
 
     private void setLine() {
@@ -137,7 +145,7 @@ public class ReverbCanvas extends View {
 
         linePath.reset();
         linePath.moveTo(left.x, left.y);
-        linePath.quadTo(point.x, point.y , right.x, right.y);
+        linePath.quadTo(right.x / 2, point.y, right.x, right.y);
     }
 
     // This is where we will handle controlling points
@@ -157,6 +165,7 @@ public class ReverbCanvas extends View {
                 if (currentTouch == TOUCH_POINT) {
                     point.update(x, y);
                     setLine();
+                    echoG.setEchos();
                     invalidate();
                 }
                 break;
@@ -187,13 +196,73 @@ public class ReverbCanvas extends View {
 //    }
 //
 
+    class EchoGraphics {
+        final int ECHO_SIZE = 40;
+        PointF[] echos;
+        Path[] arr;
+        int[] spacing;
+        Paint p;
 
-    class PointControl {
+        EchoGraphics() {
+            Random r = new Random();
+            echos = new PointF[ECHO_SIZE];
+            spacing = new int[ECHO_SIZE];
+            arr = new Path[ECHO_SIZE];
+            for (int i = 0; i < ECHO_SIZE; i++) {
+                arr[i] = new Path();
+//                echos[i] = new PointF();
+            }
+
+            final int H = YMIN - YMAX;
+            final int W =  XMAX - XMIN;
+            double heightScalar = 1.0 / ECHO_SIZE;
+
+            int x = (XMIN + r.nextInt(W / ECHO_SIZE));
+            int y;
+            for (int i = 0; i < ECHO_SIZE; i++) {
+                y = (int) (YMAX + (heightScalar * H) + (H / 6 - r.nextInt(H / 3)));
+//                Log.i(TAG, "xInc = " + xInc + ", x = " + x + ", y = " + y);
+                heightScalar += (1.0 / ECHO_SIZE);
+                echos[i] = new PointF(x, y);
+                x += 1.5 * W / ECHO_SIZE - r.nextInt(W / ECHO_SIZE);
+            }
+
+            setUpPaint();
+        }
+        private void setUpPaint() {
+            // Paint specs for line
+            p = new Paint();
+            p.setAntiAlias(true);
+            p.setColor(Color.YELLOW);
+            p.setStyle(Paint.Style.STROKE);
+            p.setStrokeJoin(Paint.Join.ROUND);
+            p.setStrokeWidth(5f);
+        }
+
+        void setEchos() {
+            float xScal = point.x / XMAX;
+            float yScal = Math.abs(point.y - YMIN) / (YMIN - YMAX);
+
+            for (int i = 0; i < ECHO_SIZE; i++) {
+                arr[i].reset();
+                arr[i].moveTo(XMIN + xScal * echos[i].x, YMIN);
+                arr[i].lineTo(XMIN + xScal * echos[i].x, YMIN - yScal * Math.abs(echos[i].y - YMIN));
+            }
+        }
+
+        void draw(Canvas canvas) {
+            for (int i = 0; i < ECHO_SIZE; i++) {
+                canvas.drawPath(arr[i], p);
+            }
+        }
+    }
+
+    class ControlPoint {
         private final float RECTSIZE;
         private float x;
         private float y;
 
-        PointControl() {
+        ControlPoint() {
             RECTSIZE = getMeasuredWidth() / 16f;
             // Initialize x & y at default locations
             // These will be set by effect values w/ backend connected
