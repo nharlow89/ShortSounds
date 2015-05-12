@@ -47,7 +47,6 @@ public class EqEffect extends Effect {
 
     private void initAudioEffect() {
         for (int i = 0; i < bandLevels.length; i++){
-            // Honestly, I just don't understand why this method takes (short, short)
             ((Equalizer)effect).setBandLevel((short)i, bandLevels[i]);
         }
     }

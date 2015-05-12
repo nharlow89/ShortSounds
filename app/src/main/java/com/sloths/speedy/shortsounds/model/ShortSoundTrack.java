@@ -35,6 +35,11 @@ public class ShortSoundTrack {
     private final long parentId;
     private MediaPlayer player;
     private MediaState mState = MediaState.INITIALIZED;
+    private EqEffect eqEffect;
+    private ReverbEffect reverbEffect;
+    public enum EFFECT {
+        EQ, REVERB, DISTORTION, BITCRUSH
+    }
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -89,6 +94,11 @@ public class ShortSoundTrack {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void setUpEffects() {
+        this.eqEffect = new EqEffect(player);
+        this.reverbEffect = new ReverbEffect(player);
     }
 
     /**
@@ -179,13 +189,26 @@ public class ShortSoundTrack {
         player.setOnCompletionListener( listener );
     }
 
-    public void addEffect() {
-        // TODO
-
+    public void addEffect(EFFECT e) {
+       switch (e) {
+           case EQ:
+               this.eqEffect.enable();
+           case REVERB:
+               this.reverbEffect.enable();
+           default:
+               throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+       }
     }
 
-    public void removeEffect() {
-        // TODO
+    public void removeEffect(EFFECT e) {
+        switch (e) {
+            case EQ:
+                this.eqEffect.disable();
+            case REVERB:
+                this.reverbEffect.disable();
+            default:
+                throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+        }
     }
 
     /**
