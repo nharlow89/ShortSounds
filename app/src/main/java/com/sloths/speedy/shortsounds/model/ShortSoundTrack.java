@@ -193,8 +193,10 @@ public class ShortSoundTrack {
        switch (e) {
            case EQ:
                this.eqEffect.enable();
+               this.player.attachAuxEffect(eqEffect.getEffectId());
            case REVERB:
                this.reverbEffect.enable();
+               this.player.attachAuxEffect(reverbEffect.getEffectId());
            default:
                throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
        }

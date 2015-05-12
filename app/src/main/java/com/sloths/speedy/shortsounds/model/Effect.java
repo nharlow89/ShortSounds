@@ -22,6 +22,10 @@ public abstract class Effect {
      * Returns the name of the effect
      * @return The name of the effect
      */
+
+    public int getEffectId() {
+        return effect.getId();
+    }
     public abstract String getTitleString();
 
     /**

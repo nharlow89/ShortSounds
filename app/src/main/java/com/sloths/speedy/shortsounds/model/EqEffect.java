@@ -37,7 +37,7 @@ public class EqEffect extends Effect {
 
     private EqEffect(String[] parameters, MediaPlayer player) {
         this.player = player;
-        effect = new Equalizer(0, player.getAudioSessionId());
+        this.effect = new Equalizer(0, player.getAudioSessionId());
         this.active = parameters[INDEX_ACTIVE].equals("ON");
         for (int i = 0; i < NUM_BANDS; i++) {
             this.bandLevels[i] = Short.parseShort(parameters[INDEX_BAND_LEVELS + i]);

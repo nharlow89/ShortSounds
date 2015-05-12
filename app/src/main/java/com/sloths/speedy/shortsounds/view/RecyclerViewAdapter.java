@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -179,7 +180,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Switch bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
             setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
-            setUpToggle(new Switch[] {eqToggle, reverbToggle, distToggle, bitToggle});
+            setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
             setPlayClickHandler();
             vTrackChild.setVisibility(View.GONE);
 
@@ -272,6 +273,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private void setUpToggle(Switch[] sws) {
             for (Switch sw : sws) {
                 if (sw == vView.findViewById(R.id.reverb_switch)) {
+                    Log.i("effects", "reverb switch clicked");
                     sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
