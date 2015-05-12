@@ -284,8 +284,8 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         seedSampleAudioFile(R.raw.test1, "ss1-track1-modified.mp3");
         seedSampleAudioFile(R.raw.test2, "ss1-track2.mp3");
         seedSampleAudioFile(R.raw.test2, "ss1-track2-modified.mp3");
-        seedSampleAudioFile(R.raw.test2, "ss1-track3.mp3");
-        seedSampleAudioFile(R.raw.test2, "ss1-track3-modified.mp3");
+        seedSampleAudioFile(R.raw.test3, "ss1-track3.mp3");
+        seedSampleAudioFile(R.raw.test3, "ss1-track3-modified.mp3");
         seedSampleAudioFile(R.raw.test1, "ss2-track1.mp3");
         seedSampleAudioFile(R.raw.test1, "ss2-track1-modified.mp3");
         seedSampleAudioFile(R.raw.test2, "ss2-track2.mp3");

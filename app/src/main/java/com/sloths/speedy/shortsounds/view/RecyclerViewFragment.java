@@ -4,6 +4,7 @@ package com.sloths.speedy.shortsounds.view;
  * Created by joel on 4/25/2015.
  */
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -19,8 +20,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
+
+import java.util.Random;
 
 
 public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapter.RVListener {
@@ -33,6 +38,12 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     private ShortSound mShortSound;
     private ImageButton mGlobalPlayButton;
     private LinearLayout mParentLayout;
+    double mLastRandom = 2;
+    Random mRand = new Random();
+    private double getRandom() {
+        return mLastRandom += mRand.nextDouble()*0.5 - 0.25;
+    }
+    private LineGraphSeries<DataPoint> series;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,8 +83,8 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     public void onDestroyView() {
         super.onDestroyView();
         // We need to cleanup the audio stuff from this ShortSound
-        mAdapter.stopAllTracks();
-        // TODO: should probably release all the tracks as well.
+        mShortSound.stopAllTracks();
+        mShortSound.releaseAllTracks();
     }
 
     /**
@@ -82,21 +93,83 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
      */
     private void setGlobalPlayButtonClickHandler() {
         mGlobalPlayButton = (ImageButton)mParentLayout.findViewById(R.id.imageButtonPlay);
+        mGlobalPlayButton.setEnabled(true);
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAdapter.playAllTracks();
+                // TODO: we need to handle the case when the ShortSound finishes playing!
+                if ( mShortSound.isPlaying() ) {
+                    // The ShortSound is already playing, stop it.
+                    mShortSound.pauseAllTracks();
+                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                } else {
+                    if ( mShortSound.isPaused() ) {
+                        // The ShortSound was previously playing, unpause it.
+                        mShortSound.unPauseAllTracks();
+                    } else {
+                        // The ShortSound is not playing yet, play it.
+                        mShortSound.playAllTracks();
+                    }
+                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
+                }
+
             }
         });
     }
 
+    // This is used for loading the popup when clicking a specific effect
     @Override
     public void onButtonClicked(View v, int track, String effect) {
-        loadEffectDialog(track, effect);
+        if (effect.equals("EQ")) {
+            loadEQDialog(track, effect);
+        } else if (effect.equals("Reverb")) {
+            loadReverbEffectDialog(track, effect);
+        } else {
+            loadGeneralEffectDialog(track, effect);
+        }
     }
 
-    private void loadEffectDialog(final int track, final String effect) {
+    // Helper method for loading a reverb effect popup
+    private void loadReverbEffectDialog(final int track, final String effect) {
+        final AlertDialog.Builder imageDialog = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+
+        View layout = getEffectCanvas(effect);
+        imageDialog.setView(layout);
+        final AlertDialog dialog = imageDialog.create();
+
+        // TODO: Set reverb values in here
+        ReverbCanvas reverbCanvas = (ReverbCanvas) layout.findViewById(R.id.effect_canvas);
+
+        // effectCanvas.setReverbVals(initEQValues);
+
+        // Shows a text popup that the effect was saved or cleared
+        layout.findViewById(R.id.saveEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                // Grab values from Reverb Canvas to save here
+                // TODO: Implement backend for saving current Reverb effect
+                // eqVals = reverbCanvas.getReverbVals();
+                // saveReverb(reverbVals);
+                // grab values from ReverbCanvas here, to save
+                showToast(effect + " saved", Toast.LENGTH_SHORT);
+            }
+        });
+        layout.findViewById(R.id.cancelEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showToast(effect + "  cleared", Toast.LENGTH_SHORT);
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    // Helper method for loading a general effect popup (holder until we get functionality
+    // for new effects)
+    private void loadGeneralEffectDialog(final int track, final String effect) {
         final AlertDialog.Builder imageDialog = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
@@ -112,6 +185,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+
                 showToast("Effects saved", Toast.LENGTH_SHORT);
             }
         });
@@ -123,6 +197,60 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
             }
         });
         dialog.show();
+    }
+
+    // Helper method for loading a specific EQ popup
+    private void loadEQDialog(final int track, final String effect) {
+        Activity activity = getActivity();
+        final AlertDialog.Builder imageDialog = new AlertDialog.Builder(activity);
+
+        View layout = getEffectCanvas(effect);
+        imageDialog.setView(layout);
+        final AlertDialog dialog = imageDialog.create();
+
+        // TODO: Here we can populate initial effect values from backend
+        EQCanvas2 effectCanvas = (EQCanvas2) layout.findViewById(R.id.effect_canvas);
+        LinearLayout ll = (LinearLayout) layout.findViewById(R.id.effect_content);
+
+
+        // Shows a text popup that the effect was saved or cleared
+        layout.findViewById(R.id.saveEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Grab values from EQ Canvas to save here
+                // TODO: Implement backend for saving current EQ effect
+                // eqVals = effectCanvas.getEQVals();
+                // saveEQ(eqVals);
+                dialog.dismiss();
+                showToast(effect + " saved", Toast.LENGTH_SHORT);
+            }
+        });
+        layout.findViewById(R.id.cancelEffectButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showToast(effect + "  cleared", Toast.LENGTH_SHORT);
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+
+    }
+
+    // Currently returns EQ canvas or reverb canvas view
+    private View getEffectCanvas(String effect) {
+        Activity activity = getActivity();
+        LayoutInflater inflater = activity.getLayoutInflater();
+        View layout = null;
+        if (effect.equals("EQ")) {
+            layout = inflater.inflate(R.layout.eq_canvas,
+                    (ViewGroup) activity.findViewById(R.id.eqCanvasParent), false);
+        } else {
+            layout = inflater.inflate(R.layout.reverb_canvas,
+                    (ViewGroup) activity.findViewById(R.id.eqCanvasParent), false);
+        }
+        // Here we can set the specific effect values
+        return layout;
     }
 
     private void showToast(String text, int length) {
