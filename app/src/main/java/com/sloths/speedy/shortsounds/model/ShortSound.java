@@ -152,7 +152,7 @@ public class ShortSound {
      * Generate audio file (with all compiled tracks)
      */
     public void generateAudioFile() {
-        // TODO
+        // TODO: Here we go.
     }
 
     /**

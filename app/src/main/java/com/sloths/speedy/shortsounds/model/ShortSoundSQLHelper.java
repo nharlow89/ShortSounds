@@ -305,7 +305,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
             OutputStream outputStream = new FileOutputStream( outputFile );
             int i;
             try {
-                byte[] buf = new byte[1024];
+                byte[] buf = new byte[4096];
                 int len;
                 while ((len = inputStream.read(buf)) > 0) {
                     outputStream.write(buf, 0, len);

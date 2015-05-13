@@ -24,6 +24,7 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.util.Random;
 
@@ -54,6 +55,11 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
 
     public void setDataSource( ShortSound sound ) {
         mShortSound = sound;
+        // We need to setup the MediaPlayers for each ShortSoundTrack.
+        for(ShortSoundTrack track: mShortSound.getTracks() ) {
+            track.setUpMediaPlayer();
+            track.prepareAsync();  // prepare for expected playback.
+        }
     }
 
     @Override
