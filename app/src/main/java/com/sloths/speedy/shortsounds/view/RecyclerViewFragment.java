@@ -48,8 +48,12 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        long sound_id = getArguments().getLong(ARG_SOUND_ID);
-        mShortSound = ShortSound.getById( sound_id );
+//        long sound_id = getArguments().getLong(ARG_SOUND_ID);
+//        mShortSound = ShortSound.getById( sound_id );
+    }
+
+    public void setDataSource( ShortSound sound ) {
+        mShortSound = sound;
     }
 
     @Override
@@ -165,6 +169,15 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
             }
         });
         dialog.show();
+    }
+
+    /**
+     * Notify the Fragment adapter that a track has been added to this
+     * ShortSound.
+     */
+    public void notifyTrackAdded( int index ) {
+//        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemInserted( index );
     }
 
     // Helper method for loading a general effect popup (holder until we get functionality
