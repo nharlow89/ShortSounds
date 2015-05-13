@@ -8,7 +8,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.support.v4.util.Pair;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,7 +42,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // prepared or not.
     public Map<Long, Pair<MediaPlayer, MediaState>> mMediaPlayerPool;
     private Context context;
-    private RVListener listener;
+//    private RVListener listener;
     private ArrayList<Color> mColorPallete;
 
 
@@ -51,13 +50,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      * Initialize the dataset of the Adapter.
      *
      */
-    public RecyclerViewAdapter(ShortSound sound, RecyclerViewFragment rvf) {
+    public RecyclerViewAdapter(ShortSound sound, TrackView rvf) {
         mShortSound = sound;
         mMediaPlayerPool = new HashMap<>();
-        this.context = rvf.getActivity();
-        listener = rvf;
-
-
+        mShortSound = sound;
+//        this.context = rvf.getActivity();
+//        listener = rvf;
     }
 
     // Create new views (invoked by the layout manager)
@@ -141,6 +139,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public int getItemCount() {
         return mShortSound.getTracks().size();
     }
+
 
     /**
      * This view holder holds the views for a track that will be part of a short sound
@@ -255,7 +254,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 bs[i].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        listener.onButtonClicked(v, getPosition(), name);
+                        ((MainActivity) context).effectEditSelected(getPosition(), name);
+//                        listener.onButtonClicked(getPosition(), name);
                     }
                 });
             }
@@ -302,7 +302,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // The button clicking implementation is actually implemented in the RecyclerViewFragment
     // It holds the logic for populating an effect popup
-    public interface RVListener {
-        public void onButtonClicked(View v, int track, String name);
+    public interface ChooseEffectListener {
+        void onButtonClicked(int track, String name);
     }
 }

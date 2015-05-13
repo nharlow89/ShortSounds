@@ -1,7 +1,5 @@
 package com.sloths.speedy.shortsounds.view;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,19 +11,28 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ViewAnimator;
 
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 
 import java.util.List;
-
+import java.util.Map;
 
 
 public class MainActivity extends FragmentActivity {
+    public static final String EQ = "EQ";
+    public static final String REVERB = "Reverb";
+    public static final String BIT = "Bit Crush";
+    public static final String DIST = "Distortion";
+    public static final String TRACKS = "tracks";
+
     private String[] mShortSoundsTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -34,6 +41,14 @@ public class MainActivity extends FragmentActivity {
     private CharSequence mTitle;
     private List<ShortSound> sounds;
     private ImageButton mGlobalPlayButton;
+    private Map<String, View> fragMap;
+    private String currentFragment;
+    private ViewAnimator animator;
+    Animation slideLeft, slideRight;
+    private ShortSound mActiveShortSound;
+
+
+    private EffectFragment eqFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +58,39 @@ public class MainActivity extends FragmentActivity {
         mShortSoundsTitles = getShortSoundTitles(sounds);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
         setUpGlobalPlayButton();
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setUpFloatingActionButton();
         }
+//        setUpFragments();
+
+
+        animator = (ViewAnimator) findViewById(R.id.view_animator);
+        slideLeft = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
+        slideRight = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
+        animator.setInAnimation(slideLeft);
+        animator.setOutAnimation(slideRight);
+
     }
+
+    public ShortSound getCurShortSound() {
+        return mActiveShortSound;
+    }
+
+//    private void setUpFragments() {
+//        fragMap = new HashMap<>();
+//        String[] arr = {EQ, DIST, REVERB, BIT};
+//        for (String s : arr) {
+//            EffectFragment f = new EffectFragment();
+//            f.setName(s);
+//            fragMap.put(s, f);
+//        }
+//    }
 
     /**
      * This sets up the Global Play button and attaches the default click
@@ -170,16 +211,22 @@ public class MainActivity extends FragmentActivity {
      */
     private void selectShortSoundFromDrawer(int position) {
         // Grabs the ShortSound and populates the screen with it
-        Fragment fragment = new RecyclerViewFragment();
+//        View fragment = new RecyclerView();
         // Sets it to the correct ShortSound
-        Bundle args = new Bundle();
-        long targetShortSoundId = sounds.get( position ).getId();
-        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
-        fragment.setArguments(args);
+//        Bundle args = new Bundle();
+//        long targetShortSoundId = sounds.get( position ).getId();
+//        args.putLong(TrackView.ARG_SOUND_ID, targetShortSoundId);
+//        fragment.setArguments(args);
 
         // Replaces the main content screen w/ Short sound
-        FragmentManager fragmentManager = this.getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.track_list, fragment).commit();
+//        FragmentManager fragmentManager = this.getSupportFragmentManager();
+//        fragmentManager.beginTransaction().replace(R.id.animator, fragment).commit();
+//        fragMap.put(TRACKS, fragment);
+        mActiveShortSound = sounds.get(position);
+        animator.setDisplayedChild(0);
+//        ((TrackView) findViewById(R.id.track_view)).setShortSound(sounds.get(position).getId());
+
+        currentFragment = TRACKS;
 
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
@@ -188,15 +235,14 @@ public class MainActivity extends FragmentActivity {
         setTitle(mShortSoundsTitles[position]);
     }
 
+
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;
         getActionBar().setTitle(mTitle);
     }
 
-    // ---------------------------------------------------------------
-    // Don't know if this stuff is needed, it's copied code
-    // ---------------------------------------------------------------
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -213,5 +259,20 @@ public class MainActivity extends FragmentActivity {
         }
         // Handle your other action bar items...
         return super.onOptionsItemSelected(item);
+    }
+
+    // This is used for loading the popup when clicking a specific effect
+    public void effectEditSelected(int track, String effect) {
+//        FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
+        if (effect.equals(EQ)) {
+            animator.setDisplayedChild(1);
+//            tr.replace(R.id.animator, fragMap.get(EQ)).commit();
+//            currentFragment = EQ;
+        } else if (effect.equals("Reverb")) {
+            animator.setDisplayedChild(2);
+//            loadReverbEffectDialog(track, effect);
+        } else {
+//            loadGeneralEffectDialog(track, effect);
+        }
     }
 }

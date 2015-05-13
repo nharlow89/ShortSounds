@@ -18,7 +18,7 @@ import java.util.List;
  * This class is for displaying a canvas view for the equalizer effect
  * Created by shampson on 5/7/15.
  */
-public class EQCanvas2 extends View {
+public class Fx_EQCanvas extends View {
 
 
     private static final String TAG = "EffectCanvas";
@@ -40,7 +40,7 @@ public class EQCanvas2 extends View {
     private boolean firstDraw;
 
 
-    public EQCanvas2(Context c, AttributeSet attrs) {
+    public Fx_EQCanvas(Context c, AttributeSet attrs) {
         super(c, attrs);
         firstDraw = true;
 
@@ -188,8 +188,6 @@ public class EQCanvas2 extends View {
                 currentGroup = PointInit.NONE;
                 break;
         }
-
-
         return true;
     }
 

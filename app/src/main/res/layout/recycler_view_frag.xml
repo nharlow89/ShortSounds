@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This is where the ShortSounds go -->
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/recycler_view"
-    android:clickable="true">
-</android.support.v7.widget.RecyclerView>
+    android:orientation="vertical"
+    android:padding="8dp">
+</LinearLayout>
+<!--&lt;!&ndash; This is where the ShortSounds go &ndash;&gt;-->
+<!--<com.sloths.speedy.shortsounds.view.TrackView-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:id="@+id/track_view"-->
+    <!--android:clickable="true">-->
+<!--</com.sloths.speedy.shortsounds.view.TrackView>-->
