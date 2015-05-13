@@ -182,6 +182,15 @@ public class ShortSound {
     }
 
     /**
+     * Remove a ShortSound, including all of its tracks
+     * @postcondition this will be null, and this ShortSound will be removed
+     * from the database, and from disk
+     */
+    public void removeShortSound() {
+        
+    }
+
+    /**
      * Specifically set the list of tracks associated with this ShortSound.
      * Should <b>only</b> be used when populating a ShortSound from the DB.
      * @param tracks
