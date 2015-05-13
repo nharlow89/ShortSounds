@@ -38,8 +38,8 @@ public class ShortSoundTrack {
     private final long parentId;
     private MediaPlayer player;
     private MediaState mState;
-    private EqEffect eqEffect;
-    private ReverbEffect reverbEffect;
+    private EqEffect mEqEffect;
+    private ReverbEffect mReverbEffect;
     public enum EFFECT {
         EQ, REVERB, DISTORTION, BITCRUSH
     }
@@ -75,7 +75,7 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TITLE + " field.");
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
         this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
-        this.file = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
+        this.file = map.get(sqlHelper.KEY_TRACK_FILENAME_MODIFIED);
         this.originalFile = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
@@ -106,8 +106,8 @@ public class ShortSoundTrack {
     }
 
     private void setUpEffects() {
-        this.eqEffect = new EqEffect(player);
-        this.reverbEffect = new ReverbEffect(player);
+        this.mEqEffect = new EqEffect(player);
+        this.mReverbEffect = new ReverbEffect(player);
     }
 
     /**
@@ -169,7 +169,15 @@ public class ShortSoundTrack {
      * Release this track from the MediaPlayer when no longer in use.
      */
     public void release() {
-        player.release();
+        if (player != null) {
+            player.release();
+        }
+        if (mEqEffect != null) {
+            mEqEffect.release();
+        }
+        if (mReverbEffect != null) {
+            mReverbEffect.release();
+        }
     }
 
     /**
@@ -204,11 +212,11 @@ public class ShortSoundTrack {
         Log.d("effects", "addEffect called");
         switch (e) {
            case EQ:
-               this.eqEffect.enable();
-               this.player.attachAuxEffect(eqEffect.getEffectId());
+               this.mEqEffect.enable();
+               this.player.attachAuxEffect(mEqEffect.getEffectId());
            case REVERB:
-               this.reverbEffect.enable();
-               this.player.attachAuxEffect(reverbEffect.getEffectId());
+               this.mReverbEffect.enable();
+               this.player.attachAuxEffect(mReverbEffect.getEffectId());
            default:
                throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
         }
@@ -217,9 +225,9 @@ public class ShortSoundTrack {
     public void removeEffect(EFFECT e) {
         switch (e) {
             case EQ:
-                this.eqEffect.disable();
+                this.mEqEffect.disable();
             case REVERB:
-                this.reverbEffect.disable();
+                this.mReverbEffect.disable();
             default:
                 throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
         }
@@ -335,15 +343,6 @@ public class ShortSoundTrack {
         if ( !originalFile.exists() ) throw new AssertionError("File does not exist: " + originalFile);
         File file = new File( this.file );
         if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
-    }
-
-    protected void releaseResources() {
-        if (player != null) {
-            player.release();
-        }
-        if (eqEffect != null) {
-            eqEffect.releaseResources();
-        }
     }
 
     public String getOriginalFile() {

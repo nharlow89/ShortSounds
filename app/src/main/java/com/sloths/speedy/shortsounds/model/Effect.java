@@ -46,7 +46,7 @@ public abstract class Effect {
      */
     public abstract String encodeParameters();
 
-    public void releaseResources() {
+    public void release() {
         if (this.effect != null) {
             this.effect.release();
         }

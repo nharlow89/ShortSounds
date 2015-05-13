@@ -390,4 +390,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
         mAudioRecorder.reset();  // Have to reset for the next recording
     }
+
+    @Override
+    public void onDestroy() {
+        mActiveShortSound.releaseAllTracks();
+    }
 }
