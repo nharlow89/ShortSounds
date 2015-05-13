@@ -162,6 +162,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         final Button distButton;
         final Button bitButton;
         //        private final ListView effectsList;
+        private Switch eqToggle;
+        private Switch reverbToggle;
+        private Switch distToggle;
+        private Switch bitToggle;
         private boolean trackExpanded;
 
         public ViewHolder(View v) {
@@ -174,13 +178,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             reverbButton = ((Button) v.findViewById(R.id.reverb_button));
             distButton = ((Button) v.findViewById(R.id.dist_button));
             bitButton = ((Button) v.findViewById(R.id.bit_button));
-            Switch eqToggle = ((Switch) v.findViewById(R.id.eq_switch));
-            Switch reverbToggle = ((Switch) v.findViewById(R.id.reverb_switch));
-            Switch distToggle = ((Switch) v.findViewById(R.id.dist_switch));
-            Switch bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
+            eqToggle = ((Switch) v.findViewById(R.id.eq_switch));
+            reverbToggle = ((Switch) v.findViewById(R.id.reverb_switch));
+            distToggle = ((Switch) v.findViewById(R.id.dist_switch));
+            bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
             setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
-            setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
+            setUpToggles();
             setPlayClickHandler();
             vTrackChild.setVisibility(View.GONE);
 
@@ -270,35 +274,52 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // This is kind of frustratingly complicated, but there's no readily apparent way for me
         // to attach an Effect object to a Switch.  If you see a better way feel free to change
         // this.  -Casey
-        private void setUpToggle(Switch[] sws) {
-            for (Switch sw : sws) {
-                if (sw == vView.findViewById(R.id.reverb_switch)) {
-                    Log.i("effects", "reverb switch clicked");
-                    sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            if (isChecked) {
-                                mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.REVERB);
-                            } else {
-                                mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.REVERB);
-                            }
-                        }
-                    });
-                } else if (sw == vView.findViewById(R.id.eq_switch)) {
-                    sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            if (isChecked) {
-                                mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.EQ);
-                            } else {
-                                mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.EQ);
-                            }
-                        }
-                    });
-                } else {
-                    throw new UnsupportedOperationException("only reverb and eq effects are currently implemented");
+        private void setUpToggles() {
+            Log.d("effects", "setUpToggle called");
+            reverbToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    Log.d("effects", "reverb switch clicked");
+                    if (isChecked) {
+                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.REVERB);
+                    } else {
+                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.REVERB);
+                    }
                 }
-            }
+            });
+            eqToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    Log.d("effects", "eq switch clicked");
+                    if (isChecked) {
+                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.EQ);
+                    } else {
+                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.EQ);
+                    }
+                }
+            });
+            distToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    Log.d("effects", "distortion switch clicked");
+                    if (isChecked) {
+                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.DISTORTION);
+                    } else {
+                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.DISTORTION);
+                    }
+                }
+            });
+            bitToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    Log.d("effects", "bitcrush switch clicked");
+                    if (isChecked) {
+                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.BITCRUSH);
+                    } else {
+                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.BITCRUSH);
+                    }
+                }
+            });
         }
 
         /**

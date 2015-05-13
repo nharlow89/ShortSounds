@@ -56,6 +56,7 @@ public class ShortSoundTrack {
         // TODO: create a copy of the original file that will be our "working" copy
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         setUpMediaPlayer();
+        setUpEffects();
     }
 
     /**
@@ -76,6 +77,7 @@ public class ShortSoundTrack {
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
         this.player = new MediaPlayer();
         setUpMediaPlayer();
+        setUpEffects();
     }
 
     private void setUpMediaPlayer() {
@@ -190,7 +192,8 @@ public class ShortSoundTrack {
     }
 
     public void addEffect(EFFECT e) {
-       switch (e) {
+        Log.d("effects", "addEffect called");
+        switch (e) {
            case EQ:
                this.eqEffect.enable();
                this.player.attachAuxEffect(eqEffect.getEffectId());
@@ -199,7 +202,7 @@ public class ShortSoundTrack {
                this.player.attachAuxEffect(reverbEffect.getEffectId());
            default:
                throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
-       }
+        }
     }
 
     public void removeEffect(EFFECT e) {
@@ -291,5 +294,14 @@ public class ShortSoundTrack {
         if ( !originalFile.exists() ) throw new AssertionError("File does not exist: " + originalFile);
         File file = new File( this.file );
         if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
+    }
+
+    protected void releaseResources() {
+        if (player != null) {
+            player.release();
+        }
+        if (eqEffect != null) {
+            eqEffect.releaseResources();
+        }
     }
 }

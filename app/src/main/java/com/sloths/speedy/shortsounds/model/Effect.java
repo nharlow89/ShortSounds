@@ -45,4 +45,10 @@ public abstract class Effect {
      * @return A String-encoded representation of the callee effect.
      */
     public abstract String encodeParameters();
+
+    public void releaseResources() {
+        if (this.effect != null) {
+            this.effect.release();
+        }
+    }
 }
