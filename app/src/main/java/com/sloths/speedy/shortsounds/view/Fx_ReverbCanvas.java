@@ -18,7 +18,7 @@ import java.util.Random;
 /**
  * Created by shampson on 5/7/15.
  */
-public class ReverbCanvas extends View {
+public class Fx_ReverbCanvas extends View {
 
 
     private static final String TAG = "EffectCanvas";
@@ -46,7 +46,7 @@ public class ReverbCanvas extends View {
 
     private float mX, mY;
 
-    public ReverbCanvas(Context c, AttributeSet attrs) {
+    public Fx_ReverbCanvas(Context c, AttributeSet attrs) {
         super(c, attrs);
         firstDraw = true;
 
@@ -107,8 +107,8 @@ public class ReverbCanvas extends View {
 
     // Helper method for intially drawing out the y & x axis
     private void setUpGraph() {
-        YMAX = getMeasuredHeight() / 4;
-        YMIN = getMeasuredHeight() * 3 / 4;
+        YMAX = MARGIN;
+        YMIN = getMeasuredHeight() - MARGIN;
         XMIN = MARGIN;
         XMAX = getMeasuredWidth() - MARGIN;
 

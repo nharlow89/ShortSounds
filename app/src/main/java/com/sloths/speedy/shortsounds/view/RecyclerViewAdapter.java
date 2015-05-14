@@ -5,7 +5,9 @@ package com.sloths.speedy.shortsounds.view;
  */
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,37 +15,42 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import com.sloths.speedy.shortsounds.R;
-import com.sloths.speedy.shortsounds.model.Effect;
-import com.sloths.speedy.shortsounds.model.EqEffect;
-import com.sloths.speedy.shortsounds.model.ReverbEffect;
+import com.sloths.speedy.shortsounds.model.MediaState;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provide views to RecyclerView with data from mDataSet.
  */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
     private ShortSound mShortSound;
+    // This is a pool of all the MediaPlayers for each track. The mapping is from ShortSoundTrack id
+    // to a pair containg the MediaPlayer and a boolean that describes if the MediaPlayer is currently
+    // prepared or not.
+    public Map<Long, Pair<MediaPlayer, MediaState>> mMediaPlayerPool;
     private Context mContext;
-    private RVListener mRVListener;
-    private List<ViewHolder> mViews;
+//    private RVListener listener;
+    private ArrayList<Color> mColorPallete;
+//    private List<ViewHolder> mViews;
+
 
     /**
      * Initialize the dataset of the Adapter.
      *
      */
-    public RecyclerViewAdapter(ShortSound sound, RecyclerViewFragment rvf) {
+    public RecyclerViewAdapter(ShortSound sound, Context context) {
         mShortSound = sound;
-        mContext = rvf.getActivity();
-        mRVListener = rvf;
-        mViews = new ArrayList<ViewHolder>();
+        mMediaPlayerPool = new HashMap<>();
+        this.mContext = context;
     }
 
     /**
@@ -59,7 +66,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click mRVListener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
-        mViews.add(vh);
+//        mViews.add(vh);
         return vh;
     }
 
@@ -172,7 +179,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             vTitle.setOnClickListener(new TrackListener());
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
-            vTrackChild.setVisibility(View.GONE);
+
+            // Populate effects in the effects list the track keeps
+            // TODO: Link the effects to the real ones in the database
+            // Currently populating a fake effects list
+//            List<Effect> effects = getEffects();
+//
+//            effectsList = (ListView) v.findViewById(R.id.effects_list_b);
+//            EffectsListAdapter effectsAdapter = new EffectsListAdapter(mContext, effects);
+//            effectsList.setAdapter(effectsAdapter);
             trackExpanded = false;
 
             // init buttons
@@ -188,7 +203,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             // perform setup
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
             setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
-            setPlayClickHandler();
+            setPlayClickHandler(v);
         }
 
         /**
@@ -202,17 +217,25 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         /**
          * Set the event handler for the Play button on a given track.
          */
-        private void setPlayClickHandler() {
+        private void setPlayClickHandler(View v) {
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    if (mShortSoundTrack.isPlaying()) {
+
+                    // handle case for all tracks being played.
+                    if(mShortSound.isPlaying() || mShortSound.isPaused()) {
+                        mShortSound.stopAllTracks();
+                        ((ImageButton)((MainActivity) mContext).findViewById(R.id.imageButtonPlay))
+                                .setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_action_play));
+                        //getmGlobalPlayButton().setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_action_play));
+                    }
+
+                    if ( mShortSoundTrack.isPlaying() ) {
                         // If the track was playing then stop it.
                         mShortSoundTrack.stop();
                         mShortSoundTrack.prepareAsync();
                         mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
                     } else {
-                        // The track was not playing, stop any other tracks and play this one.
-                        mShortSound.stopAllTracks();
+                        // The track was not playing, play this one
                         mShortSoundTrack.play();
                         mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_stop));
                     }
@@ -245,15 +268,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             });
         }
 
-        private List<Effect> getEffects() {
-            List<Effect> retList = new ArrayList<Effect>();
-            Effect effect1 = new EqEffect();
-            retList.add(effect1);
-            Effect effect2 = new ReverbEffect();
-            retList.add(effect2);
-            retList.add(effect2);
-            return retList;
-        }
+//        private List<Effect> getEffects() {
+//            List<Effect> retList = new ArrayList<Effect>();
+//            Effect effect1 = new EqEffect();
+//            retList.add(effect1);
+//            Effect effect2 = new ReverbEffect();
+//            retList.add(effect2);
+//            retList.add(effect2);
+//            return retList;
+//        }
 
         private void setUpButtons(Button[] bs) {
             for (int i = 0; i < 4; i++) {
@@ -262,7 +285,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 bs[i].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mRVListener.onButtonClicked(v, getPosition(), name);
+                        ((MainActivity) mContext).effectEditSelected(getPosition(), name);
                     }
                 });
             }
@@ -290,11 +313,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private class TrackListener implements View.OnClickListener  {
             @Override
             public void onClick(View v) {
-
-                //mRVListener.onButtonClicked(v, getPosition());
                 if (!trackExpanded) {
                     // Expand a track
-                    collapseAllOtherTracks();
+//                    collapseAllOtherTracks();
                     expandTrackChildView(vTrackChild);
                     trackExpanded = true;
                     // Upon selecting a track we need to prepare the track for playing.
@@ -305,21 +326,21 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     trackExpanded = false;
                     // Stop the track (just in case it was playing)
                     mShortSoundTrack.stop();
+                    mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
                 }
             }
         }
     }
-
-    /**
-     * Collapse all other tracks
-     */
-    public void collapseAllOtherTracks() {
-        for(ViewHolder vh: mViews) {
-            if ( vh.trackExpanded ) {
-                collapseTrackChildView(vh.vTrackChild);
-            }
-        }
-    }
+//    /**
+//     * Collapse all other tracks
+//     */
+//    public void collapseAllOtherTracks() {
+//        for(ViewHolder vh: mViews) {
+//            if ( vh.trackExpanded ) {
+//                collapseTrackChildView(vh.vTrackChild);
+//            }
+//        }
+//    }
 
     /**
      * Uses animation to expand the child view of a track
@@ -382,11 +403,4 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         v.startAnimation(a);
     }
 
-    /**
-     * The button clicking implementation is actually implemented in the RecyclerViewFragment
-     * It holds the logic for populating an effect popup
-     */
-    public interface RVListener {
-        void onButtonClicked(View v, int track, String name);
-    }
 }
