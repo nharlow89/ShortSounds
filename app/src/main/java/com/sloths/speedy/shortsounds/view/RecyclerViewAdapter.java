@@ -175,7 +175,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          */
         public ViewHolder(View v) {
             super(v);
-
             // init instance variables
             vView = v;
             vTitle = (TextView) v.findViewById(R.id.track_title);
@@ -198,7 +197,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
             setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
             setPlayClickHandler(v);
-            collapseTrackChildView(vTrackChild);
+
         }
 
         /**
