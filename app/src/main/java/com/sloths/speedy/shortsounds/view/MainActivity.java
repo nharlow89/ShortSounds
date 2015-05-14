@@ -349,7 +349,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             animator.addView(add, viewMap.get(TRACKS) + 1);
             animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
             animator.removeViewAt(viewMap.get(TRACKS));
-
             invalidateOptionsMenu();
         } else {
             // selected mix is already loaded so cloase the drawer
@@ -430,15 +429,18 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         invalidateOptionsMenu();
     }
 
+    /*
+     * Sets the Title on the action bar to the parameter title
+     */
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;
         getActionBar().setTitle(mTitle);
     }
 
-    // ---------------------------------------------------------------
-    // Don't know if this stuff is needed, it's copied code
-    // ---------------------------------------------------------------
+    /*
+     * Creates the Action Bar Options Menu
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -456,6 +458,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return true;
     }
 
+    /*
+     * Specifies the share intent
+     */
     private Intent createShareIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         File absolutePath = new File(getFilesDir(), "ss1-track1.mp3");
@@ -470,6 +475,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return shareIntent;
     }
 
+    /*
+     * Determines what to do when a button is pressed on the menu bar
+     * based on what the MenuItem that is passed in as a parameter is
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Pass the event to ActionBarDrawerToggle, if it returns
@@ -497,6 +506,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
  
     }
 
+    /*
+     * Deletes a ShortSound from the library.
+     */
     private void deleteShortSound() {
         if (mActiveShortSound != null) {
             // Delete sound from database.
@@ -505,35 +517,35 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
+    /*
+     * Creates a new ShortSound and takes it to an empty screen with no
+     * current tracks for this ShortSound
+     */
     private void createNew() {
         // TODO update to not use a fragment
-//        ShortSound newSound = new ShortSound();
-//        setTitle(newSound.getTitle());
-//        sounds.add(newSound);
-//        mActiveShortSound = newSound;
-//        mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
-//        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-//                R.layout.drawer_list_item, mShortSoundsTitles));
-//        mMainFragment = new RecyclerViewFragment();
-//        // Sets it to the correct ShortSound
-//        mMainFragment.setDataSource( mActiveShortSound );
-////        Bundle args = new Bundle();
-////        long targetShortSoundId = sounds.get( position ).getId();
-////        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
-////        mMainFragment.setArguments(args);
-//
-//        // Replaces the main content screen w/ Short sound
-//        FragmentManager fragmentManager = this.getFragmentManager();
-//        fragmentManager.beginTransaction().replace(R.id.track_list, mMainFragment).commit();
-//
+        ShortSound newSound = new ShortSound();
+        setTitle(newSound.getTitle());
+        sounds.add(newSound);
+        mActiveShortSound = newSound;
+        mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, mShortSoundsTitles));
+        selectShortSoundFromDrawer(sounds.size() - 1);
     }
 
+    /*
+     * Renames a ShortSound
+     */
     private void rename() {
         FragmentManager fragmentManager = getFragmentManager();
         NoticeDialogFragment inputNameDialog = new NoticeDialogFragment();
         inputNameDialog.show(fragmentManager, "Input Dialog");
     }
 
+    /*
+     * Changes the ShortSound name to inputText if
+     * inputText is not only whitespace or the empty string
+     */
     @Override
     public void onOkay(String inputText) {
         if (!inputText.matches("\\s+") && !inputText.equals("")) {
