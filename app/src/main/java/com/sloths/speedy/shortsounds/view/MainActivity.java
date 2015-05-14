@@ -1,12 +1,7 @@
 package com.sloths.speedy.shortsounds.view;
 
 import android.app.ActionBar;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
@@ -21,11 +16,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.support.v4.view.MenuItemCompat;
+import android.widget.TextView;
+import android.widget.ViewAnimator;
 import android.content.Intent;
 import android.widget.ShareActionProvider;
 
@@ -35,11 +35,20 @@ import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
+public class MainActivity extends FragmentActivity implements NoticeDialogFragment.NoticeDialogListener {
+    public static final String EQ = "EQ";
+    public static final String REVERB = "Reverb";
+    public static final String BIT = "Bit Crush";
+    public static final String DIST = "Distortion";
+    public static final String TRACKS = "tracks";
 
-public class MainActivity extends FragmentActivity implements NoticeDialogFragment.NoticeDialogListener{
+    public static final int SLIDE_DURATION = 400;
+
     private String[] mShortSoundsTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -48,12 +57,16 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private CharSequence mTitle;
     private List<ShortSound> sounds;
     private ImageButton mGlobalPlayButton;
+    private Map<String, Integer> viewMap;
+    private String currentView;
+    private ViewAnimator animator;
+    private Animation slideLeft;
+    private Animation slideRight;
     private ShareActionProvider mShareActionProvider;
     private int position;
     private ShortSound mActiveShortSound;
     private AudioRecorder mAudioRecorder;
     private FloatingActionButtonBasicFragment mActionBarFragment;
-    private RecyclerViewFragment mMainFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +80,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         setUpGlobalPlayButton();
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
+        setUpViews();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setUpFloatingActionButton();
         } else {
@@ -82,6 +96,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void setUpGlobalPlayButton() {
         mGlobalPlayButton = (ImageButton) findViewById(R.id.imageButtonPlay);
+        Log.e("DEBUG", mGlobalPlayButton.toString());
         mGlobalPlayButton.setEnabled(false);  // Default to disabled when ShortSound has not been clicked.
     }
 
@@ -119,6 +134,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
+    public ShortSound getCurShortSound() {
+        return mActiveShortSound;
+    }
     /**
      * Sets up the floating action button used as record button. Will
      * only be called for Android SDK >= LOLLIPOP
@@ -155,8 +173,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
-
-
     }
 
     /**
@@ -238,6 +254,26 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
+    private void setUpViews() {
+        viewMap = new HashMap<>();
+        viewMap.put(TRACKS, 0);
+        viewMap.put(EQ, 1);
+        viewMap.put(REVERB, 2);
+        viewMap.put(BIT, 3);
+        viewMap.put(DIST, 4);
+
+        animator = (ViewAnimator) findViewById(R.id.view_animator);
+//        slideLeft = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
+//        slideRight = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
+//        slideLeft.setDuration(SLIDE_DURATION);
+//        slideRight.setDuration(SLIDE_DURATION);
+        animator.setInAnimation(inFromRightAnimation());
+        animator.setOutAnimation(outToLeftAnimation());
+
+        ((TextView)animator.getChildAt(viewMap.get(BIT)).findViewById(R.id.effectNameTitle)).setText(BIT);
+        ((TextView)animator.getChildAt(viewMap.get(DIST)).findViewById(R.id.effectNameTitle)).setText(DIST);
+    }
+
     /**
      * Helper method for the the DrawerItemClickListener. When a drawer item is clicked
      * its position is passed in as a parameter which determines the short sound to load
@@ -245,27 +281,96 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * @param position int the position of the drawer item clicked
      */
     private void selectShortSoundFromDrawer(int position) {
-        mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
-        // Grabs the ShortSound and populates the screen with it
-        mMainFragment = new RecyclerViewFragment();
-        // Sets it to the correct ShortSound
-        mMainFragment.setDataSource( mActiveShortSound );
-//        Bundle args = new Bundle();
-//        long targetShortSoundId = sounds.get( position ).getId();
-//        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
-//        mMainFragment.setArguments(args);
+        mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
 
-        // Replaces the main content screen w/ Short sound
-        FragmentManager fragmentManager = this.getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.track_list, mMainFragment).commit();
+        if (this.position != position) {
+            currentView = TRACKS;
 
-        // Highlight item, update title, close drawer
-        mDrawerList.setItemChecked(position, true);
+            // Highlight item, update title, close drawer
+            mDrawerList.setItemChecked(position, true);
+            mDrawerLayout.closeDrawer(mDrawerList);
+            setTitle(mShortSoundsTitles[position]);
+            this.position = position;
 
-        mDrawerLayout.closeDrawer(mDrawerList);
-        setTitle(mShortSoundsTitles[position]);
-        this.position = position;
-        invalidateOptionsMenu();
+            // load the mix into a view and replace it in the animator
+            TrackView tv = (TrackView) findViewById(R.id.track_list);
+            View add = getLayoutInflater().inflate(R.layout.track_list_xml, tv, false);
+            animator.addView(add, viewMap.get(TRACKS) + 1);
+            animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
+            animator.removeViewAt(viewMap.get(TRACKS));
+
+            invalidateOptionsMenu();
+        } else {
+            // selected mix is already loaded so cloase the drawer
+            mDrawerLayout.closeDrawer(mDrawerList);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (currentView.equals(TRACKS)) {
+            super.onBackPressed();
+        } else {
+            Animation in = animator.getInAnimation();
+            Animation out = animator.getOutAnimation();
+            animator.setInAnimation(inFromLeftAnimation());
+            animator.setOutAnimation(outToRightAnimation());
+            animator.setDisplayedChild(viewMap.get(TRACKS));
+            animator.setInAnimation(in);
+            animator.setOutAnimation(out);
+            currentView = TRACKS;
+        }
+    }
+
+    private Animation inFromRightAnimation() {
+        Animation inFromRight = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT, +1.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f);
+        inFromRight.setDuration(SLIDE_DURATION);
+        inFromRight.setInterpolator(new AccelerateInterpolator());
+        return inFromRight;
+    }
+
+
+    private Animation outToRightAnimation() {
+        Animation outtoRight = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, +1.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f);
+        outtoRight.setDuration(SLIDE_DURATION);
+        outtoRight.setInterpolator(new AccelerateInterpolator());
+        return outtoRight;
+    }
+    private Animation inFromLeftAnimation() {
+        Animation inFromLeft = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT, -1.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f);
+        inFromLeft.setDuration(SLIDE_DURATION);
+        inFromLeft.setInterpolator(new AccelerateInterpolator());
+        return inFromLeft;
+    }
+
+    private Animation outToLeftAnimation() {
+        Animation outtoLeft = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, -1.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f);
+        outtoLeft.setDuration(SLIDE_DURATION);
+        outtoLeft.setInterpolator(new AccelerateInterpolator());
+        return outtoLeft;
+    }
+
+    // This is used for loading the popup when clicking a specific effect
+    public void effectEditSelected(int track, String effect) {
+        animator.setDisplayedChild(viewMap.get(effect));
+        currentView = effect;
     }
 
     @Override
@@ -330,6 +435,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             default:
                 return super.onOptionsItemSelected(item);
         }
+ 
     }
 
     private void rename() {
@@ -350,10 +456,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     /** Begins the recording process. */
     private void beginRecording() {
         // Play back other tracks if there are other tracks
-        if (mActiveShortSound != null) {
+        if (mActiveShortSound != null)
             mActiveShortSound.playAllTracks();
-        }
-
         // Setup the MediaRecorder
         mAudioRecorder.start();
     }
@@ -379,14 +483,14 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         Log.d("DEBUG", "Finished Recording new track to ShortSound["+mActiveShortSound.getId()+"]");
         // Create the new ShortSoundTrack (that this will record to)
         ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
-        mActiveShortSound.addTrack( newTrack );
+        mActiveShortSound.addTrack(newTrack);
 
         if ( isNewShortSound ) {
             // Select the new ShortSound to be active.
             selectShortSoundFromDrawer(sounds.size() - 1);
         } else {
             // Update the existing fragment manager to add new track to list
-            mMainFragment.notifyTrackAdded( mActiveShortSound.getTracks().size() - 1 );
+            ((TrackView) animator.getCurrentView()).notifyTrackAdded( mActiveShortSound.getTracks().size() - 1 );
         }
         mAudioRecorder.reset();  // Have to reset for the next recording
     }

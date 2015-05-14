@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/reverbCanvasParent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -9,7 +8,7 @@
     <LinearLayout android:id="@+id/topPanel"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight=".1"
+        android:layout_weight=".2"
         android:orientation="vertical"
         android:minHeight="30dp">
         <TextView android:id="@+id/effectNameTitle"
@@ -17,7 +16,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="Reverb"
-            android:textSize="20dp"
+            android:textSize="100dp"
             android:minHeight="30dp">
         </TextView>
         <!-- If the client uses a customTitle, it will be added here. -->
@@ -27,20 +26,29 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:id="@+id/effect_content"
-        android:layout_weight=".8"
+        android:layout_weight=".6"
         android:gravity="center"
         android:orientation="vertical">
-        <com.sloths.speedy.shortsounds.view.ReverbCanvas
-            android:id="@+id/effect_canvas"
+
+        <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="10dp"
+            android:background="@android:color/white"/>
+
+        <com.sloths.speedy.shortsounds.view.Fx_ReverbCanvas
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:background="@android:color/white"/>
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="bottom"
-        android:layout_weight=".1"
+        android:layout_weight=".2"
         android:orientation="horizontal">
 
         <Button
@@ -50,8 +58,14 @@
             android:id="@+id/cancelEffectButton"
             android:layout_gravity="center_vertical"
             android:layout_toLeftOf="@+id/effectSpace"
-            android:layout_toStartOf="@+id/effectSpace"
-            android:layout_centerHorizontal="true" />
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_alignTop="@+id/saveEffectButton"
+            android:textSize="30dp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -59,10 +73,13 @@
             android:text="Save"
             android:id="@+id/saveEffectButton"
             android:layout_gravity="center_vertical"
-            android:layout_alignBottom="@+id/cancelEffectButton"
             android:layout_toRightOf="@+id/effectSpace"
-            android:layout_toEndOf="@+id/effectSpace"
-            android:layout_centerHorizontal="true" />
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="20dp"
+            android:textSize="30dp" />
 
         <Space
             android:layout_width="100px"
