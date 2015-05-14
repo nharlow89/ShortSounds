@@ -12,12 +12,33 @@
         android:orientation="vertical">
 
         <!-- This is where the ShortSounds go -->
-        <RelativeLayout
-            android:id="@+id/track_list"
+        <ViewAnimator
+            android:id="@+id/view_animator"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2">
-        </RelativeLayout>
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/recordASound"
+                    android:layout_centerInParent="true"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+            <include layout="@layout/eq_canvas"/>
+
+            <include layout="@layout/reverb_canvas"/>
+
+            <include layout="@layout/effect_view"/>
+
+            <include layout="@layout/effect_view"/>
+
+        </ViewAnimator>
+
 
         <!-- This is the bottom toolbar -->
         <FrameLayout android:id="@+id/footer" android:layout_width="fill_parent"
@@ -50,7 +71,9 @@
         android:id="@+id/sample_content_fragment"
         android:layout_weight="0.21"
         android:layout_width="match_parent"
-        android:layout_height="0px" />
+        android:layout_height="0px" >
+
+    </FrameLayout>
 
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"

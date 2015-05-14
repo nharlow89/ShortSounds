@@ -40,4 +40,5 @@
     <string name="EQ">EQ</string>
     <string name="Cancel">Cancel</string>
     <string name="Save">Save</string>
+    <string name="recordASound">Record a Sound!</string>
 </resources>

@@ -145,7 +145,7 @@ public class ShortSound {
      * @return ShortSound
      */
     public static ShortSound getById( long id ) {
-        return sqlHelper.queryShortSoundById( id );
+        return sqlHelper.queryShortSoundById(id);
     }
 
     /**
@@ -179,6 +179,15 @@ public class ShortSound {
         this.tracks.remove(track);
         track.delete();
         repInvariant();
+    }
+
+    /**
+     * Remove a ShortSound, including all of its tracks
+     * @postcondition this will be null, and this ShortSound will be removed
+     * from the database, and from disk
+     */
+    public void removeShortSound() {
+        
     }
 
     /**
@@ -218,6 +227,19 @@ public class ShortSound {
         }
         sqlHelper.removeShortSound( this );
     }
+
+     /* Getter for Duration
+     * Gets the duration of the longest of the tracks in the shortSound
+     * @return Duration of the longest track in milliseconds
+     */
+    public int getDuration() {
+        int maxDuration = 0;
+        for (ShortSoundTrack track : this.tracks)
+            if (track.getDuration() > maxDuration)
+                maxDuration = track.getDuration();
+        return maxDuration;
+    }
+
 
     /**
      * Returns a readable string containing the title of this ShortSound
