@@ -94,6 +94,7 @@ public class ShortSoundTrack {
                         play();
                 }
             });
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -188,12 +189,23 @@ public class ShortSoundTrack {
     }
 
     /**
+     * Sets the volume of this track
+     * @param leftVolume
+     * @param rightVolume
+     */
+    public void setVolume(float leftVolume, float rightVolume) {
+        player.setVolume(leftVolume, rightVolume);
+    }
+
+    /**
      * Set the onCompletionListener for this ShortSoundTrack.
      * @param listener
      */
     public void setOnPlayCompleteListener( MediaPlayer.OnCompletionListener listener ) {
         player.setOnCompletionListener( listener );
     }
+
+
 
     public void addEffect() {
         // TODO

@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import com.sloths.speedy.shortsounds.R;
@@ -162,12 +164,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
         private final LinearLayout vTrackChild;
+        private final double maxSeek = 100.0;
         private Button mPlayTrackButton;
         private ShortSoundTrack mShortSoundTrack;
         private View vView;
         private int mPrimaryColor;
         private int mSecondaryColor;
         private boolean trackExpanded;
+        private SeekBar mTrackSeekBar;
 
         /**
          * Constructor for ViewHolder
@@ -181,6 +185,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             vTitle.setOnClickListener(new TrackListener());
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
+            mTrackSeekBar = (SeekBar) v.findViewById(R.id.volumeSlider);
             trackExpanded = false;
 
             // init buttons
@@ -194,9 +199,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Switch bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
 
             // perform setup
+            setUpSeekBar();
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
             setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
             setPlayClickHandler(v);
+            setVolumeHandler(v);
 
         }
 
@@ -206,6 +213,37 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          */
         public View getViewHoldersView() {
             return vView;
+        }
+
+        /**
+         * Sets up intial settings for volume bar
+         */
+        private void setUpSeekBar() {
+            mTrackSeekBar.setMax((int)maxSeek);
+            mTrackSeekBar.setProgress((int)maxSeek / 2);
+        }
+
+        /**
+         * Sets the event handler for volume changing on tracks.
+         * @param v
+         */
+        private void setVolumeHandler(View v) {
+            mTrackSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    mShortSoundTrack.setVolume((float)(i/maxSeek), (float)(i/maxSeek));
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
         }
 
         /**

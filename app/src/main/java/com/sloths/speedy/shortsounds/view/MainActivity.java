@@ -115,7 +115,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                             // The ShortSound was previously playing, unpause it.
                             mActiveShortSound.unPauseAllTracks();
                         } else {
-                            // The ShortSound is not playing yet, play it.
+                            // The ShortSound is not playing yet, stop all tracks to reset, then play it.
+
+                            mActiveShortSound.stopAllTracks();
                             mActiveShortSound.playAllTracks();
                         }
                         mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
