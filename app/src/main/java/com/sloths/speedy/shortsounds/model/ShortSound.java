@@ -21,6 +21,7 @@ public class ShortSound {
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
     private boolean isPlaying = false;
     private boolean isPaused = false;
+    private int tracksPlaying;
 
     /**
      * Create a new empty ShortSound.
@@ -64,6 +65,7 @@ public class ShortSound {
         }
         isPlaying = true;
         isPaused = false;
+        tracksPlaying = tracks.size();
     }
 
     /**
@@ -100,6 +102,16 @@ public class ShortSound {
     }
 
     /**
+     * Called when a ShortSoundTrack is finished playing. When all tracks are done, isPlaying() will
+     * return false;
+     */
+    public void updateShortSound() {
+        if (--tracksPlaying == 0) {
+            isPlaying = false;
+        }
+    }
+
+    /**
      * Release all the tracks to free up memory (called when done working with this ShortSound).
      */
     public void releaseAllTracks() {
@@ -111,9 +123,7 @@ public class ShortSound {
     /**
      * Return whether or not the current ShortSound is playing.
      */
-    public boolean isPlaying() {
-        return this.isPlaying;
-    }
+    public boolean isPlaying() { return this.isPlaying; }
 
     /**
      * Return whether or not the ShortSound is in a paused state.
