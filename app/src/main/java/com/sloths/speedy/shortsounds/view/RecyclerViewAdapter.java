@@ -149,8 +149,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         public ViewHolder(View v) {
             super(v);
-            v.setOnClickListener(new TrackListener());
             vTitle = (TextView) v.findViewById(R.id.track_title);
+            vTitle.setOnClickListener(new TrackListener());
             vView = v;
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             Button eqButton = ((Button) v.findViewById(R.id.eq_button));
@@ -192,11 +192,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private void setPlayClickHandler() {
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    if ( mShortSoundTrack.isPlaying() ) {
+                    if (mShortSoundTrack.isPlaying()) {
                         // If the track was playing then stop it.
                         mShortSoundTrack.stop();
                         mShortSoundTrack.prepareAsync();
-                        mPlayTrackButton.setBackground( context.getResources().getDrawable(R.drawable.ic_action_play) );
+                        mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_play));
                     } else {
                         // The track was not playing, stop any other tracks and play this one.
                         mShortSound.stopAllTracks();
@@ -266,8 +266,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 });
             }
         }
-        
-        /* The click listener for ListView in the navigation drawer */
+
+        /**
+         * The click listener for individual tracks
+         */
         private class TrackListener implements View.OnClickListener  {
             @Override
             public void onClick(View v) {
