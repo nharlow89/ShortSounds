@@ -10,9 +10,11 @@ import java.io.IOException;
 import java.util.UUID;
 
 /**
- * Created by neilharlow on 5/8/15.
+ * The AudioRecorder class is a wrapper around Androids MediaRecorder class.
  */
 public class AudioRecorder {
+    public static final int OUTPUT_FORMAT = MediaRecorder.OutputFormat.AAC_ADTS;
+    public static final int AUDIO_ENCODING = MediaRecorder.AudioEncoder.AAC;
 
     private MediaRecorder mTrackRecorder;
     private File mTempAudioFile;
@@ -67,9 +69,9 @@ public class AudioRecorder {
             mOutputStream = new FileOutputStream( mTempAudioFile );
             mTrackRecorder = new MediaRecorder();
             mTrackRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mTrackRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+            mTrackRecorder.setOutputFormat(OUTPUT_FORMAT);
             mTrackRecorder.setOutputFile(mOutputStream.getFD());
-            mTrackRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+            mTrackRecorder.setAudioEncoder(AUDIO_ENCODING);
             mIsRecording = false;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
