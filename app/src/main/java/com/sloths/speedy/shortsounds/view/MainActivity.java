@@ -27,7 +27,9 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.support.v4.view.MenuItemCompat;
 import android.content.Intent;
+import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
+import android.widget.TextView;
 
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
@@ -53,6 +55,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private AudioRecorder mAudioRecorder;
     private FloatingActionButtonBasicFragment mActionBarFragment;
     private RecyclerViewFragment mMainFragment;
+    private SeekBar mGlobalSeekBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +67,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpGlobalPlayButton();
+        setUpGlobalSeekBar();
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -76,11 +80,20 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     /**
      * This sets up the Global Play button and attaches the default click
      * handler. Note that when no ShortSound is loaded, this button should
-     * be disabled.
+     * be invisible
      */
     private void setUpGlobalPlayButton() {
         mGlobalPlayButton = (ImageButton) findViewById(R.id.imageButtonPlay);
-        mGlobalPlayButton.setEnabled(false);  // Default to disabled when ShortSound has not been clicked.
+        mGlobalPlayButton.setVisibility(View.INVISIBLE);  // Default to invisible when ShortSound has not been clicked.
+    }
+
+    /**
+     * This sets up the Global SeekBar. Note that when no ShortSound is loaded, this SeekBar should
+     * be invisible
+     */
+    private void setUpGlobalSeekBar() {
+        mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
+        mGlobalSeekBar.setVisibility(View.INVISIBLE);  // Default to invisible when ShortSound has not been clicked.
     }
 
     /**
@@ -97,6 +110,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 public void onCheckedChanged(FloatingActionButton fabView, boolean isChecked) {
                     if ( !isChecked ) {
                         endRecording();
+                        hideRecordATrackTextView();
                     } else {
                         beginRecording();
                     }
@@ -107,13 +121,25 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             recordButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if ( mAudioRecorder.isRecording() ) {
+                    if (mAudioRecorder.isRecording()) {
                         endRecording();
+                        hideRecordATrackTextView();
                     } else {
                         beginRecording();
                     }
                 }
             });
+        }
+    }
+
+    /**
+     * Checks if there are currently any tracks, if so will hide hide the record a
+     * sound textview
+     */
+    private void hideRecordATrackTextView() {
+        if (mActiveShortSound.getTracks().size() > 0) {
+            TextView recordASound = (TextView) findViewById(R.id.textRecordASound);
+            if (recordASound != null) recordASound.setVisibility(View.INVISIBLE);
         }
     }
 

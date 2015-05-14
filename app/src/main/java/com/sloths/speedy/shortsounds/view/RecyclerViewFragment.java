@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     protected RecyclerViewAdapter mAdapter;
     private ShortSound mShortSound;
     private ImageButton mGlobalPlayButton;
+    private SeekBar mGlobalSeekBar;
     private LinearLayout mParentLayout;
     double mLastRandom = 2;
     Random mRand = new Random();
@@ -73,6 +75,8 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         mAdapter = new RecyclerViewAdapter(mShortSound, this);
         mRecyclerView.setAdapter(mAdapter);
         setGlobalPlayButtonClickHandler();
+        setGlobalSeekBar();
+        hideRecordASoundText();
 //
 //        mRecyclerView.setRecyclerListener(new RecyclerView.RecyclerListener() {
 //            @Override
@@ -92,12 +96,22 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
     }
 
     /**
+     * Hides the record a sound textview now that we have a ShortSound in focus
+     */
+    private void hideRecordASoundText() {
+        TextView recordASound = (TextView) mParentLayout.findViewById(R.id.textRecordASound);
+        if(recordASound != null) recordASound.setVisibility(View.INVISIBLE);
+
+    }
+
+    /**
      * Now that we have a selected ShortSound in focus we need to update the Global Play
-     * button's click handler to play all tracks associated with this ShortSound.
+     * button's click handler to play all tracks associated with this ShortSound and also make it
+     * visible.
      */
     private void setGlobalPlayButtonClickHandler() {
         mGlobalPlayButton = (ImageButton)mParentLayout.findViewById(R.id.imageButtonPlay);
-        mGlobalPlayButton.setEnabled(true);
+        mGlobalPlayButton.setVisibility(View.VISIBLE);
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,6 +134,15 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
 
             }
         });
+    }
+
+    /**
+     * Now that we have a selected ShortSound in focus we need to update the global seek bar to be
+     * visible.
+     */
+    private void setGlobalSeekBar() {
+        mGlobalSeekBar = (SeekBar) mParentLayout.findViewById(R.id.seekBar);
+        mGlobalSeekBar.setVisibility(View.VISIBLE);
     }
 
     // This is used for loading the popup when clicking a specific effect
