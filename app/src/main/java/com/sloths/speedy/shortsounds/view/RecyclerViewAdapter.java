@@ -26,6 +26,7 @@ import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,7 +41,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private Context mContext;
 //    private RVListener listener;
     private ArrayList<Color> mColorPallete;
-//    private List<ViewHolder> mViews;
+    private List<ViewHolder> mViews;
 
 
     /**
@@ -66,7 +67,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click mRVListener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
-//        mViews.add(vh);
+        //mViews.add(vh);
         return vh;
     }
 

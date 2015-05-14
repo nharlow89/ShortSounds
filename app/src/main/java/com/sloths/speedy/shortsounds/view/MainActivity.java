@@ -94,6 +94,38 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     /**
+     * Now that we have a selected ShortSound in focus we need to update the Global Play
+     * button's click handler to play all tracks associated with this ShortSound.
+     */
+    private void setGlobalPlayButtonClickHandler() {
+        mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
+        mGlobalPlayButton.setVisibility(View.VISIBLE);
+        Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
+        mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mActiveShortSound != null) {
+                    // TODO: we need to handle the case when the ShortSound finishes playing!
+                    if (mActiveShortSound.isPlaying()) {
+                        // The ShortSound is already playing, stop it.
+                        mActiveShortSound.pauseAllTracks();
+                        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                    } else {
+                        if (mActiveShortSound.isPaused()) {
+                            // The ShortSound was previously playing, unpause it.
+                            mActiveShortSound.unPauseAllTracks();
+                        } else {
+                            // The ShortSound is not playing yet, play it.
+                            mActiveShortSound.playAllTracks();
+                        }
+                        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
+                    }
+                }
+            }
+        });
+    }
+
+    /**
      * This sets up the Global Play button and attaches the default click
      * handler. Note that when no ShortSound is loaded, this button should
      * be invisible
@@ -111,6 +143,15 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void setUpGlobalSeekBar() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mGlobalSeekBar.setVisibility(View.INVISIBLE);  // Default to invisible when ShortSound has not been clicked.
+    }
+
+    /**
+     * Now that we have a selected ShortSound in focus we need to update the global seek bar to be
+     * visible.
+     */
+    private void enableFunctionalityOfGlobalSeekBar() {
+        mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
+        mGlobalSeekBar.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -291,7 +332,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void selectShortSoundFromDrawer(int position) {
         mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
-
+        setGlobalPlayButtonClickHandler();
+        enableFunctionalityOfGlobalSeekBar();
         if (this.position != position) {
             currentView = TRACKS;
 
@@ -381,22 +423,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         animator.setDisplayedChild(viewMap.get(effect));
         currentView = effect;
         mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
-        // Grabs the ShortSound and populates the screen with it
-//        mMainFragment = new RecyclerViewFragment();
-        // Sets it to the correct ShortSound
-//        mMainFragment.setDataSource( mActiveShortSound );
-//        Bundle args = new Bundle();
-//        long targetShortSoundId = sounds.get( position ).getId();
-//        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
-//        mMainFragment.setArguments(args);
-
-        // Replaces the main content screen w/ Short sound
-//        FragmentManager fragmentManager = this.getFragmentManager();
-//        fragmentManager.beginTransaction().replace(R.id.track_list, mMainFragment).commit();
-
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
-
         mDrawerLayout.closeDrawer(mDrawerList);
         setTitle(mShortSoundsTitles[position]);
         invalidateOptionsMenu();
