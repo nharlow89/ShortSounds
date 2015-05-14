@@ -1,5 +1,9 @@
 package com.sloths.speedy.shortsounds.model;
 
+import android.media.MediaPlayer;
+import android.media.audiofx.EnvironmentalReverb;
+import android.util.Log;
+
 import com.sloths.speedy.shortsounds.model.Effect;
 
 /**
@@ -14,10 +18,10 @@ public class ReverbEffect extends Effect {
     private static final int INDEX_REFLECTION_LEVEL = 4;
     private static final int INDEX_DENSITY = 5;
 
-    private static final int DEFAULT_DECAY = 0;
-    private static final int DEFAULT_REFLECTION_DELAY = 0;
-    private static final int DEFAULT_REFLECTION_LEVEL = 0;
-    private static final int DEFAULT_DENSITY = 0;
+    private static final int DEFAULT_DECAY = 1;
+    private static final int DEFAULT_REFLECTION_DELAY = 150;
+    private static final int DEFAULT_REFLECTION_LEVEL = 5000;
+    private static final int DEFAULT_DENSITY = 500;
 
     private int decay;
     private int reflectDelay;
@@ -34,8 +38,9 @@ public class ReverbEffect extends Effect {
         return retVal + "," + decay + "," + reflectDelay + "," + reflectLevel + "," + density;
     }
 
-    public static Effect parseParameters(String[] parameters) {
-        ReverbEffect retVal = new ReverbEffect(parameters[INDEX_ACTIVE].equals("ON"),
+    public static Effect parseParameters(String[] parameters, MediaPlayer player) {
+        ReverbEffect retVal = new ReverbEffect(player,
+                parameters[INDEX_ACTIVE].equals("ON"),
                 Integer.parseInt(parameters[INDEX_DECAY]),
                 Integer.parseInt(parameters[INDEX_REFLECTION_DELAY]),
                 Integer.parseInt(parameters[INDEX_REFLECTION_LEVEL]),
@@ -43,20 +48,53 @@ public class ReverbEffect extends Effect {
         return retVal;
     }
 
-    private ReverbEffect(boolean active, int decay, int reflectDelay, int reflectLevel, int density) {
+    private ReverbEffect(MediaPlayer player, boolean active, int decay, int reflectDelay,
+                         int reflectLevel, int density) {
+        Log.d("effects", "ReverbEffect initialized from loaded state");
+        this.player = player;
         this.active = active;
         this.decay = decay;
         this.reflectLevel = reflectLevel;
         this.reflectDelay = reflectDelay;
         this.density = density;
+        //initAudioEffect();
     }
 
-    public ReverbEffect() {
+    public ReverbEffect(MediaPlayer player) {
+        Log.d("effects", "ReverbEffect initialized from scratch");
+        this.player = player;
         this.active = false;
         this.decay = DEFAULT_DECAY;
         this.reflectLevel = DEFAULT_REFLECTION_LEVEL;
         this.reflectDelay = DEFAULT_REFLECTION_DELAY;
         this.density = DEFAULT_DENSITY;
+        //initAudioEffect();
+    }
+
+    private void initAudioEffect() {
+        this.effect = new EnvironmentalReverb(0, player.getAudioSessionId());
+        ((EnvironmentalReverb)effect).setDecayTime(this.decay);
+        ((EnvironmentalReverb)effect).setReflectionsLevel((short) this.reflectLevel);
+        ((EnvironmentalReverb)effect).setReflectionsDelay((short) this.reflectDelay);
+        ((EnvironmentalReverb)effect).setDensity((short)this.density);
+    }
+
+    @Override
+    public void prepare() {
+        if (effect == null) {
+            initAudioEffect();
+        }
+    }
+
+    public void enable() {
+        initAudioEffect();
+        effect.setEnabled(true);
+    }
+
+    public void disable() {
+        effect.setEnabled(false);
+        effect.release();
+        effect = null;
     }
 
     /**

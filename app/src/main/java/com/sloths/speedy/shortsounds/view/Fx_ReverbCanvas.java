@@ -8,11 +8,9 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -163,7 +161,7 @@ public class Fx_ReverbCanvas extends View {
             // Drag points
             case MotionEvent.ACTION_MOVE:
                 if (currentTouch == TOUCH_POINT) {
-                    point.update(x, y);
+                    point.set(x, y);
                     setLine();
                     echoG.setEchos();
                     invalidate();
@@ -172,13 +170,29 @@ public class Fx_ReverbCanvas extends View {
             // If user lifts up --> set new touch area & draw line & point
             case MotionEvent.ACTION_UP:
                 if (currentTouch == TOUCH_POINT) {
-                    point.update(x, y);
+                    point.set(x, y);
                         invalidate();
                         currentTouch = NONE;
                 }
                 break;
         }
         return true;
+    }
+
+    public PointF getValue() {
+        float percentX = point.x / getMeasuredWidth();
+        float percentY = point.y / getMeasuredHeight();
+        return new PointF(percentX, percentY);
+    }
+
+    public void setValue(PointF value) {
+        if (value == null || value.length() == 0) {
+            // No values are pulled from model --> Set to default
+            point = new ControlPoint();
+        }
+        float x = value.x * getMeasuredWidth();
+        float y = value.y * getMeasuredHeight();
+        point.set(x, y);
     }
 
 //    // This is for setting the x & y values that will come
@@ -274,7 +288,7 @@ public class Fx_ReverbCanvas extends View {
                                    x + RECTSIZE, y + RECTSIZE);
         }
 
-        void update(float x, float y) {
+        void set(float x, float y) {
             if (x > XMIN + 4 * MARGIN && x < XMAX - 4 * MARGIN)
                 this.x = x;
             if (y  < YMIN - 4 * MARGIN && y  > YMAX + 4 * MARGIN)

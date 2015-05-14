@@ -3,6 +3,7 @@ package com.sloths.speedy.shortsounds.view;
 import android.app.ActionBar;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
+import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -295,7 +296,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         if (this.position != position) {
             currentView = TRACKS;
 
-            // Highlight item, update title, close drawer
+            // Highlight item, set title, close drawer
             mDrawerList.setItemChecked(position, true);
             mDrawerLayout.closeDrawer(mDrawerList);
             setTitle(mShortSoundsTitles[position]);
@@ -378,6 +379,15 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
     // This is used for loading the popup when clicking a specific effect
     public void effectEditSelected(int track, String effect) {
+        // Set effect view with values pulled from model
+        PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
+        if (effect.equals(EQ)) {
+            ((Fx_EQCanvas) findViewById(R.id.eq_canvas)).setValues(values);
+        } else if (effect.equals(REVERB)) {
+            ((Fx_ReverbCanvas) findViewById(R.id.reverb_canvas)).setValue(values[0]);
+        }
+
+        // Change the view to the effect
         animator.setDisplayedChild(viewMap.get(effect));
         currentView = effect;
         mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
@@ -394,7 +404,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 //        FragmentManager fragmentManager = this.getFragmentManager();
 //        fragmentManager.beginTransaction().replace(R.id.track_list, mMainFragment).commit();
 
-        // Highlight item, update title, close drawer
+        // Highlight item, set title, close drawer
         mDrawerList.setItemChecked(position, true);
 
         mDrawerLayout.closeDrawer(mDrawerList);
@@ -478,7 +488,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     private void createNew() {
-        // TODO update to not use a fragment
+        // TODO set to not use a fragment
 //        ShortSound newSound = new ShortSound();
 //        setTitle(newSound.getTitle());
 //        sounds.add(newSound);
@@ -557,5 +567,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             ((TrackView) animator.getCurrentView()).notifyTrackAdded( mActiveShortSound.getTracks().size() - 1 );
         }
         mAudioRecorder.reset();  // Have to reset for the next recording
+    }
+
+    @Override
+    public void onDestroy() {
+        mActiveShortSound.releaseAllTracks();
     }
 }

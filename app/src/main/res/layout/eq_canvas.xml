@@ -37,7 +37,8 @@ android:orientation="vertical">
             android:background="@android:color/white"/>
         <com.sloths.speedy.shortsounds.view.Fx_EQCanvas
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:id="@+id/eq_canvas"/>
         <View
             android:layout_width="match_parent"
             android:layout_height="10dp"

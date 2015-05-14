@@ -1,6 +1,7 @@
 package com.sloths.speedy.shortsounds.model;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.media.MediaPlayer;
 import android.util.Log;
 
@@ -39,6 +40,12 @@ public class ShortSoundTrack {
     private MediaPlayer player;
     private boolean preparingWhilePlayed;
     private MediaState mState;
+    private EqEffect mEqEffect;
+    private ReverbEffect mReverbEffect;
+
+    public enum EFFECT {
+        EQ, REVERB, DISTORTION, BITCRUSH
+    }
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -56,6 +63,7 @@ public class ShortSoundTrack {
         this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
         initFiles( audioFile );
         setUpMediaPlayer();
+        setUpEffects();
     }
 
     /**
@@ -70,12 +78,13 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TITLE + " field.");
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
         this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
-        this.file = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
+        this.file = map.get(sqlHelper.KEY_TRACK_FILENAME_MODIFIED);
         this.originalFile = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
         this.player = new MediaPlayer();
         setUpMediaPlayer();
+        setUpEffects();
     }
 
     private void setUpMediaPlayer() {
@@ -97,6 +106,11 @@ public class ShortSoundTrack {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void setUpEffects() {
+        this.mEqEffect = new EqEffect(player);
+        this.mReverbEffect = new ReverbEffect(player);
     }
 
     /**
@@ -164,7 +178,15 @@ public class ShortSoundTrack {
      * Release this track from the MediaPlayer when no longer in use.
      */
     public void release() {
-        player.release();
+        if (player != null) {
+            player.release();
+        }
+        if (mEqEffect != null) {
+            mEqEffect.release();
+        }
+        if (mReverbEffect != null) {
+            mReverbEffect.release();
+        }
     }
 
     /**
@@ -195,12 +217,51 @@ public class ShortSoundTrack {
         player.setOnCompletionListener( listener );
     }
 
-    public void addEffect() {
-        // TODO
+    public void addEffect(EFFECT e) {
+        Log.d("effects", "addEffect called");
+        switch (e) {
+           case EQ:
+               Log.d("effects", "EQ toggle switch clicked");
+               this.mEqEffect.enable();
+               this.player.attachAuxEffect(mEqEffect.getEffectId());
+               break;
+           case REVERB:
+               Log.d("effects", "REVERB toggle switch clicked");
+               this.mReverbEffect.enable();
+               this.player.attachAuxEffect(mReverbEffect.getEffectId());
+               break;
+           case DISTORTION:
+               Log.d("effects", "DISTORTION toggle switch clicked");
+               //throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+               break;
+           case BITCRUSH:
+               Log.d("effects", "BITCRUSH toggle switch clicked");
+               //throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+               break;
+        }
     }
 
-    public void removeEffect() {
-        // TODO
+    // TODO:
+    public PointF[] getEffectVals(String effect) {
+//        if (EQ) {
+//            return eq vals (2 PointF)
+//        } else {
+//            return reverb vals (1 PointF)
+//        }
+
+        // If nothing is stored for effects yet just return null
+        return null;
+    }
+
+    public void removeEffect(EFFECT e) {
+        switch (e) {
+            case EQ:
+                this.mEqEffect.disable();
+            case REVERB:
+                this.mReverbEffect.disable();
+            default:
+                throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+        }
     }
 
     /**

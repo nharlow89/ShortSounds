@@ -89,7 +89,7 @@ public class TrackView extends RecyclerView {
 //
 //    }
 //    /**
-//     * Now that we have a selected ShortSound in focus we need to update the global seek bar to be
+//     * Now that we have a selected ShortSound in focus we need to set the global seek bar to be
 //     * visible.
 //     */
 //    private void setGlobalSeekBar() {
@@ -136,7 +136,7 @@ public class TrackView extends RecyclerView {
 //    }
 
 //    /**
-//     * Now that we have a selected ShortSound in focus we need to update the Global Play
+//     * Now that we have a selected ShortSound in focus we need to set the Global Play
 //     * button's click handler to play all tracks associated with this ShortSound.
 //     */
 //    private void setGlobalPlayButtonClickHandler() {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/reverbCanvasParent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -37,7 +38,8 @@
 
         <com.sloths.speedy.shortsounds.view.Fx_ReverbCanvas
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:id="@+id/reverb_canvas"/>
         <View
             android:layout_width="match_parent"
             android:layout_height="10dp"
