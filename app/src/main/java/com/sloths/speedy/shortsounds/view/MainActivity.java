@@ -496,25 +496,14 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void createNew() {
         // TODO update to not use a fragment
-//        ShortSound newSound = new ShortSound();
-//        setTitle(newSound.getTitle());
-//        sounds.add(newSound);
-//        mActiveShortSound = newSound;
-//        mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
-//        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-//                R.layout.drawer_list_item, mShortSoundsTitles));
-//        mMainFragment = new RecyclerViewFragment();
-//        // Sets it to the correct ShortSound
-//        mMainFragment.setDataSource( mActiveShortSound );
-////        Bundle args = new Bundle();
-////        long targetShortSoundId = sounds.get( position ).getId();
-////        args.putLong(RecyclerViewFragment.ARG_SOUND_ID, targetShortSoundId);
-////        mMainFragment.setArguments(args);
-//
-//        // Replaces the main content screen w/ Short sound
-//        FragmentManager fragmentManager = this.getFragmentManager();
-//        fragmentManager.beginTransaction().replace(R.id.track_list, mMainFragment).commit();
-//
+        ShortSound newSound = new ShortSound();
+        setTitle(newSound.getTitle());
+        sounds.add(newSound);
+        mActiveShortSound = newSound;
+        mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, mShortSoundsTitles));
+        selectShortSoundFromDrawer(sounds.size() - 1);
     }
 
     /*
