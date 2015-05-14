@@ -209,9 +209,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
             // perform setup
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
-            setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
+            setUpToggles();
             setPlayClickHandler(v);
-
         }
 
         /**
