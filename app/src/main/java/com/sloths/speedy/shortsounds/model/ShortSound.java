@@ -21,6 +21,7 @@ public class ShortSound {
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
     private boolean isPlaying = false;
     private boolean isPaused = false;
+    private int tracksPlaying;
 
     /**
      * Create a new empty ShortSound.
@@ -64,6 +65,7 @@ public class ShortSound {
         }
         isPlaying = true;
         isPaused = false;
+        tracksPlaying = tracks.size();
     }
 
     /**
@@ -100,6 +102,16 @@ public class ShortSound {
     }
 
     /**
+     * Called when a ShortSoundTrack is finished playing. When all tracks are done, isPlaying() will
+     * return false;
+     */
+    public void updateShortSound() {
+        if (--tracksPlaying == 0) {
+            isPlaying = false;
+        }
+    }
+
+    /**
      * Release all the tracks to free up memory (called when done working with this ShortSound).
      */
     public void releaseAllTracks() {
@@ -111,9 +123,7 @@ public class ShortSound {
     /**
      * Return whether or not the current ShortSound is playing.
      */
-    public boolean isPlaying() {
-        return this.isPlaying;
-    }
+    public boolean isPlaying() { return this.isPlaying; }
 
     /**
      * Return whether or not the ShortSound is in a paused state.
@@ -135,7 +145,7 @@ public class ShortSound {
      * @return ShortSound
      */
     public static ShortSound getById( long id ) {
-        return sqlHelper.queryShortSoundById( id );
+        return sqlHelper.queryShortSoundById(id);
     }
 
     /**
@@ -172,6 +182,15 @@ public class ShortSound {
     }
 
     /**
+     * Remove a ShortSound, including all of its tracks
+     * @postcondition this will be null, and this ShortSound will be removed
+     * from the database, and from disk
+     */
+    public void removeShortSound() {
+        
+    }
+
+    /**
      * Specifically set the list of tracks associated with this ShortSound.
      * Should <b>only</b> be used when populating a ShortSound from the DB.
      * @param tracks
@@ -197,6 +216,19 @@ public class ShortSound {
         this.title = new_title;
         sqlHelper.updateShortSound( this );  // Update the DB
         repInvariant();
+    }
+
+    /**
+     * Getter for Duration
+     * Gets the duration of the longest of the tracks in the shortSound
+     * @return Duration of the longest track in milliseconds
+     */
+    public int getDuration() {
+        int maxDuration = 0;
+        for(ShortSoundTrack track: this.tracks)
+            if(track.getDuration() > maxDuration)
+                maxDuration = track.getDuration();
+        return maxDuration;
     }
 
     /**

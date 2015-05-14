@@ -7,7 +7,10 @@ import android.util.Log;
 import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
 
 /**
@@ -34,22 +37,24 @@ public class ShortSoundTrack {
     private String title;
     private final long parentId;
     private MediaPlayer player;
-    private MediaState mState = MediaState.INITIALIZED;
+    private boolean preparingWhilePlayed;
+    private MediaState mState;
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
-     * @param filename The filename of the recorded audio file.
      * @param shortSoundId The id of the ShortSound that this track belongs to.
      * @postcondition This ShortSoundTrack will be stored in the database and a
      *      copy of the file referenced by filename will be made.
      */
-    public ShortSoundTrack( String filename, long shortSoundId ) {
+    public ShortSoundTrack( File audioFile, long shortSoundId ) {
         this.title = DEFAULT_TITLE;
-        this.originalFile = filename;
-        this.file = filename + "-ss";  // May need to change?
         this.parentId = shortSoundId;
         // TODO: create a copy of the original file that will be our "working" copy
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
+        this.originalFile = "ss" + shortSoundId + "-track" + id;
+        this.file = originalFile + "-modified";
+        this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
+        initFiles( audioFile );
         setUpMediaPlayer();
     }
 
@@ -66,7 +71,7 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
         this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
         this.file = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
-        this.originalFile = map.get( sqlHelper.KEY_TRACK_FILENAME_ORIGINAL );
+        this.originalFile = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
         this.player = new MediaPlayer();
@@ -78,12 +83,15 @@ public class ShortSoundTrack {
         Context context = ShortSoundsApplication.getAppContext();
         String path = context.getFilesDir().getAbsolutePath();
         try {
+            Log.d("DEBUG", "setDataSource(" + path + "/" + this.file + ")");
             this.player.setDataSource( path + "/" + this.file );
+            mState = MediaState.INITIALIZED;
             this.player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mState = MediaState.PREPARED;
-                    Log.d(TAG, "prepared track [" + id + "]");
+                    if(preparingWhilePlayed)
+                        play();
                 }
             });
         } catch (IOException e) {
@@ -99,15 +107,21 @@ public class ShortSoundTrack {
             Log.d(TAG, "play track ["+this.getId()+"]");
             player.start();
             mState = MediaState.STARTED;
+            preparingWhilePlayed = false;
         } else if ( mState == MediaState.STOPPED ) {
             try {
                 Log.d(TAG, "play stopped track ["+this.getId()+"]");
                 player.prepare();
                 player.start();
+                preparingWhilePlayed = false;
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else if (mState == MediaState.PREPARING) {
+            Log.d(TAG, "Preparing track ["+this.getId()+"]");
+            preparingWhilePlayed = true;
         }
+
     }
 
     /**
@@ -164,6 +178,8 @@ public class ShortSoundTrack {
      * Prepare this track asynchronously.
      */
     public void prepareAsync() {
+        if ( player == null )
+            setUpMediaPlayer();
         if ( mState == MediaState.INITIALIZED || mState == MediaState.STOPPED ) {
             Log.d(TAG, "prepareAsync track ["+this.getId()+"]");
             player.prepareAsync();
@@ -199,6 +215,24 @@ public class ShortSoundTrack {
     }
 
     /**
+     * Initialize the files for a new ShortSoundTrack. This makes a copy of the original audio file
+     * into the proper location.
+     * @param audioFile
+     */
+    private void initFiles( File audioFile ) {
+        Context context = ShortSoundsApplication.getAppContext();
+        String path = context.getFilesDir().getAbsolutePath();
+        File originalFile = new File( path, this.originalFile );
+        File file = new File( path , this.file );
+        try {
+            copyFile( audioFile, originalFile );
+            copyFile( audioFile, file );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Remove this ShortSoundTrack's files from memory (both the original and
      * any modified)
      */
@@ -212,6 +246,26 @@ public class ShortSoundTrack {
             file.delete();
         }
     }
+
+    private void copyFile(File src, File dst) throws IOException {
+        Log.d("DEBUG", "Copy file [" + src.getPath() + "] to ["+ dst.getPath() +"]");
+        FileChannel inChannel = new FileInputStream(src).getChannel();
+        FileChannel outChannel = new FileOutputStream(dst).getChannel();
+        try {
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+        } finally {
+            if (inChannel != null)
+                inChannel.close();
+            if (outChannel != null)
+                outChannel.close();
+        }
+    }
+
+    /**
+     * Wrapper for the mediaPlayer's getDuration method
+     * @return Duration of the track in milliseconds
+     */
+    public int getDuration() { return player.getDuration(); }
 
     /**
      * Get the title of this ShortSoundTrack.
@@ -246,7 +300,7 @@ public class ShortSoundTrack {
 
     /**
      * Get this tracks id.
-     * @return
+     * @return id
      */
     public long getId() { return this.id; }
 
@@ -265,5 +319,9 @@ public class ShortSoundTrack {
         if ( !originalFile.exists() ) throw new AssertionError("File does not exist: " + originalFile);
         File file = new File( this.file );
         if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
+    }
+
+    public String getOriginalFile() {
+        return originalFile;
     }
 }
