@@ -214,12 +214,12 @@ public class ShortSoundTrack {
            case EQ:
                Log.d("effects", "EQ toggle switch clicked");
                this.mEqEffect.enable();
-               //this.player.attachAuxEffect(mEqEffect.getEffectId());
+               this.player.attachAuxEffect(mEqEffect.getEffectId());
                break;
            case REVERB:
                Log.d("effects", "REVERB toggle switch clicked");
                this.mReverbEffect.enable();
-               //this.player.attachAuxEffect(mReverbEffect.getEffectId());
+               this.player.attachAuxEffect(mReverbEffect.getEffectId());
                break;
            case DISTORTION:
                Log.d("effects", "DISTORTION toggle switch clicked");
