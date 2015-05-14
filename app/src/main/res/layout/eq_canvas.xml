@@ -6,72 +6,88 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:orientation="vertical">
 
-<LinearLayout android:id="@+id/topPanel"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight=".2"
-    android:orientation="vertical"
-    android:minHeight="30dp">
-    <TextView android:id="@+id/effectNameTitle"
+    <LinearLayout android:id="@+id/topPanel"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="@string/EQ"
-        android:textSize="100sp"
+        android:layout_height="0dp"
+        android:layout_weight=".2"
+        android:orientation="vertical"
         android:minHeight="30dp">
-    </TextView>
-    <!-- If the client uses a customTitle, it will be added here. -->
-</LinearLayout>
+        <TextView android:id="@+id/effectNameTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/EQ"
+            android:textSize="100sp"
+            android:minHeight="30dp">
+        </TextView>
+        <!-- If the client uses a customTitle, it will be added here. -->
+    </LinearLayout>
 
-<com.sloths.speedy.shortsounds.view.Fx_EQCanvas
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:id="@+id/effect_content"
-    android:layout_weight=".6"
-    android:orientation="vertical"
-    android:gravity="center">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/effect_content"
+        android:layout_weight=".6"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <!--<com.sloths.speedy.shortsounds.view.Fx_EQCanvas-->
-        <!--android:id="@+id/effect_canvas"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"/>-->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:background="@android:color/white"/>
+        <com.sloths.speedy.shortsounds.view.Fx_EQCanvas
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:background="@android:color/white"/>
+    </LinearLayout>
 
-</com.sloths.speedy.shortsounds.view.Fx_EQCanvas>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="bottom"
+        android:layout_weight=".2"
+        android:orientation="horizontal">
 
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_gravity="bottom"
-    android:layout_weight=".2"
-    android:orientation="horizontal">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:id="@+id/cancelEffectButton"
+            android:layout_gravity="center_vertical"
+            android:layout_toLeftOf="@+id/effectSpace"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_alignTop="@+id/saveEffectButton"
+            android:textSize="30dp" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/Cancel"
-        android:id="@+id/cancelEffectButton"
-        android:layout_gravity="center_vertical"
-        android:layout_alignTop="@+id/saveEffectButton"
-        android:layout_toLeftOf="@+id/effectSpace"
-        android:layout_toStartOf="@+id/effectSpace" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save"
+            android:id="@+id/saveEffectButton"
+            android:layout_gravity="center_vertical"
+            android:layout_toRightOf="@+id/effectSpace"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="20dp"
+            android:textSize="30dp" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/Save"
-        android:id="@+id/saveEffectButton"
-        android:layout_gravity="center_vertical"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/effectSpace"
-        android:layout_toEndOf="@+id/effectSpace" />
+        <Space
+            android:layout_width="100px"
+            android:layout_height="20px"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/effectSpace" />
 
-    <Space
-        android:layout_width="100dp"
-        android:layout_height="20dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/effectSpace" />
-
-</RelativeLayout>
+    </RelativeLayout>
 
 </LinearLayout>

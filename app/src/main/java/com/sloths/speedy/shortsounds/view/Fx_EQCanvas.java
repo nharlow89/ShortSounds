@@ -231,24 +231,23 @@ public class Fx_EQCanvas extends View {
             cp = new PointF(x, y);
             rp = new PointF(x + BANDWIDTH, y);
 
-            rect = initRectF();
+            rect = new RectF(cp.x - RECTSIZE, cp.y - RECTSIZE,
+                             cp.x + RECTSIZE, cp.y + RECTSIZE);
             enabled = true;
-        }
-        private RectF initRectF() {
-            return new RectF(cp.x - RECTSIZE,
-                    cp.y - RECTSIZE,
-                    cp.x + RECTSIZE,
-                    cp.y + RECTSIZE);
         }
 
         void set(float x, float y) {
-            if (x > BANDWIDTH && x < getMeasuredWidth() - BANDWIDTH) {
+            if (x > BANDWIDTH / 2 && x < getMeasuredWidth() - BANDWIDTH / 2) {
                 lp.x = x - BANDWIDTH;
                 cp.x = x;
-                cp.y = y;
                 rp.x = x + BANDWIDTH;
-                rect = initRectF();
             }
+
+            if (y < getMeasuredHeight() - RECTSIZE / 2 && y > RECTSIZE / 2)
+                cp.y = y;
+
+            rect.set(cp.x - RECTSIZE, cp.y - RECTSIZE,
+                    cp.x + RECTSIZE, cp.y + RECTSIZE);;
         }
     }
 }

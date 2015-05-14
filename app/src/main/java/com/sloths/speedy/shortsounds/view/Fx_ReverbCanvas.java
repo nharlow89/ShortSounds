@@ -107,8 +107,8 @@ public class Fx_ReverbCanvas extends View {
 
     // Helper method for intially drawing out the y & x axis
     private void setUpGraph() {
-        YMAX = getMeasuredHeight() / 4;
-        YMIN = getMeasuredHeight() * 3 / 4;
+        YMAX = MARGIN;
+        YMIN = getMeasuredHeight() - MARGIN;
         XMIN = MARGIN;
         XMAX = getMeasuredWidth() - MARGIN;
 

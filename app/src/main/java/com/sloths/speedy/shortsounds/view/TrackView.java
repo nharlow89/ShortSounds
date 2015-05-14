@@ -52,19 +52,32 @@ public class TrackView extends RecyclerView {
         super(context, attrs);
         this.context = context;
 //        long sound_id = getArguments().getLong(ARG_SOUND_ID);
-        mShortSound = ((MainActivity) context).getCurShortSound();
-//        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.track_view);
-        // create an mLayoutManager which is required for RecyclerViews
-        mLayoutManager = new LinearLayoutManager(context);
-        // set the LayoutManager for the RecyclerView
-        setLayoutManager(mLayoutManager);
-        // set the adapter for the RecyclerView, passing in the data
-        mAdapter = new RecyclerViewAdapter(mShortSound, this);
-        setAdapter(mAdapter);
+        notifyNewSS();
 //        setGlobalPlayButtonClickHandler();
     }
 
+    /**
+     * Notify the Fragment adapter that a track has been added to this
+     * ShortSound.
+     */
+    public void notifyTrackAdded( int index ) {
+        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemInserted( index );
+    }
 
+    public void notifyNewSS() {
+        mShortSound = ((MainActivity) context).getCurShortSound();
+        if (mShortSound != null) {
+//        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.track_view);
+            // create an mLayoutManager which is required for RecyclerViews
+            mLayoutManager = new LinearLayoutManager(context);
+            // set the LayoutManager for the RecyclerView
+            setLayoutManager(mLayoutManager);
+            // set the adapter for the RecyclerView, passing in the data
+            mAdapter = new RecyclerViewAdapter(mShortSound, context);
+            setAdapter(mAdapter);
+        }
+    }
 
 //    @Override
 //    public void onCreate(Bundle savedInstanceState) {
@@ -81,7 +94,7 @@ public class TrackView extends RecyclerView {
 //        // Save the parent container for later reference (targeting the global play button)
 //        mParentLayout = (LinearLayout) container.getParent();
 //        // grab the root view of the layout for recycler view
-//        View rootView = inflater.inflate(R.layout.recycler_view_frag, container, false);
+//        View rootView = inflater.inflate(R.layout.track_list_xml, container, false);
 //        // grab the RecyclerView component from the layout
 //        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.track_view);
 //        // create an mLayoutManager which is required for RecyclerViews

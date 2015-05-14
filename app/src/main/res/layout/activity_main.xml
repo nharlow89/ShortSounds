@@ -18,19 +18,26 @@
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <com.sloths.speedy.shortsounds.view.TrackView
+            <!-- empty layout for initial view -->
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/track_view">
-            </com.sloths.speedy.shortsounds.view.TrackView>
+                android:layout_height="match_parent"
+                android:gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Record a Sound or Load a Mix!"
+                    android:layout_centerInParent="true"
+                    android:textSize="20sp" />
+            </RelativeLayout>
 
-            <com.sloths.speedy.shortsounds.view.Fx_EQCanvas
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+            <include layout="@layout/eq_canvas"/>
 
-            <com.sloths.speedy.shortsounds.view.Fx_ReverbCanvas
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+            <include layout="@layout/reverb_canvas"/>
+
+            <include layout="@layout/effect_view"/>
+
+            <include layout="@layout/effect_view"/>
 
         </ViewAnimator>
 

@@ -50,11 +50,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      * Initialize the dataset of the Adapter.
      *
      */
-    public RecyclerViewAdapter(ShortSound sound, TrackView rvf) {
+    public RecyclerViewAdapter(ShortSound sound, Context context) {
         mShortSound = sound;
         mMediaPlayerPool = new HashMap<>();
-        mShortSound = sound;
-//        this.context = rvf.getActivity();
+        this.context = context;
 //        listener = rvf;
     }
 
@@ -139,7 +138,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public int getItemCount() {
         return mShortSound.getTracks().size();
     }
-
 
     /**
      * This view holder holds the views for a track that will be part of a short sound
@@ -233,6 +231,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 public void onCompletion(MediaPlayer mp) {
                     mShortSoundTrack.stop();  // Make sure the state is updated with ShortSoundTrack
                     mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_play));
+                    mShortSound.updateShortSound();
                 }
             });
         }
@@ -281,7 +280,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private class TrackListener implements View.OnClickListener  {
             @Override
             public void onClick(View v) {
-
                 //listener.onButtonClicked(v, getPosition());
                 if (!trackExpanded) {
                     // Expand a track
