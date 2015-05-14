@@ -52,6 +52,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         mShortSound = sound;
         mMediaPlayerPool = new HashMap<>();
         this.mContext = context;
+        mViews = new ArrayList<ViewHolder>();
     }
 
     /**
@@ -67,7 +68,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click mRVListener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
-        //mViews.add(vh);
+        mViews.add(vh);
         return vh;
     }
 
@@ -174,22 +175,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          */
         public ViewHolder(View v) {
             super(v);
+
             // init instance variables
             vView = v;
             vTitle = (TextView) v.findViewById(R.id.track_title);
             vTitle.setOnClickListener(new TrackListener());
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
-
-            // Populate effects in the effects list the track keeps
-            // TODO: Link the effects to the real ones in the database
-            // Currently populating a fake effects list
-//            List<Effect> effects = getEffects();
-//
-//            effectsList = (ListView) v.findViewById(R.id.effects_list_b);
-//            EffectsListAdapter effectsAdapter = new EffectsListAdapter(mContext, effects);
-//            effectsList.setAdapter(effectsAdapter);
-            collapseTrackChildView(vTrackChild);
             trackExpanded = false;
 
             // init buttons
@@ -206,6 +198,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
             setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
             setPlayClickHandler(v);
+            collapseTrackChildView(vTrackChild);
         }
 
         /**
@@ -317,7 +310,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             public void onClick(View v) {
                 if (!trackExpanded) {
                     // Expand a track
-//                    collapseAllOtherTracks();
+                    collapseAllOtherTracks();
                     expandTrackChildView(vTrackChild);
                     trackExpanded = true;
                     // Upon selecting a track we need to prepare the track for playing.
@@ -333,16 +326,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
     }
-//    *
-//     * Collapse all other tracks
-//
-//    public void collapseAllOtherTracks() {
-//        for(ViewHolder vh: mViews) {
-//            if ( vh.trackExpanded ) {
-//                collapseTrackChildView(vh.vTrackChild);
-//            }
-//        }
-//    }
+
+    /**
+     * Collapse all other tracks.
+     */
+    public void collapseAllOtherTracks() {
+        for(ViewHolder vh: mViews) {
+            if ( vh.trackExpanded ) {
+                collapseTrackChildView(vh.vTrackChild);
+            }
+        }
+    }
 
     /**
      * Uses animation to expand the child view of a track
