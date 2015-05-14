@@ -598,7 +598,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             selectShortSoundFromDrawer(sounds.size() - 1);
         } else {
             // Update the existing fragment manager to add new track to list
-            ((TrackView) animator.getCurrentView()).notifyTrackAdded( mActiveShortSound.getTracks().size() - 1 );
+            ((TrackView) findViewById(R.id.track_list)).notifyTrackAdded(mActiveShortSound.getTracks().size() - 1);
         }
         mAudioRecorder.reset();  // Have to reset for the next recording
     }

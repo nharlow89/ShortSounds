@@ -152,7 +152,7 @@ public class ShortSound {
      * Generate audio file (with all compiled tracks)
      */
     public void generateAudioFile() {
-        // TODO
+        // TODO: Here we go.
     }
 
     /**
@@ -219,17 +219,27 @@ public class ShortSound {
     }
 
     /**
-     * Getter for Duration
+     * Delete this ShortSound
+     */
+    public void delete() {
+        for( ShortSoundTrack track: this.tracks ) {
+            track.delete();
+        }
+        sqlHelper.removeShortSound( this );
+    }
+
+     /* Getter for Duration
      * Gets the duration of the longest of the tracks in the shortSound
      * @return Duration of the longest track in milliseconds
      */
     public int getDuration() {
         int maxDuration = 0;
-        for(ShortSoundTrack track: this.tracks)
-            if(track.getDuration() > maxDuration)
+        for (ShortSoundTrack track : this.tracks)
+            if (track.getDuration() > maxDuration)
                 maxDuration = track.getDuration();
         return maxDuration;
     }
+
 
     /**
      * Returns a readable string containing the title of this ShortSound
