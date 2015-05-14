@@ -188,6 +188,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            effectsList = (ListView) v.findViewById(R.id.effects_list_b);
 //            EffectsListAdapter effectsAdapter = new EffectsListAdapter(mContext, effects);
 //            effectsList.setAdapter(effectsAdapter);
+            collapseTrackChildView(vTrackChild);
             trackExpanded = false;
 
             // init buttons
@@ -331,9 +332,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
     }
-//    /**
+//    *
 //     * Collapse all other tracks
-//     */
+//
 //    public void collapseAllOtherTracks() {
 //        for(ViewHolder vh: mViews) {
 //            if ( vh.trackExpanded ) {

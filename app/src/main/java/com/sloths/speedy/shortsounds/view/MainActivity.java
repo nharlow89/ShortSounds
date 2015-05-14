@@ -307,7 +307,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             animator.addView(add, viewMap.get(TRACKS) + 1);
             animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
             animator.removeViewAt(viewMap.get(TRACKS));
-
             invalidateOptionsMenu();
         } else {
             // selected mix is already loaded so cloase the drawer
