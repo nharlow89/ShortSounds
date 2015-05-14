@@ -5,9 +5,11 @@ package com.sloths.speedy.shortsounds.view;
  */
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +24,14 @@ import android.widget.TextView;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.EqEffect;
+import com.sloths.speedy.shortsounds.model.MediaState;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provide views to RecyclerView with data from mDataSet.
@@ -186,9 +191,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             vTitle.setOnClickListener(new TrackListener());
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
-            setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
-            setPlayClickHandler();
-            controller.setVisibility(View.GONE);
 
             // Populate effects in the effects list the track keeps
             // TODO: Link the effects to the real ones in the database
@@ -234,7 +236,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     // handle case for all tracks being played.
                     if(mShortSound.isPlaying() || mShortSound.isPaused()) {
                         mShortSound.stopAllTracks();
-                        rvf.mGlobalPlayButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_action_play));
+                        rvf.getmGlobalPlayButton().setImageDrawable(context.getResources().getDrawable(R.drawable.ic_action_play));
                     }
 
                     if ( mShortSoundTrack.isPlaying() ) {

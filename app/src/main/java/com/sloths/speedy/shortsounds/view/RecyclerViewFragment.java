@@ -145,6 +145,10 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         mGlobalSeekBar.setVisibility(View.VISIBLE);
     }
 
+    public android.widget.ImageButton getmGlobalPlayButton() {
+        return mGlobalPlayButton;
+    }
+
     // This is used for loading the popup when clicking a specific effect
     @Override
     public void onButtonClicked(View v, int track, String effect) {
