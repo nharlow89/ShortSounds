@@ -128,7 +128,7 @@ public class ShortSoundTrack {
      * Stop playing this track and reset its position to the beginning of the audio file.
      */
     public void stop() {
-        if ( player.isPlaying() || mState == MediaState.STARTED || mState == MediaState.PAUSED ) {
+        if (mState != MediaState.INITIALIZED &&  (mState == MediaState.STARTED || mState == MediaState.PAUSED) ) {
             Log.d(TAG, "stop track ["+this.getId()+"]");
             player.stop();
             player.prepareAsync();
