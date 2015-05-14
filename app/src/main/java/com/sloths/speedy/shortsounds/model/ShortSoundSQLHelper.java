@@ -124,7 +124,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     /**
      * Get A single ShortSound by id.
      * @param id
-     * @return ShortSound
+     * @return ShortSound if one exists with given id, otherwise null
      */
     public ShortSound queryShortSoundById(long id) {
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE id = " + id, null);
@@ -142,7 +142,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                 return ss;
             } while (cursor.moveToNext());
         }
-        cursor.close();  // Shouldnt hit this statement
+        cursor.close();  // Should hit this statement if there was no result
         return null;
     }
 
@@ -177,8 +177,8 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      * Remove a ShortSound from the database and removes any associated ShortSoundTracks.
      * @param ss
      */
-    public void removeShortSound( ShortSound ss ) {
-        // TODO
+    public boolean removeShortSound( ShortSound ss ) {
+        return db.delete(TABLE_NAME, KEY_ID + "=" + ss.getId(), null) > 0;
     }
 
     /**
@@ -240,13 +240,13 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Removes a ShortSoundTrack from the database.
+     * Remove an entry for the given ShortSoundTrack in the database.
      * @param track
+     * @return Boolean, whether a row was deleted.
      */
-    public void removeShortSoundTrack( ShortSoundTrack track ) {
-        // TODO remove from db and delete any files
+    public boolean removeShortSoundTrack( ShortSoundTrack track ) {
+        return db.delete(TRACK_TABLE_NAME, KEY_ID + "=" + track.getId(), null) > 0;
     }
-
 
     public String getCurrentTimestamp() {
         Date now = new Date();

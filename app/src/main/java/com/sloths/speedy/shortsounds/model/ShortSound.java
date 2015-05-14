@@ -210,6 +210,16 @@ public class ShortSound {
     }
 
     /**
+     * Delete this ShortSound
+     */
+    public void delete() {
+        for( ShortSoundTrack track: this.tracks ) {
+            track.delete();
+        }
+        sqlHelper.removeShortSound( this );
+    }
+
+    /**
      * Returns a readable string containing the title of this ShortSound
      * and the titles of all it's tracks.
      * @return String
