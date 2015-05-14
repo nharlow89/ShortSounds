@@ -212,13 +212,23 @@ public class ShortSoundTrack {
         Log.d("effects", "addEffect called");
         switch (e) {
            case EQ:
+               Log.d("effects", "EQ toggle switch clicked");
                this.mEqEffect.enable();
-               this.player.attachAuxEffect(mEqEffect.getEffectId());
+               //this.player.attachAuxEffect(mEqEffect.getEffectId());
+               break;
            case REVERB:
+               Log.d("effects", "REVERB toggle switch clicked");
                this.mReverbEffect.enable();
-               this.player.attachAuxEffect(mReverbEffect.getEffectId());
-           default:
-               throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+               //this.player.attachAuxEffect(mReverbEffect.getEffectId());
+               break;
+           case DISTORTION:
+               Log.d("effects", "DISTORTION toggle switch clicked");
+               //throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+               break;
+           case BITCRUSH:
+               Log.d("effects", "BITCRUSH toggle switch clicked");
+               //throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+               break;
         }
     }
 

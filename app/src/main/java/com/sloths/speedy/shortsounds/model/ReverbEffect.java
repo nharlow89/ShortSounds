@@ -2,6 +2,7 @@ package com.sloths.speedy.shortsounds.model;
 
 import android.media.MediaPlayer;
 import android.media.audiofx.EnvironmentalReverb;
+import android.util.Log;
 
 import com.sloths.speedy.shortsounds.model.Effect;
 
@@ -49,23 +50,25 @@ public class ReverbEffect extends Effect {
 
     private ReverbEffect(MediaPlayer player, boolean active, int decay, int reflectDelay,
                          int reflectLevel, int density) {
+        Log.d("effects", "ReverbEffect initialized from loaded state");
         this.player = player;
         this.active = active;
         this.decay = decay;
         this.reflectLevel = reflectLevel;
         this.reflectDelay = reflectDelay;
         this.density = density;
-        initAudioEffect();
+        //initAudioEffect();
     }
 
     public ReverbEffect(MediaPlayer player) {
+        Log.d("effects", "ReverbEffect initialized from scratch");
         this.player = player;
         this.active = false;
         this.decay = DEFAULT_DECAY;
         this.reflectLevel = DEFAULT_REFLECTION_LEVEL;
         this.reflectDelay = DEFAULT_REFLECTION_DELAY;
         this.density = DEFAULT_DENSITY;
-        initAudioEffect();
+        //initAudioEffect();
     }
 
     private void initAudioEffect() {
@@ -76,12 +79,22 @@ public class ReverbEffect extends Effect {
         ((EnvironmentalReverb)effect).setDensity((short)this.density);
     }
 
+    @Override
+    public void prepare() {
+        if (effect == null) {
+            initAudioEffect();
+        }
+    }
+
     public void enable() {
+        initAudioEffect();
         effect.setEnabled(true);
     }
 
     public void disable() {
         effect.setEnabled(false);
+        effect.release();
+        effect = null;
     }
 
     /**

@@ -42,7 +42,7 @@ public class EqEffect extends Effect {
         for (int i = 0; i < NUM_BANDS; i++) {
             this.bandLevels[i] = Short.parseShort(parameters[INDEX_BAND_LEVELS + i]);
         }
-        initAudioEffect();
+        // initAudioEffect();
     }
 
     private void initAudioEffect() {
@@ -59,15 +59,25 @@ public class EqEffect extends Effect {
         for (int i = 0; i < NUM_BANDS; i++) {
             bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
         }
-        initAudioEffect();
+        //initAudioEffect();
+    }
+
+    @Override
+    public void prepare() {
+        if (effect == null) {
+            initAudioEffect();
+        }
     }
 
     public void enable() {
+        initAudioEffect();
         effect.setEnabled(true);
     }
 
     public void disable() {
         effect.setEnabled(false);
+        effect.release();
+        effect = null;
     }
 
     /**
