@@ -57,7 +57,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private FloatingActionButtonBasicFragment mActionBarFragment;
     private RecyclerViewFragment mMainFragment;
     private SeekBar mGlobalSeekBar;
-    private boolean recordTextIsVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,11 +112,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 public void onCheckedChanged(FloatingActionButton fabView, boolean isChecked) {
                     if ( !isChecked ) {
                         endRecording();
-                        if (recordTextIsVisible) {
-                            TextView recordASound = (TextView) findViewById(R.id.textRecordASound);
-                            if (recordASound != null) recordASound.setVisibility(View.INVISIBLE);
-                            recordTextIsVisible = false;
-                        }
+                        hideRecordATrackTextView();
                     } else {
                         beginRecording();
                     }
@@ -130,11 +125,23 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 public void onClick(View v) {
                     if (mAudioRecorder.isRecording()) {
                         endRecording();
+                        hideRecordATrackTextView();
                     } else {
                         beginRecording();
                     }
                 }
             });
+        }
+    }
+
+    /**
+     * Checks if there are currently any tracks, if so will hide hide the record a
+     * sound textview
+     */
+    private void hideRecordATrackTextView() {
+        if (mActiveShortSound.getTracks().size() > 0) {
+            TextView recordASound = (TextView) findViewById(R.id.textRecordASound);
+            if (recordASound != null) recordASound.setVisibility(View.INVISIBLE);
         }
     }
 
