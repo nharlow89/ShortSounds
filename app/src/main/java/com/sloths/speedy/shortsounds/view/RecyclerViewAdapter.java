@@ -37,7 +37,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ShortSound mShortSound;
     private Context context;
     private RVListener listener;
-    private ArrayList<Color> mColorPallete;
+    private List<ViewHolder> views;
 
     /**
      * Initialize the dataset of the Adapter.
@@ -47,6 +47,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         mShortSound = sound;
         this.context = rvf.getActivity();
         listener = rvf;
+        views = new ArrayList<ViewHolder>();
     }
 
     // Create new views (invoked by the layout manager)
@@ -57,6 +58,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click listener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
+        views.add(vh);
         return vh;
     }
 
@@ -143,16 +145,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private View vView;
         private int mPrimaryColor;
         private int mSecondaryColor;
-      
-        //        private final ListView effectsList;
         private boolean trackExpanded;
 
+        /**
+         * Constructor for ViewHolder
+         * @param v The view associated with the ViewHolder
+         */
         public ViewHolder(View v) {
             super(v);
+            // init instance variables
+            vView = v;
             vTitle = (TextView) v.findViewById(R.id.track_title);
             vTitle.setOnClickListener(new TrackListener());
-            vView = v;
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
+            mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
+            vTrackChild.setVisibility(View.GONE);
+            trackExpanded = false;
+
+            // init buttons
             Button eqButton = ((Button) v.findViewById(R.id.eq_button));
             Button reverbButton = ((Button) v.findViewById(R.id.reverb_button));
             Button distButton = ((Button) v.findViewById(R.id.dist_button));
@@ -161,21 +171,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Switch reverbToggle = ((Switch) v.findViewById(R.id.reverb_switch));
             Switch distToggle = ((Switch) v.findViewById(R.id.dist_switch));
             Switch bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
-            mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
-            setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
-            setUpToggle(new Switch[] {eqToggle, reverbToggle, distToggle, bitToggle});
-            setPlayClickHandler();
-            vTrackChild.setVisibility(View.GONE);
 
-            // Populate effects in the effects list the track keeps
-            // TODO: Link the effects to the real ones in the database
-            // Currently populating a fake effects list
-//            List<Effect> effects = getEffects();
-//
-//            effectsList = (ListView) v.findViewById(R.id.effects_list_b);
-//            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
-//            effectsList.setAdapter(effectsAdapter);
-            trackExpanded = false;
+            // perform setup
+            setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
+            setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
+            setPlayClickHandler();
         }
 
         /**
@@ -207,6 +207,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             });
         }
 
+        /**
+         * Dynamically set the text for each track title
+         * @param position The position of each track as int
+         */
         public void setTitleView(int position) {
             vTitle.setText(mShortSound.getTracks().get(position).getTitle());
         }
@@ -277,6 +281,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //listener.onButtonClicked(v, getPosition());
                 if (!trackExpanded) {
                     // Expand a track
+                    collapseAllOtherTracks();
                     expandTrackChildView(vTrackChild);
                     trackExpanded = true;
                     // Upon selecting a track we need to prepare the track for playing.
@@ -288,6 +293,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     // Stop the track (just in case it was playing)
                     mShortSoundTrack.stop();
                 }
+            }
+        }
+    }
+
+    /**
+     * Collapse all other tracks
+     */
+    public void collapseAllOtherTracks() {
+        for(ViewHolder vh: views) {
+            if ( vh.trackExpanded ) {
+                collapseTrackChildView(vh.vTrackChild);
             }
         }
     }
