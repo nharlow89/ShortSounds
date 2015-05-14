@@ -76,6 +76,7 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         mRecyclerView.setAdapter(mAdapter);
         setGlobalPlayButtonClickHandler();
         setGlobalSeekBar();
+        hideRecordASoundText();
 //
 //        mRecyclerView.setRecyclerListener(new RecyclerView.RecyclerListener() {
 //            @Override
@@ -92,6 +93,15 @@ public class RecyclerViewFragment extends Fragment implements RecyclerViewAdapte
         // We need to cleanup the audio stuff from this ShortSound
         mShortSound.stopAllTracks();
         mShortSound.releaseAllTracks();
+    }
+
+    /**
+     * Hides the record a sound textview now that we have a ShortSound in focus
+     */
+    private void hideRecordASoundText() {
+        TextView recordASound = (TextView) mParentLayout.findViewById(R.id.textRecordASound);
+        if(recordASound != null) recordASound.setVisibility(View.INVISIBLE);
+
     }
 
     /**
