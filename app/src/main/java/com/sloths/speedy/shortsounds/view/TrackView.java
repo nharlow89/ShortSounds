@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,7 +88,14 @@ public class TrackView extends RecyclerView {
 //
 //
 //    }
-
+//    /**
+//     * Now that we have a selected ShortSound in focus we need to update the global seek bar to be
+//     * visible.
+//     */
+//    private void setGlobalSeekBar() {
+//        mGlobalSeekBar = (SeekBar) mParentLayout.findViewById(R.id.seekBar);
+//        mGlobalSeekBar.setVisibility(View.VISIBLE);
+//    }
 //    @Override
 //    public View onCreateView(LayoutInflater inflater, ViewGroup container,
 //                             Bundle savedInstanceState) {

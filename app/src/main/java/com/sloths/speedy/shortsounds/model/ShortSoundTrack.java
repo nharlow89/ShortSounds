@@ -37,6 +37,7 @@ public class ShortSoundTrack {
     private String title;
     private final long parentId;
     private MediaPlayer player;
+    private boolean preparingWhilePlayed;
     private MediaState mState;
 
     /**
@@ -79,7 +80,6 @@ public class ShortSoundTrack {
 
     private void setUpMediaPlayer() {
         this.player = new MediaPlayer();
-
         Context context = ShortSoundsApplication.getAppContext();
         String path = context.getFilesDir().getAbsolutePath();
         try {
@@ -90,7 +90,8 @@ public class ShortSoundTrack {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mState = MediaState.PREPARED;
-                    Log.d(TAG, "prepared track [" + id + "]");
+                    if(preparingWhilePlayed)
+                        play();
                 }
             });
         } catch (IOException e) {
@@ -106,22 +107,28 @@ public class ShortSoundTrack {
             Log.d(TAG, "play track ["+this.getId()+"]");
             player.start();
             mState = MediaState.STARTED;
+            preparingWhilePlayed = false;
         } else if ( mState == MediaState.STOPPED ) {
             try {
                 Log.d(TAG, "play stopped track ["+this.getId()+"]");
                 player.prepare();
                 player.start();
+                preparingWhilePlayed = false;
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else if (mState == MediaState.PREPARING) {
+            Log.d(TAG, "Preparing track ["+this.getId()+"]");
+            preparingWhilePlayed = true;
         }
+
     }
 
     /**
      * Stop playing this track and reset its position to the beginning of the audio file.
      */
     public void stop() {
-        if ( mState == MediaState.STARTED || mState == MediaState.PAUSED ) {
+        if ( player.isPlaying() || mState == MediaState.STARTED || mState == MediaState.PAUSED ) {
             Log.d(TAG, "stop track ["+this.getId()+"]");
             player.stop();
             player.prepareAsync();
@@ -131,7 +138,7 @@ public class ShortSoundTrack {
 
     public void pause() {
         if ( mState == MediaState.STARTED || player.isPlaying() ) {
-            Log.d(TAG, "pause track [" + this.getId() + "]");
+            Log.d(TAG, "pause track ["+this.getId()+"]");
             player.pause();
             mState = MediaState.PAUSED;
         }
@@ -255,6 +262,12 @@ public class ShortSoundTrack {
     }
 
     /**
+     * Wrapper for the mediaPlayer's getDuration method
+     * @return Duration of the track in milliseconds
+     */
+    public int getDuration() { return player.getDuration(); }
+
+    /**
      * Get the title of this ShortSoundTrack.
      * @return String
      */
@@ -287,7 +300,7 @@ public class ShortSoundTrack {
 
     /**
      * Get this tracks id.
-     * @return
+     * @return id
      */
     public long getId() { return this.id; }
 
