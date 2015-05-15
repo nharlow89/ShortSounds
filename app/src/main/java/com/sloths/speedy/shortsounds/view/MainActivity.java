@@ -490,7 +490,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
         switch (item.getItemId()) {
             case R.id.action_delete:
-                //TODO: Add delete functionality
                 deleteShortSound();
                 return true;
             case R.id.action_new:
@@ -514,12 +513,17 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void deleteShortSound() {
         if (mActiveShortSound != null) {
+            this.position = -1;
+            Log.d("CHECK", "" + sounds.size());
             sounds.remove(mActiveShortSound);
+            Log.d("CHECK", "" + sounds.size());
             mActiveShortSound.delete();
             if (sounds.size() > 0) {
                 mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
+                Log.d("CHECK", "" + mShortSoundsTitles.length);
                 mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                         R.layout.drawer_list_item, mShortSoundsTitles));
+                Log.d("CHECK", sounds.get(0).getTitle());
                 selectShortSoundFromDrawer(0);
                 // hides seek bar and play button
                 setUpGlobalSeekBar();
@@ -527,7 +531,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             } else {
                 createNew();
             }
-            // TODO: make record a sound text view visible
         }
     }
 
