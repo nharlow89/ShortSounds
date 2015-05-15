@@ -13,15 +13,12 @@ import java.util.List;
  * modifying a ShortSound will create/update an entry in the database).
  */
 public class ShortSound {
-
+    public static final String DEBUG_TAG = "SHORT_SOUNDS";
     private static final String DEFAULT_TITLE = "Untitled";
     private List<ShortSoundTrack> tracks;
     private String title;
     private long id;
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
-    private boolean isPlaying = false;
-    private boolean isPaused = false;
-    private int tracksPlaying;
 
     /**
      * Create a new empty ShortSound.
@@ -49,70 +46,6 @@ public class ShortSound {
         this.title = map.get(sqlHelper.KEY_TITLE);
         this.tracks = new ArrayList<ShortSoundTrack>();
         repInvariant();
-    }
-
-
-    /**
-     * Play all the tracks associated with this ShortSound.
-     */
-    public void playAllTracks() {
-        for ( ShortSoundTrack track: this.tracks ) {
-            track.play();
-            tracksPlaying++;
-        }
-        isPlaying = true;
-        isPaused = false;
-    }
-
-    /**
-     * Stop any currently playing tracks within this ShortSound.
-     */
-    public void stopAllTracks() {
-        for( ShortSoundTrack track: this.tracks ) {
-            track.stop();
-        }
-        isPlaying = false;
-        isPaused = false;
-    }
-
-    /**
-     * Pause all the ShortSound tracks at their current position.
-     */
-    public void pauseAllTracks() {
-        for( ShortSoundTrack track: this.tracks ) {
-            track.pause();
-        }
-        isPlaying = false;
-        isPaused = true;
-    }
-
-    /**
-     * Called when a ShortSoundTrack is finished playing. When all tracks are done, isPlaying() will
-     * return false;
-     */
-    public void updateShortSound() {
-        if (--tracksPlaying == 0) {
-            isPlaying = false;
-        }
-    }
-
-    /**
-     * Release all the tracks to free up memory (called when done working with this ShortSound).
-     */
-    public void releaseAllTracks() {
-        // TODO? or remove
-    }
-
-    /**
-     * Return whether or not the current ShortSound is playing.
-     */
-    public boolean isPlaying() { return this.isPlaying; }
-
-    /**
-     * Return whether or not the ShortSound is in a paused state.
-     */
-    public boolean isPaused() {
-        return this.isPaused;
     }
 
     /**

@@ -8,13 +8,10 @@ import android.util.Log;
 
 import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
 
@@ -33,25 +30,16 @@ public class ShortSoundTrack {
     public static final int MODE = AudioTrack.MODE_STREAM;
     public static int BUFFER_SIZE = 44100; // Default
 
-
     public static final String DEFAULT_TITLE = "Untitled Track";
     private static final String TAG = "Track";
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
     private static final Context context = ShortSoundsApplication.getAppContext();
-    private static final String STORAGE_PATH = context.getFilesDir().getAbsolutePath();
-    private final String originalFile;
-    private final String file;
-    private InputStream audioInputStream;
+    public static final String STORAGE_PATH = context.getFilesDir().getAbsolutePath();
+    private final String originalFileName;
+    private final String fileName;
     private long id;
     private String title;
     private final long parentId;
-    private AudioTrack audioTrack;
-    private Thread audioThread;
-    private byte[] audioFrame;
-    private TrackState trackState;
-    private enum TrackState{ PLAYING, PAUSED, STOPPED };
-    private OnCompleteListener onCompleteListener;
-
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -64,11 +52,10 @@ public class ShortSoundTrack {
         this.title = DEFAULT_TITLE;
         this.parentId = shortSoundId;
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
-        this.originalFile = "ss" + shortSoundId + "-track" + id;
-        this.file = originalFile + "-modified";
+        this.originalFileName = "ss" + shortSoundId + "-track" + id;
+        this.fileName = originalFileName + "-modified";
         this.sqlHelper.updateShortSoundTrack(this);  // Had to update with filenames =(
         initFiles(audioFile);
-        setupAudioTrack();
     }
 
     /**
@@ -83,113 +70,10 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TITLE + " field.");
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
         this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
-        this.file = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
-        this.originalFile = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
+        this.fileName = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
+        this.originalFileName = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
-        setupAudioTrack();
-    }
-
-    /**
-     * Sets up the AudioTrack for this ShortSoundTrack. This method needs to be called prior to
-     * any audio interaction (stop, play, etc..).
-     */
-    public void setupAudioTrack() {
-        BUFFER_SIZE = AudioTrack.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
-        audioTrack = new AudioTrack(STREAM_TYPE, SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, BUFFER_SIZE, MODE);
-        audioFrame = new byte[BUFFER_SIZE * 2];
-        trackState = TrackState.STOPPED;
-    }
-
-    /**
-     * Play the audio track associated with this ShortSound.
-     */
-    public void play() {
-        // If the track is Stopped then we need to reset the input stream so the AudioTrack starts
-        // from the beginning again.
-        if ( trackState == TrackState.STOPPED ) {
-            setInputStream();
-        }
-        if ( audioThread != null ) {
-            audioThread.interrupt();
-        }
-        trackState = TrackState.PLAYING;
-        AudioTask task = new AudioTask();
-        audioThread = new Thread(task);
-        audioThread.start();
-        Log.d(DEBUG_TAG, "Play track ["+id+"] from new thread.");
-    }
-
-    private class AudioTask implements Runnable {
-        @Override
-        public void run() {
-            try {
-                Log.d(DEBUG_TAG, "Running thread to play ShortSoundTrack["+id+"]");
-                audioTrack.play();
-                int bytesRead;
-                while( (bytesRead = audioInputStream.read( audioFrame ) ) != -1 && trackState == TrackState.PLAYING ) {
-                    // NOTE: this is blocking, so the next frame will not be loaded until ready.
-                    // Look at AudioTrack docs for more info.
-                    Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack. PlaybackPosition["+audioTrack.getPlaybackHeadPosition()+"]");
-                    audioTrack.write( audioFrame, 0, bytesRead );
-                }
-                if ( trackState == TrackState.PLAYING ) {
-                    // We reached the end of the track
-                    Log.d(DEBUG_TAG, "Reached end of track["+id+"]");
-                    audioTrack.flush();  // Clear the playback buffer and set Playback position to 0
-                    trackState = TrackState.STOPPED;
-                    audioInputStream.close();
-                    onCompleteListener.onComplete();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void setInputStream() {
-        if ( audioInputStream != null ) {
-            try {
-                audioInputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream( new File(STORAGE_PATH, file) );
-            audioInputStream = new DataInputStream( fileInputStream );
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Stop playing this track and reset its position to the beginning of the audio file.
-     */
-    public void stop() {
-        // TODO
-    }
-
-    /**
-     * Pause this track.
-     */
-    public void pause() {
-        if ( trackState == TrackState.PLAYING ) {
-            Log.d(DEBUG_TAG, "Pause track [" + id + "]");
-            audioTrack.pause();
-            trackState = TrackState.PAUSED;
-        } else {
-            Log.e(DEBUG_TAG, "Tried to pause track ["+id+"] in invalid state ["+trackState+"]");
-        }
-    }
-
-    /**
-     * Set the onCompletionListener for this ShortSoundTrack.
-     * @param listener
-     */
-    public void setOnPlayCompleteListener( OnCompleteListener listener ) {
-        this.onCompleteListener = listener;
     }
 
     public void addEffect() {
@@ -218,8 +102,8 @@ public class ShortSoundTrack {
      * @param audioFile
      */
     private void initFiles( File audioFile ) {
-        File originalFile = new File( STORAGE_PATH, this.originalFile );
-        File file = new File( STORAGE_PATH , this.file );
+        File originalFile = new File( STORAGE_PATH, this.originalFileName);
+        File file = new File( STORAGE_PATH , this.fileName);
         try {
             copyFile( audioFile, originalFile );
             copyFile( audioFile, file );
@@ -233,11 +117,11 @@ public class ShortSoundTrack {
      * any modified)
      */
     private void deleteFiles() {
-        File originalFile = new File( this.originalFile );
+        File originalFile = new File( this.originalFileName);
         if( originalFile.exists() ) {
             originalFile.delete();
         }
-        File file = new File( this.file );
+        File file = new File( this.fileName);
         if( file.exists() ) {
             file.delete();
         }
@@ -286,17 +170,13 @@ public class ShortSoundTrack {
      * Get the filename associated with this track.
      * @return filename
      */
-    public String getFile() { return this.file; }
+    public String getFileName() { return this.fileName; }
 
     /**
      * Get this tracks id.
      * @return id
      */
     public long getId() { return this.id; }
-
-    public interface OnCompleteListener {
-        public void onComplete();
-    }
 
     /**
      * This is the representation invarient of the ShortSoundTrack model.
@@ -305,17 +185,17 @@ public class ShortSoundTrack {
      */
     private void repInvariant() {
         if ( this.title == null || !(this.title instanceof String) ) throw new AssertionError("Invalid title");
-        if ( this.file == null || !(this.file instanceof String) ) throw new AssertionError("Invalid filename");
-        if ( this.originalFile == null || !(this.originalFile instanceof String) ) throw new AssertionError("Invalid filename");
+        if ( this.fileName == null || !(this.fileName instanceof String) ) throw new AssertionError("Invalid filename");
+        if ( this.originalFileName == null || !(this.originalFileName instanceof String) ) throw new AssertionError("Invalid filename");
         if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
         // Check that the files are on disk
-        File originalFile = new File( this.originalFile );
+        File originalFile = new File( this.originalFileName);
         if ( !originalFile.exists() ) throw new AssertionError("File does not exist: " + originalFile);
-        File file = new File( this.file );
+        File file = new File( this.fileName);
         if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
     }
 
-    public String getOriginalFile() {
-        return originalFile;
+    public String getOriginalFileName() {
+        return originalFileName;
     }
 }
