@@ -5,6 +5,7 @@ import android.graphics.PointF;
 import android.media.MediaPlayer;
 import android.util.Log;
 
+import com.sloths.speedy.shortsounds.view.MainActivity;
 import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
 import java.io.File;
@@ -77,14 +78,20 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_TRACK_FILENAME_MODIFIED ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TRACK_FILENAME_MODIFIED + " field.");
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TITLE + " field.");
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
-        this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
+        if ( !map.containsKey( sqlHelper.EQ_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.EQ_EFFECT_PARAMS + " field.");
+        if ( !map.containsKey( sqlHelper.REVERB_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.REVERB_EFFECT_PARAMS + " field.");
+
+        this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
         this.file = map.get(sqlHelper.KEY_TRACK_FILENAME_MODIFIED);
         this.originalFile = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
-        this.title = map.get( sqlHelper.KEY_TITLE );
+        this.title = map.get(sqlHelper.KEY_TITLE);
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
         this.player = new MediaPlayer();
+
+        String eqParams = map.get( sqlHelper.EQ_EFFECT_PARAMS );
+        String reverbParams = map.get( sqlHelper.REVERB_EFFECT_PARAMS);
         setUpMediaPlayer();
-        setUpEffects();
+        loadEffectsFromDB(eqParams, reverbParams);
     }
 
     private void setUpMediaPlayer() {
@@ -111,6 +118,22 @@ public class ShortSoundTrack {
     private void setUpEffects() {
         this.mEqEffect = new EqEffect(player);
         this.mReverbEffect = new ReverbEffect(player);
+    }
+
+    private void loadEffectsFromDB(String eqParams, String reverbParams) {
+        Log.d("ShortSoundTrack", "eq effect params received: "+ eqParams);
+        Log.d("ShortSoundTrack", "reverb effect params received: "+ reverbParams);
+
+        if (eqParams == null || eqParams.equals("NULL")) {
+            this.mEqEffect = new EqEffect(player);
+        } else {
+            this.mEqEffect = new EqEffect(player, eqParams);
+        }
+        if (reverbParams == null || reverbParams.equals("NULL")) {
+            this.mReverbEffect = new ReverbEffect(player);
+        } else {
+            this.mReverbEffect = new ReverbEffect(player, reverbParams);
+        }
     }
 
     /**
@@ -241,16 +264,20 @@ public class ShortSoundTrack {
         }
     }
 
-    // TODO:
+    /***
+     *
+     * @param effect
+     * @return
+     */
     public PointF[] getEffectVals(String effect) {
-//        if (EQ) {
-//            return eq vals (2 PointF)
-//        } else {
-//            return reverb vals (1 PointF)
-//        }
-
-        // If nothing is stored for effects yet just return null
-        return null;
+        if (effect.equals(EFFECT.EQ)) {
+            PointF[] points = mEqEffect.getPointVals();
+            return points;
+        } else {
+            // Reverb point being returned
+            PointF[] points = mReverbEffect.getPointVal();
+            return points;
+        }
     }
 
     public void removeEffect(EFFECT e) {
@@ -384,5 +411,13 @@ public class ShortSoundTrack {
 
     public String getOriginalFile() {
         return originalFile;
+    }
+
+    public String getEQEffectString() {
+        return mEqEffect.encodeParameters();
+    }
+
+    public String getReverbEffectString() {
+        return mReverbEffect.encodeParameters();
     }
 }

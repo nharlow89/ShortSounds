@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="Reverb"
-            android:textSize="100dp"
+            android:textSize="60dp"
             android:minHeight="30dp">
         </TextView>
         <!-- If the client uses a customTitle, it will be added here. -->
@@ -67,7 +67,7 @@
             android:layout_marginRight="20dp"
             android:layout_marginBottom="20dp"
             android:layout_alignTop="@+id/saveEffectButton"
-            android:textSize="30dp" />
+            android:textSize="20dp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -81,7 +81,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_margin="20dp"
-            android:textSize="30dp" />
+            android:textSize="20dp" />
 
         <Space
             android:layout_width="100px"

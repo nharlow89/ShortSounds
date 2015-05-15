@@ -382,9 +382,13 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         // Set effect view with values pulled from model
         PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
         if (effect.equals(EQ)) {
-            ((Fx_EQCanvas) findViewById(R.id.eq_canvas)).setValues(values);
+            if (values != null) {
+                ((Fx_EQCanvas) findViewById(R.id.eq_canvas)).setValues(values);
+            }
         } else if (effect.equals(REVERB)) {
-            ((Fx_ReverbCanvas) findViewById(R.id.reverb_canvas)).setValue(values[0]);
+            if (values != null) {
+                ((Fx_ReverbCanvas) findViewById(R.id.reverb_canvas)).setValue(values[0]);
+            }
         }
 
         // Change the view to the effect

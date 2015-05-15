@@ -46,6 +46,8 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     public static final String KEY_SHORT_SOUND_ID = "short_sound_id";
     public static final String KEY_TRACK_FILENAME_ORIGINAL = "filename_original";
     public static final String KEY_TRACK_FILENAME_MODIFIED = "filename_modified";
+    public static final String EQ_EFFECT_PARAMS = "eq_effects";
+    public static final String REVERB_EFFECT_PARAMS = "reverb_effects";
 
 
     // Table Create Query
@@ -64,7 +66,9 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                     KEY_TRACK_FILENAME_ORIGINAL + " TEXT, " +
                     KEY_TRACK_FILENAME_MODIFIED + " TEXT, " +
                     KEY_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
-                    KEY_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP);";
+                    KEY_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                    EQ_EFFECT_PARAMS + " TEXT DEFAULT 'NULL'," +
+                    REVERB_EFFECT_PARAMS + " TEXT DEFAULT 'NULL');";
 
     private ShortSoundSQLHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -222,6 +226,8 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         values.put( KEY_SHORT_SOUND_ID, id );
         values.put( KEY_TRACK_FILENAME_ORIGINAL, track.getOriginalFile() );
         values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFile() );
+        values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
+        values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
         return db.insert( TRACK_TABLE_NAME, null, values );  // Returns the new entry id
     }
 
@@ -236,6 +242,8 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         values.put( KEY_TITLE, track.getTitle() );
         values.put( KEY_TRACK_FILENAME_ORIGINAL, track.getOriginalFile() );
         values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFile() );
+        values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
+        values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
         db.update( TRACK_TABLE_NAME, values, "id=" + track.getId(), null );  // Returns the new entry id
     }
 
