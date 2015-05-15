@@ -13,6 +13,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,8 +25,10 @@ import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewAnimator;
 import android.content.Intent;
 import android.widget.SeekBar;
@@ -35,6 +38,8 @@ import android.widget.TextView;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
+import com.sloths.speedy.shortsounds.model.EqEffect;
+import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
@@ -422,21 +427,35 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
     // This is used for loading the popup when clicking a specific effect
     public void effectEditSelected(int track, String effect) {
+
         // Set effect view with values pulled from model
         PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
         if (effect.equals(EQ)) {
             if (values != null) {
-                Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
-                eqCanvas.setValues(values);
-                // Save & cancel buttons
-                findViewById(R.id.cancelEQButton).setOnClickListener(new SaveButtonListener(eqCanvas));
+                // Set saved values
+                ((Fx_EQCanvas) findViewById(R.id.eq_canvas)).setValues(values);;
+            } else {
+                // Set default values for EQ
+                ((Fx_EQCanvas) findViewById(R.id.eq_canvas)).resetPoints();
             }
+            // Set button listeners on save & cancel on EQ
+            findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(track, effect));
+            findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(effect));
         } else if (effect.equals(REVERB)) {
             if (values != null) {
                 ((Fx_ReverbCanvas) findViewById(R.id.reverb_canvas)).setValue(values[0]);
+            } else {
+                // Set default values for Reverb
+                ((Fx_ReverbCanvas) findViewById(R.id.reverb_canvas)).resetPoint();
             }
+            // Set button listeners on save & cancel on Reverb
+            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(track, effect));
+            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
+        } else {
+            // Set cancel and save for other effects
+            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(track, effect));
+            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
         }
-
 
         // Change the view to the effect
         animator.setDisplayedChild(viewMap.get(effect));
@@ -630,10 +649,21 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
 
     public class CancelButtonListener implements View.OnClickListener {
+        private String effect;
 
+        public CancelButtonListener(String effect) {
+            this.effect = effect;
+        }
+
+        // Switch view back w/o saving anything to backend
         @Override
         public void onClick(View v) {
+            Log.d("Main", "Cancel clicked");
 
+            // Show message
+            showToast("Canceled " + effect);
+            // Got back to track view
+            onBackPressed();
         }
     }
 
@@ -642,19 +672,50 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * Should save the values to the model
      */
     public class SaveButtonListener implements View.OnClickListener {
-        private Effect effect;
+        private int track;
+        private String effect;
 
-        public SaveButtonListener(Effect effect) {
+        public SaveButtonListener(int track, String effect) {
+            this.track = track;
             this.effect = effect;
+            String trackName = mActiveShortSound.getTracks().get(track).toString();
         }
 
         @Override
         public void onClick(View v) {
-            // Grab values from UI
-//            PointF[] vals = effect.getValues
-            // Update effect
+            String trackName = mActiveShortSound.getTracks().get(track).toString();
 
-            // Close
+            // Save values to backend effect (EQ/Reverb) & change view
+            if (effect.equals(EQ)) {
+                Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
+                PointF lo = eqCanvas.getBandA();
+                PointF hi = eqCanvas.getBandB();
+                EqEffect effect = mActiveShortSound.getTracks().get(track).getmEqEffect();
+                PointF[] newVals = new PointF[]{lo, hi};
+                effect.setPointVals(newVals);
+            } else if (effect.equals(REVERB)) {
+                Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
+                PointF point = reverbCanvas.getValue();
+                ReverbEffect effect = mActiveShortSound.getTracks().get(track).getmReverbEffect();
+                effect.setPointVal(point);
+            } else {
+                // Don't do anything for other effects
+            }
+
+            // Show message
+            showToast("Saved " + effect);
+
+            // Switch view back
+            onBackPressed();
         }
+    }
+
+    private void showToast(String text) {
+        Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        LinearLayout layout =(LinearLayout)toast.getView();
+        TextView textView = ((TextView)layout.getChildAt(0));
+        textView.setTextSize(20);
+        textView.setGravity(Gravity.CENTER);
+        toast.show();
     }
 }

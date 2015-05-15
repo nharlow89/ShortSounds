@@ -442,4 +442,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public interface ChooseEffectListener {
         void onButtonClicked(int track, String name);
     }
+
+    public View getViewAtPos(int i) {
+        return mViews.get(i).getViewHoldersView();
+    }
 }

@@ -62,6 +62,8 @@ public class Fx_EQCanvas extends View {
         right = new EQPointF(getMeasuredWidth(), getMeasuredHeight() / 2);
         lo = new PointGroup(PointInit.LO);
         hi = new PointGroup(PointInit.HI);
+        setPath();
+        invalidate();
     }
 
     void setStyles() {
@@ -219,12 +221,12 @@ public class Fx_EQCanvas extends View {
     }
 
     private PointF getBand(EQPointF point) {
-        float midY = getMeasuredHeight() / 2;
+        float midY = (float) getMeasuredHeight() / (float) 2;
 
         // lo point to return as percentage
-        float loXPercent = point.x / getMeasuredWidth();
+        float loXPercent = point.x / (float) getMeasuredWidth();
         float loYPercent = (midY - point.y) / midY;
-        return new PointF((int) loXPercent, (int) loYPercent);
+        return new PointF(loXPercent, loYPercent);
     }
 
     public void setValues(PointF[] points) {
@@ -234,9 +236,11 @@ public class Fx_EQCanvas extends View {
             return;
         }
         float width = getMeasuredWidth();
-        float height = getMeasuredHeight() / 2;
-        lo.set(points[0].x * width, points[0].y * height);
-        hi.set(points[1].x * width, points[1].y * height);
+        float height = getMeasuredHeight() / (float) 2;
+        lo.set(points[0].x * width, height - points[0].y * height);
+        hi.set(points[1].x * width, height - points[1].y * height);
+        setPath();
+        invalidate();
     }
 
     class PointGroup {

@@ -75,6 +75,10 @@ public class TrackView extends RecyclerView {
         }
     }
 
+    public RecyclerViewAdapter getmAdapter() {
+        return mAdapter;
+    }
+
 //    private void showToast(String text, int length) {
 //        Toast toast = Toast.makeText(getActivity(), text, length);
 //        LinearLayout layout =(LinearLayout)toast.getView();

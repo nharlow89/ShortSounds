@@ -4,6 +4,7 @@ import android.graphics.PointF;
 import android.media.MediaPlayer;
 import android.media.audiofx.AudioEffect;
 import android.media.audiofx.Equalizer;
+import android.util.Log;
 
 /**
  * Created by caseympfischer on 4/28/15.
@@ -133,6 +134,12 @@ public class EqEffect extends Effect {
      * @return
      */
     public PointF[] getPointVals() {
+        Log.d("EqEfect", "Returning eq effect values...");
+        if (eqPoints == null) {
+            Log.d("EqEffect", "null eq effect values");
+        } else {
+            Log.d("EqEffect", eqPoints[0].x + ", " + eqPoints[0].y + "),(" + eqPoints[1].x + ", " + eqPoints[1].y + ")");
+        }
         return eqPoints;
     }
 
@@ -141,10 +148,13 @@ public class EqEffect extends Effect {
      * @param points
      */
     public void setPointVals(PointF[] points) {
+        Log.d("EqEfect", "Setting eq effect values to...");
         if (eqPoints == null) {
-            eqPoints = new PointF[2];
+            this.eqPoints = new PointF[2];
         }
-        eqPoints[0] = points[0];
-        eqPoints[1] = points[1];
+        this.eqPoints[0] = points[0];
+        this.eqPoints[1] = points[1];
+        Log.d("EqEffect", eqPoints[0].x + ", " + eqPoints[0].y + "),(" + eqPoints[1].x + ", " + eqPoints[1].y + ")");
+
     }
 }

@@ -284,7 +284,7 @@ public class ShortSoundTrack {
      * @return
      */
     public PointF[] getEffectVals(String effect) {
-        if (effect.equals(EFFECT.EQ)) {
+        if (effect.equals(MainActivity.EQ)) {
             PointF[] points = mEqEffect.getPointVals();
             return points;
         } else {

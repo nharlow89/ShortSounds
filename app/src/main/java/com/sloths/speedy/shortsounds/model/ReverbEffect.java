@@ -114,6 +114,7 @@ public class ReverbEffect extends Effect {
      * @param point
      */
     public void setPointVal(PointF point) {
+        Log.d("ReverbEffect", "Setting reverb effect values");
         this.pointVal = point;
     }
 }
