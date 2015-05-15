@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.ShortSound;
@@ -45,6 +46,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public RecyclerViewAdapter(ShortSound sound, Context context) {
         mShortSound = sound;
         this.mContext = context;
+//        modelControl = (ModelControl) context;
         mAudioPlayer = ((MainActivity) this.mContext).getActiveAudioPlayer();
         mViews = new ArrayList<ViewHolder>();
     }
