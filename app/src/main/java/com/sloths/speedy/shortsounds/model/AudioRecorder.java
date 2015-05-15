@@ -30,11 +30,29 @@ public class AudioRecorder {
     private File mCacheDir;
     private Thread mRecordingThread = null;
 
+    /**
+     * Constructor for an AudioRecorder
+     * @param cacheDir File to be used for audio
+     */
     public AudioRecorder( File cacheDir ) {
         mCacheDir = cacheDir;
         this.setup();
     }
 
+    /**
+     * Performs setup for this AudioRecorder. Primarily sets up mTrackRecorder.
+     */
+    private void setup() {
+        mTrackRecorder = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE_IN_HZ, CHANNEL_CONFIG,
+                AUDIO_FORMAT, BUFFER_ELEMENTS_TO_REC * BYTES_PER_ELEMENT);
+        int current_state = mTrackRecorder.getState();
+        assert(current_state == AudioRecord.STATE_INITIALIZED);
+        mIsRecording = false;
+    }
+
+    /**
+     * Starts the recording process
+     */
     public void start() {
         mTrackRecorder.startRecording();
         mIsRecording = true;
@@ -46,19 +64,9 @@ public class AudioRecorder {
         mRecordingThread.start();
     }
 
-    public File end() {
-        if ( mTrackRecorder != null && mIsRecording ) {
-            Log.d("DEBUG", "Attempt to stop recording!");
-            // stops the recording activity
-            mTrackRecorder.stop();
-            mTrackRecorder.release();
-            mTrackRecorder = null;
-            mRecordingThread = null;
-            mIsRecording = false;
-        }
-        return mTempAudioFile;
-    }
-
+    /**
+     * writes the audio data to mTempAudioFile
+     */
     private void writeAudioDataToFile() {
         // Write the output audio in byte
         short sData[] = new short[BUFFER_ELEMENTS_TO_REC];
@@ -69,7 +77,6 @@ public class AudioRecorder {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
         while (isRecording()) {
             // gets the voice output from microphone to byte format
             mTrackRecorder.read(sData, 0, BUFFER_ELEMENTS_TO_REC);
@@ -88,6 +95,31 @@ public class AudioRecorder {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * ends the recording process
+     * @return File the file holding the audio
+     */
+    public File end() {
+        if ( mTrackRecorder != null && mIsRecording ) {
+            Log.d("DEBUG", "Attempt to stop recording!");
+            // stops the recording activity
+            mTrackRecorder.stop();
+            mTrackRecorder.release();
+            mTrackRecorder = null;
+            mRecordingThread = null;
+            mIsRecording = false;
+        }
+        return mTempAudioFile;
+    }
+
+    /**
+     * returns True if this AudioRecorder is recording, false else
+     * @return boolean true if this AudioRecorder is recording, false else
+     */
+    public boolean isRecording() {
+        return this.mIsRecording;
     }
 
     /**
@@ -113,18 +145,4 @@ public class AudioRecorder {
         // TODO: cleanup resources from previous recording? temp file?
         setup();
     }
-
-    public boolean isRecording() {
-        return this.mIsRecording;
-    }
-
-    private void setup() {
-        mTrackRecorder = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE_IN_HZ, CHANNEL_CONFIG,
-                AUDIO_FORMAT, BUFFER_ELEMENTS_TO_REC * BYTES_PER_ELEMENT);
-        int current_state = mTrackRecorder.getState();
-        assert(current_state == AudioRecord.STATE_INITIALIZED);
-        mIsRecording = false;
-    }
-
-
 }
