@@ -502,11 +502,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 deleteShortSound();
                 return true;
             case R.id.action_new:
-                //TODO: Add new shortsound functionality
                 createNew();
                 return true;
             case R.id.action_rename:
-                //TODO: Don't allow only white space
                 rename();
                 return true;
             default:
@@ -516,13 +514,28 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     /*
-     * Deletes a ShortSound from the library.
+     * Deletes the current ShortSound from the library.
+     * If there are other ShortSounds in the library, opens the first
+     * ShortSound.
+     * If there are no ShortSounds in the library, creates and opens a new
+     * ShortSound
      */
     private void deleteShortSound() {
         if (mActiveShortSound != null) {
-            // Delete sound from database.
-            // Reset library
-            // Return to start screen
+            sounds.remove(mActiveShortSound);
+            mActiveShortSound.delete();
+            if (sounds.size() > 0) {
+                mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
+                mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                        R.layout.drawer_list_item, mShortSoundsTitles));
+                selectShortSoundFromDrawer(0);
+                // hides seek bar and play button
+                setUpGlobalSeekBar();
+                setUpGlobalPlayButton();
+            } else {
+                createNew();
+            }
+            // TODO: make record a sound text view visible
         }
     }
 
