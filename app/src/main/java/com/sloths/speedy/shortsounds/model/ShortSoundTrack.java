@@ -91,7 +91,6 @@ public class ShortSoundTrack {
      *      will be removed.
      */
     public void delete() {
-        // TODO: cleanup any resources (audio players and stuff)
         sqlHelper.removeShortSoundTrack( this );
         deleteFiles();
     }
