@@ -21,16 +21,13 @@ import java.util.HashMap;
  * file. A ShortSoundTrack should belong to a single ShortSound at any given time.
  */
 public class ShortSoundTrack {
+
     /**
      * Please note that the internal state of a ShortSoundTrack attempts to follow the state
      * machine found here in the MediaPlayer class: http://developer.android.com/reference/android/media/MediaPlayer.html
      */
 
-    public static final String AUDIO_FORMAT = "";  // TODO: format/encoding?
-    public static final int TRACK_LENGTH = 30;  // Track length in seconds
-    public static final int BUFFER_SIZE = 2000;  // TODO: make buffer size with respect to TRACK_LENGTH
     public static final String DEFAULT_TITLE = "Untitled Track";
-
     private static final String TAG = "Track";
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
     private final String originalFile;
@@ -50,6 +47,7 @@ public class ShortSoundTrack {
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
+     * @param audioFile The recorded audio file.
      * @param shortSoundId The id of the ShortSound that this track belongs to.
      * @postcondition This ShortSoundTrack will be stored in the database and a
      *      copy of the file referenced by filename will be made.
@@ -57,7 +55,6 @@ public class ShortSoundTrack {
     public ShortSoundTrack( File audioFile, long shortSoundId ) {
         this.title = DEFAULT_TITLE;
         this.parentId = shortSoundId;
-        // TODO: create a copy of the original file that will be our "working" copy
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         this.originalFile = "ss" + shortSoundId + "-track" + id;
         this.file = originalFile + "-modified";
@@ -94,7 +91,7 @@ public class ShortSoundTrack {
         loadEffectsFromDB(eqParams, reverbParams);
     }
 
-    private void setUpMediaPlayer() {
+    public void setUpMediaPlayer() {
         this.player = new MediaPlayer();
         Context context = ShortSoundsApplication.getAppContext();
         String path = context.getFilesDir().getAbsolutePath();
@@ -120,6 +117,11 @@ public class ShortSoundTrack {
         this.mReverbEffect = new ReverbEffect(player);
     }
 
+    /**
+     * Loads teh effects given their held String state parameters in the database
+     * @param eqParams
+     * @param reverbParams
+     */
     private void loadEffectsFromDB(String eqParams, String reverbParams) {
         Log.d("ShortSoundTrack", "eq effect params received: "+ eqParams);
         Log.d("ShortSoundTrack", "reverb effect params received: "+ reverbParams);
@@ -129,6 +131,8 @@ public class ShortSoundTrack {
         } else {
             this.mEqEffect = new EqEffect(player, eqParams);
         }
+
+        // Reverb
         if (reverbParams == null || reverbParams.equals("NULL")) {
             this.mReverbEffect = new ReverbEffect(player);
         } else {
@@ -147,7 +151,7 @@ public class ShortSoundTrack {
             preparingWhilePlayed = false;
         } else if ( mState == MediaState.STOPPED ) {
             try {
-                Log.d(TAG, "play stopped track ["+this.getId()+"]");
+                Log.d(TAG, "prepare and then play stopped track ["+this.getId()+"]");
                 player.prepare();
                 player.start();
                 preparingWhilePlayed = false;
@@ -157,6 +161,8 @@ public class ShortSoundTrack {
         } else if (mState == MediaState.PREPARING) {
             Log.d(TAG, "Preparing track ["+this.getId()+"]");
             preparingWhilePlayed = true;
+        } else {
+            Log.e("DEBUG", "Attempted to play track ["+this.id+"] from invalid/undefined state?: " + mState);
         }
 
     }
@@ -165,11 +171,13 @@ public class ShortSoundTrack {
      * Stop playing this track and reset its position to the beginning of the audio file.
      */
     public void stop() {
-        if ( player.isPlaying() || mState == MediaState.STARTED || mState == MediaState.PAUSED ) {
+        if (mState != MediaState.INITIALIZED &&  (mState == MediaState.STARTED || mState == MediaState.PAUSED) ) {
             Log.d(TAG, "stop track ["+this.getId()+"]");
             player.stop();
             player.prepareAsync();
             mState = MediaState.PREPARING;
+        } else {
+            Log.e("DEBUG", "Attempted to stop track ["+this.id+"] from invalid state: " + mState);
         }
     }
 
@@ -178,6 +186,8 @@ public class ShortSoundTrack {
             Log.d(TAG, "pause track ["+this.getId()+"]");
             player.pause();
             mState = MediaState.PAUSED;
+        } else {
+            Log.e("DEBUG", "Attempted to pause track ["+this.id+"] from invalid state: " + mState);
         }
     }
 
@@ -194,6 +204,8 @@ public class ShortSoundTrack {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            Log.e("DEBUG", "Attempted to prepare track ["+this.id+"] from invalid state: " + mState);
         }
     }
 
@@ -226,9 +238,11 @@ public class ShortSoundTrack {
         if ( player == null )
             setUpMediaPlayer();
         if ( mState == MediaState.INITIALIZED || mState == MediaState.STOPPED ) {
-            Log.d(TAG, "prepareAsync track ["+this.getId()+"]");
+            Log.d(TAG, "prepareAsync track ["+this.id+"]");
             player.prepareAsync();
             mState = MediaState.PREPARING;
+        } else {
+            Log.e("DEBUG", "Attempted to prepareAsync track ["+this.id+"] from invalid state: " + mState);
         }
     }
 
@@ -298,6 +312,7 @@ public class ShortSoundTrack {
      *      will be removed.
      */
     public void delete() {
+        // TODO: cleanup any resources (audio players and stuff)
         sqlHelper.removeShortSoundTrack( this );
         deleteFiles();
     }
@@ -419,5 +434,13 @@ public class ShortSoundTrack {
 
     public String getReverbEffectString() {
         return mReverbEffect.encodeParameters();
+    }
+
+    public EqEffect getmEqEffect() {
+        return mEqEffect;
+    }
+
+    public ReverbEffect getmReverbEffect() {
+        return mReverbEffect;
     }
 }

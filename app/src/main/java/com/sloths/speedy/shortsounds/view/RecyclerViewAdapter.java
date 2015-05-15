@@ -17,6 +17,7 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -44,9 +45,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // to a pair containg the MediaPlayer and a boolean that describes if the MediaPlayer is currently
     // prepared or not.
     public Map<Long, Pair<MediaPlayer, MediaState>> mMediaPlayerPool;
-    private Context context;
-//    private RVListener listener;
+    private Context mContext;
+    //    private RVListener listener;
     private ArrayList<Color> mColorPallete;
+    private List<ViewHolder> mViews;
 
 
     /**
@@ -56,8 +58,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public RecyclerViewAdapter(ShortSound sound, Context context) {
         mShortSound = sound;
         mMediaPlayerPool = new HashMap<>();
-        this.context = context;
-//        listener = rvf;
+        this.mContext = context;
+        mViews = new ArrayList<ViewHolder>();
     }
 
     // Create new views (invoked by the layout manager)
@@ -68,6 +70,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .inflate(R.layout.track_view, viewGroup, false);
         // Define click listener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
+        mViews.add(vh);
         return vh;
     }
 
@@ -94,33 +97,33 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         int num_colors = 6;
         switch(position % num_colors) {
             case 0:
-                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.purple_500);
-                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.purple_200);
+                viewHolder.mPrimaryColor = this.mContext.getResources().getColor(R.color.purple_500);
+                viewHolder.mSecondaryColor = this.mContext.getResources().getColor(R.color.purple_200);
                 setColorOnView(viewHolder, currentView);
                 break;
             case 1:
-                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.teal_500);
-                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.teal_200);
+                viewHolder.mPrimaryColor = this.mContext.getResources().getColor(R.color.teal_500);
+                viewHolder.mSecondaryColor = this.mContext.getResources().getColor(R.color.teal_200);
                 setColorOnView(viewHolder, currentView);
                 break;
             case 2:
-                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.deep_orange_500);
-                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.deep_orange_200);
+                viewHolder.mPrimaryColor = this.mContext.getResources().getColor(R.color.deep_orange_500);
+                viewHolder.mSecondaryColor = this.mContext.getResources().getColor(R.color.deep_orange_200);
                 setColorOnView(viewHolder, currentView);
                 break;
             case 3:
-                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.pink_500);
-                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.pink_200);
+                viewHolder.mPrimaryColor = this.mContext.getResources().getColor(R.color.pink_500);
+                viewHolder.mSecondaryColor = this.mContext.getResources().getColor(R.color.pink_200);
                 setColorOnView(viewHolder, currentView);
                 break;
             case 4:
-                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.yellow_500);
-                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.yellow_200);
+                viewHolder.mPrimaryColor = this.mContext.getResources().getColor(R.color.yellow_500);
+                viewHolder.mSecondaryColor = this.mContext.getResources().getColor(R.color.yellow_200);
                 setColorOnView(viewHolder, currentView);
                 break;
             case 5:
-                viewHolder.mPrimaryColor = this.context.getResources().getColor(R.color.indigo_500);
-                viewHolder.mSecondaryColor = this.context.getResources().getColor(R.color.indigo_200);
+                viewHolder.mPrimaryColor = this.mContext.getResources().getColor(R.color.indigo_500);
+                viewHolder.mSecondaryColor = this.mContext.getResources().getColor(R.color.indigo_200);
                 setColorOnView(viewHolder, currentView);
                 break;
             default:
@@ -154,10 +157,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private View vView;
         private int mPrimaryColor;
         private int mSecondaryColor;
-        final Button eqButton;
-        final Button reverbButton;
-        final Button distButton;
-        final Button bitButton;
         //        private final ListView effectsList;
         private Switch eqToggle;
         private Switch reverbToggle;
@@ -167,33 +166,29 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         public ViewHolder(View v) {
             super(v);
-            v.setOnClickListener(new TrackListener());
-            vTitle = (TextView) v.findViewById(R.id.track_title);
+            // init instance variables
             vView = v;
+            vTitle = (TextView) v.findViewById(R.id.track_title);
+            vTitle.setOnClickListener(new TrackListener());
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
-            eqButton = ((Button) v.findViewById(R.id.eq_button));
-            reverbButton = ((Button) v.findViewById(R.id.reverb_button));
-            distButton = ((Button) v.findViewById(R.id.dist_button));
-            bitButton = ((Button) v.findViewById(R.id.bit_button));
-            eqToggle = ((Switch) v.findViewById(R.id.eq_switch));
-            reverbToggle = ((Switch) v.findViewById(R.id.reverb_switch));
-            distToggle = ((Switch) v.findViewById(R.id.dist_switch));
-            bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
             mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
-            setUpButtons(new Button[] {eqButton, reverbButton, bitButton, distButton});
-            setUpToggles();
-            setPlayClickHandler();
-            vTrackChild.setVisibility(View.GONE);
-
-            // Populate effects in the effects list the track keeps
-            // TODO: Link the effects to the real ones in the database
-            // Currently populating a fake effects list
-//            List<Effect> effects = getEffects();
-//
-//            effectsList = (ListView) v.findViewById(R.id.effects_list_b);
-//            EffectsListAdapter effectsAdapter = new EffectsListAdapter(context, effects);
-//            effectsList.setAdapter(effectsAdapter);
             trackExpanded = false;
+
+            // init buttons
+            Button eqButton = ((Button) v.findViewById(R.id.eq_button));
+            Button reverbButton = ((Button) v.findViewById(R.id.reverb_button));
+            Button distButton = ((Button) v.findViewById(R.id.dist_button));
+            Button bitButton = ((Button) v.findViewById(R.id.bit_button));
+            Switch eqToggle = ((Switch) v.findViewById(R.id.eq_switch));
+            Switch reverbToggle = ((Switch) v.findViewById(R.id.reverb_switch));
+            Switch distToggle = ((Switch) v.findViewById(R.id.dist_switch));
+            Switch bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
+
+            // perform setup
+            setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
+            setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
+            setPlayClickHandler(v);
+
         }
 
         /**
@@ -207,19 +202,27 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         /**
          * Set the event handler for the Play button on a given track.
          */
-        private void setPlayClickHandler() {
+        private void setPlayClickHandler(View v) {
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+
+                    // handle case for all tracks being played.
+                    if(mShortSound.isPlaying() || mShortSound.isPaused()) {
+                        mShortSound.stopAllTracks();
+                        ((ImageButton)((MainActivity) mContext).findViewById(R.id.imageButtonPlay))
+                                .setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_action_play));
+                        //getmGlobalPlayButton().setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_action_play));
+                    }
+
                     if ( mShortSoundTrack.isPlaying() ) {
                         // If the track was playing then stop it.
                         mShortSoundTrack.stop();
                         mShortSoundTrack.prepareAsync();
-                        mPlayTrackButton.setBackground( context.getResources().getDrawable(R.drawable.ic_action_play) );
+                        mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
                     } else {
-                        // The track was not playing, stop any other tracks and play this one.
-                        mShortSound.stopAllTracks();
+                        // The track was not playing, play this one
                         mShortSoundTrack.play();
-                        mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_stop));
+                        mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_stop));
                     }
                 }
             });
@@ -240,7 +243,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     mShortSoundTrack.stop();  // Make sure the state is updated with ShortSoundTrack
-                    mPlayTrackButton.setBackground(context.getResources().getDrawable(R.drawable.ic_action_play));
+                    mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
                     mShortSound.updateShortSound();
                 }
             });
@@ -263,7 +266,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 bs[i].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ((MainActivity) context).effectEditSelected(getPosition(), name);
+                        ((MainActivity) mContext).effectEditSelected(getPosition(), name);
 //                        listener.onButtonClicked(getPosition(), name);
                     }
                 });
@@ -321,6 +324,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             });
         }
 
+        // TODO implement effect toggle
+        private void setUpToggle(Switch[] sws) {
+            for (Switch sw : sws) {
+                sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            //effect on
+                        } else {
+                            //effect off
+                        }
+                    }
+                });
+            }
+        }
+
         /**
          * The listener for when a track is clicked on
          */
@@ -330,6 +349,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //listener.onButtonClicked(v, getPosition());
                 if (!trackExpanded) {
                     // Expand a track
+                    collapseAllOtherTracks();
                     expandTrackChildView(vTrackChild);
                     trackExpanded = true;
                     // Upon selecting a track we need to prepare the track for playing.
@@ -341,6 +361,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     // Stop the track (just in case it was playing)
                     mShortSoundTrack.stop();
                 }
+            }
+        }
+    }
+
+    /**
+     * Collapse all other tracks.
+     */
+    public void collapseAllOtherTracks() {
+        for(ViewHolder vh: mViews) {
+            if ( vh.trackExpanded ) {
+                collapseTrackChildView(vh.vTrackChild);
             }
         }
     }
