@@ -6,8 +6,6 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.media.MediaPlayer;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,30 +13,26 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+
 import com.sloths.speedy.shortsounds.R;
-import com.sloths.speedy.shortsounds.model.MediaState;
+import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provide views to RecyclerView with data from mDataSet.
  */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
     private ShortSound mShortSound;
-    // This is a pool of all the MediaPlayers for each track. The mapping is from ShortSoundTrack id
-    // to a pair containg the MediaPlayer and a boolean that describes if the MediaPlayer is currently
-    // prepared or not.
-    public Map<Long, Pair<MediaPlayer, MediaState>> mMediaPlayerPool;
     private Context mContext;
+    private AudioPlayer mAudioPlayer;
 //    private RVListener listener;
     private ArrayList<Color> mColorPallete;
     private List<ViewHolder> mViews;
@@ -50,8 +44,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     public RecyclerViewAdapter(ShortSound sound, Context context) {
         mShortSound = sound;
-        mMediaPlayerPool = new HashMap<>();
         this.mContext = context;
+        mAudioPlayer = ((MainActivity) this.mContext).getActiveAudioPlayer();
         mViews = new ArrayList<ViewHolder>();
     }
 
@@ -214,24 +208,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private void setPlayClickHandler(View v) {
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-
-                    // handle case for all tracks being played.
-                    if(mShortSound.isPlaying() || mShortSound.isPaused()) {
-                        mShortSound.stopAllTracks();
-                        ((ImageButton)((MainActivity) mContext).findViewById(R.id.imageButtonPlay))
-                                .setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_action_play));
-                        //getmGlobalPlayButton().setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_action_play));
-                    }
-
-                    if ( mShortSoundTrack.isPlaying() ) {
-                        // If the track was playing then stop it.
-                        mShortSoundTrack.stop();
-                        mShortSoundTrack.prepareAsync();
+                    if ( mAudioPlayer.isPlayingTrack( mShortSoundTrack ) ) {
+                        mAudioPlayer.pauseTrack( mShortSoundTrack );
                         mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
                     } else {
-                        // The track was not playing, play this one
-                        mShortSoundTrack.play();
-                        mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_stop));
+                        mAudioPlayer.playTrack( mShortSoundTrack, 0 );  // TODO: get the position from seekbar
+                        mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_pause));
                     }
                 }
             });
@@ -246,20 +228,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
         /**
-         * Set the ShortSoundTrack that this view corresponds to. We also setup the
-         * MediaPlayer for this particular track.
+         * Set the ShortSoundTrack that this view corresponds to.
          * @param track
          */
         public void setShortSoundTrack(ShortSoundTrack track) {
             mShortSoundTrack = track;
-            mShortSoundTrack.setOnPlayCompleteListener(new MediaPlayer.OnCompletionListener() {
+            /*
+            mShortSoundTrack.setOnPlayCompleteListener(new ShortSoundTrack.OnCompleteListener() {
                 @Override
-                public void onCompletion(MediaPlayer mp) {
-                    mShortSoundTrack.stop();  // Make sure the state is updated with ShortSoundTrack
+                public void onComplete() {
                     mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
-                    mShortSound.updateShortSound();
+                    mShortSound.notifyTrackStopped();
                 }
             });
+            */
         }
 
 //        private List<Effect> getEffects() {
@@ -312,14 +294,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     collapseAllOtherTracks();
                     expandTrackChildView(vTrackChild);
                     trackExpanded = true;
-                    // Upon selecting a track we need to prepare the track for playing.
-                    mShortSoundTrack.prepareAsync();
                 } else {
                     // Close the current open track
                     collapseTrackChildView(vTrackChild);
                     trackExpanded = false;
                     // Stop the track (just in case it was playing)
-                    mShortSoundTrack.stop();
+                    mAudioPlayer.stopTrack( mShortSoundTrack );
                     mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
                 }
             }
