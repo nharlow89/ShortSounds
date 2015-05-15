@@ -102,7 +102,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
         mGlobalPlayButton.setVisibility(View.VISIBLE);
-
+        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -627,6 +627,12 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         } else {
             // Update the existing fragment manager to add new track to list
             ((TrackView) findViewById(R.id.track_list)).notifyTrackAdded(mActiveShortSound.getTracks().size() - 1);
+        }
+
+        // Activate GlobalPlayButton so that tracks are playable
+        // If there is only one track, this must've been an empty ShortSound before
+        if (mActiveShortSound.getTracks().size() == 1) {
+            setGlobalPlayButtonClickHandler();
         }
     }
 }

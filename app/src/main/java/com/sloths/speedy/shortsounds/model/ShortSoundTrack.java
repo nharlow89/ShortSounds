@@ -35,7 +35,6 @@ public class ShortSoundTrack {
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
     private static final Context context = ShortSoundsApplication.getAppContext();
     public static final String STORAGE_PATH = context.getFilesDir().getAbsolutePath();
-    private final String originalFileName;
     private final String fileName;
     private long id;
     private String title;
@@ -52,8 +51,7 @@ public class ShortSoundTrack {
         this.title = DEFAULT_TITLE;
         this.parentId = shortSoundId;
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
-        this.originalFileName = "ss" + shortSoundId + "-track" + id;
-        this.fileName = originalFileName + "-modified";
+        this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
         this.sqlHelper.updateShortSoundTrack(this);  // Had to update with filenames =(
         initFiles(audioFile);
     }
@@ -71,7 +69,6 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
         this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
         this.fileName = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
-        this.originalFileName = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
     }
@@ -96,15 +93,12 @@ public class ShortSoundTrack {
     }
 
     /**
-     * Initialize the files for a new ShortSoundTrack. This makes a copy of the original audio file
-     * into the proper location.
+     * Initialize the files for a new ShortSoundTrack.
      * @param audioFile
      */
     private void initFiles( File audioFile ) {
-        File originalFile = new File( STORAGE_PATH, this.originalFileName);
         File file = new File( STORAGE_PATH , this.fileName);
         try {
-            copyFile( audioFile, originalFile );
             copyFile( audioFile, file );
         } catch (IOException e) {
             e.printStackTrace();
@@ -112,14 +106,9 @@ public class ShortSoundTrack {
     }
 
     /**
-     * Remove this ShortSoundTrack's files from memory (both the original and
-     * any modified)
+     * Remove this ShortSoundTrack's files from memory.
      */
     private void deleteFiles() {
-        File originalFile = new File( this.originalFileName);
-        if( originalFile.exists() ) {
-            originalFile.delete();
-        }
         File file = new File( this.fileName);
         if( file.exists() ) {
             file.delete();
@@ -185,16 +174,9 @@ public class ShortSoundTrack {
     private void repInvariant() {
         if ( this.title == null || !(this.title instanceof String) ) throw new AssertionError("Invalid title");
         if ( this.fileName == null || !(this.fileName instanceof String) ) throw new AssertionError("Invalid filename");
-        if ( this.originalFileName == null || !(this.originalFileName instanceof String) ) throw new AssertionError("Invalid filename");
         if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
         // Check that the files are on disk
-        File originalFile = new File( this.originalFileName);
-        if ( !originalFile.exists() ) throw new AssertionError("File does not exist: " + originalFile);
         File file = new File( this.fileName);
         if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
-    }
-
-    public String getOriginalFileName() {
-        return originalFileName;
     }
 }
