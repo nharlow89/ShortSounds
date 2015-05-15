@@ -180,7 +180,7 @@ public class ShortSound {
     }
 
     /**
-     * This is the representation invarient of a ShortSound model. A key part of this
+     * This is the representation invariant of a ShortSound model. A key part of this
      * is making sure the ShortSoundTracks associated with this ShortSound have
      * corresponding ids.
      */
