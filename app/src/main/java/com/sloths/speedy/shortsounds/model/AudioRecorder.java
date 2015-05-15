@@ -16,11 +16,8 @@ import java.util.UUID;
 public class AudioRecorder {
     // global vars
     public static final int AUDIO_SOURCE = MediaRecorder.AudioSource.DEFAULT;
-    public static final int SAMPLE_RATE_IN_HZ = 44100;
-    // TODO: Maybe CHANNEL_CONFIG should be AudioFormat.CHANNEL_IN_MONO;
-    public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_STEREO;
+    public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_MONO;
     public static final int BUFFER_ELEMENTS_TO_REC = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
-    public static final int BYTES_PER_ELEMENT = 2; // 2 bytes in 16bit format
     public static int BUFFER_SIZE;
     // instance vars
     private AudioRecord mTrackRecorder;
@@ -45,8 +42,8 @@ public class AudioRecorder {
      * Performs setup for this AudioRecorder. Primarily sets up mTrackRecorder.
      */
     private void setup() {
-        BUFFER_SIZE = AudioRecord.getMinBufferSize(ShortSoundTrack.SAMPLE_RATE, ShortSoundTrack.CHANNEL_CONFIG, ShortSoundTrack.AUDIO_FORMAT);
-        mTrackRecorder = new AudioRecord(AUDIO_SOURCE, ShortSoundTrack.SAMPLE_RATE, ShortSoundTrack.CHANNEL_CONFIG,
+        BUFFER_SIZE = AudioRecord.getMinBufferSize(ShortSoundTrack.SAMPLE_RATE, CHANNEL_CONFIG, ShortSoundTrack.AUDIO_FORMAT);
+        mTrackRecorder = new AudioRecord(AUDIO_SOURCE, ShortSoundTrack.SAMPLE_RATE, CHANNEL_CONFIG,
                 ShortSoundTrack.AUDIO_FORMAT, BUFFER_SIZE);
         mIsRecording = false;
     }
@@ -84,6 +81,7 @@ public class AudioRecorder {
             System.out.println("Short writing to file" + frameBuffer.toString());
             try {
                 // Put de gains
+                /*
                 int i = 0;
                 while ( i < bytesRead ) {
                     float sample = (float)( frameBuffer[ i ] & 0xFF
@@ -111,6 +109,7 @@ public class AudioRecorder {
                     }
                     i += 2;
                 }
+                */
                 mOutputStream.write(frameBuffer, 0, BUFFER_ELEMENTS_TO_REC);
             } catch (IOException e) {
                 e.printStackTrace();
