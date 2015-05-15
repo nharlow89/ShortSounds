@@ -15,13 +15,13 @@ import java.util.UUID;
  */
 public class AudioRecorder {
     // global vars
-    public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
-    public static final int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
+    public static final int AUDIO_SOURCE = MediaRecorder.AudioSource.DEFAULT;
     public static final int SAMPLE_RATE_IN_HZ = 44100;
     // TODO: Maybe CHANNEL_CONFIG should be AudioFormat.CHANNEL_IN_MONO;
     public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_STEREO;
     public static final int BUFFER_ELEMENTS_TO_REC = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
     public static final int BYTES_PER_ELEMENT = 2; // 2 bytes in 16bit format
+    public static int BUFFER_SIZE;
     // instance vars
     private AudioRecord mTrackRecorder;
     private File mTempAudioFile;
@@ -45,8 +45,9 @@ public class AudioRecorder {
      * Performs setup for this AudioRecorder. Primarily sets up mTrackRecorder.
      */
     private void setup() {
-        mTrackRecorder = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE_IN_HZ, CHANNEL_CONFIG,
-                AUDIO_FORMAT, BUFFER_ELEMENTS_TO_REC * BYTES_PER_ELEMENT);
+        BUFFER_SIZE = AudioRecord.getMinBufferSize(ShortSoundTrack.SAMPLE_RATE, ShortSoundTrack.CHANNEL_CONFIG, ShortSoundTrack.AUDIO_FORMAT);
+        mTrackRecorder = new AudioRecord(AUDIO_SOURCE, ShortSoundTrack.SAMPLE_RATE, ShortSoundTrack.CHANNEL_CONFIG,
+                ShortSoundTrack.AUDIO_FORMAT, BUFFER_SIZE);
         mIsRecording = false;
     }
 
@@ -69,7 +70,7 @@ public class AudioRecorder {
      */
     private void writeAudioDataToFile() {
         // Write the output audio in byte
-        short sData[] = new short[BUFFER_ELEMENTS_TO_REC];
+        byte frameBuffer[] = new byte[BUFFER_ELEMENTS_TO_REC];
         try {
             mTempFileName = "temp-recording-file-" + UUID.randomUUID().toString().substring(0, 4);
             mTempAudioFile = new File( mCacheDir, mTempFileName);
@@ -79,13 +80,38 @@ public class AudioRecorder {
         }
         while (isRecording()) {
             // gets the voice output from microphone to byte format
-            mTrackRecorder.read(sData, 0, BUFFER_ELEMENTS_TO_REC);
-            System.out.println("Short writing to file" + sData.toString());
+            int bytesRead = mTrackRecorder.read(frameBuffer, 0, BUFFER_ELEMENTS_TO_REC);
+            System.out.println("Short writing to file" + frameBuffer.toString());
             try {
-                // // writes the data to file from buffer
-                // // stores the voice buffer
-                byte bData[] = short2byte(sData);
-                mOutputStream.write(bData, 0, BUFFER_ELEMENTS_TO_REC * BYTES_PER_ELEMENT);
+                // Put de gains
+                int i = 0;
+                while ( i < bytesRead ) {
+                    float sample = (float)( frameBuffer[ i ] & 0xFF
+                            | frameBuffer[ i + 1 ] << 8 );
+                    // THIS is the point were the work is done:
+                    // Increase level by about 6dB:
+                    // sample *= 2;
+                    // Or increase level by 20dB:
+                    sample *= 10;
+                    // Or if you prefer any dB value, then calculate the gain factor outside the loop
+                    // float gainFactor = (float)Math.pow( 10., dB / 20. );    // dB to gain factor
+                    // sample *= gainFactor;
+
+                    // Avoid 16-bit-integer overflow when writing back the manipulated data:
+                    if ( sample >= 32767f ) {
+                        frameBuffer[ i ] = (byte)0xFF;
+                        frameBuffer[ i + 1 ] = 0x7F;
+                    } else if ( sample <= -32768f ) {
+                        frameBuffer[ i ] = 0x00;
+                        frameBuffer[ i + 1 ] = (byte)0x80;
+                    } else {
+                        int s = (int)( 0.5f + sample );  // Here, dithering would be more appropriate
+                        frameBuffer[ i ] = (byte)(s & 0xFF);
+                        frameBuffer[ i + 1 ] = (byte)(s >> 8 & 0xFF);
+                    }
+                    i += 2;
+                }
+                mOutputStream.write(frameBuffer, 0, BUFFER_ELEMENTS_TO_REC);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -111,8 +137,8 @@ public class AudioRecorder {
             mRecordingThread = null;
             mIsRecording = false;
         }
-        setup();
-        repInvariant();
+//        setup();
+//        repInvariant();
         return mTempAudioFile;
     }
 
