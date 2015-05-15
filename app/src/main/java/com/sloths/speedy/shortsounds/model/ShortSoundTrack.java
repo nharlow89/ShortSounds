@@ -197,6 +197,9 @@ public class ShortSoundTrack {
      * @param listener
      */
     public void setOnPlayCompleteListener( MediaPlayer.OnCompletionListener listener ) {
+        if (player == null) {
+            setUpMediaPlayer();
+        }
         player.setOnCompletionListener( listener );
     }
 
