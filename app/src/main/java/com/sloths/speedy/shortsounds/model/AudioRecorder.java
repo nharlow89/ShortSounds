@@ -38,6 +38,7 @@ public class AudioRecorder {
     public AudioRecorder( File cacheDir ) {
         mCacheDir = cacheDir;
         this.setup();
+        repInvariant();
     }
 
     /**
@@ -46,8 +47,6 @@ public class AudioRecorder {
     private void setup() {
         mTrackRecorder = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE_IN_HZ, CHANNEL_CONFIG,
                 AUDIO_FORMAT, BUFFER_ELEMENTS_TO_REC * BYTES_PER_ELEMENT);
-        int current_state = mTrackRecorder.getState();
-        assert(current_state == AudioRecord.STATE_INITIALIZED);
         mIsRecording = false;
     }
 
@@ -112,6 +111,8 @@ public class AudioRecorder {
             mRecordingThread = null;
             mIsRecording = false;
         }
+        setup();
+        repInvariant();
         return mTempAudioFile;
     }
 
@@ -145,5 +146,10 @@ public class AudioRecorder {
     public void reset() {
         // TODO: cleanup resources from previous recording? temp file?
         setup();
+    }
+
+    private void repInvariant() {
+        int current_state = mTrackRecorder.getState();
+        assert(current_state == AudioRecord.STATE_INITIALIZED);
     }
 }
