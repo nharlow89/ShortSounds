@@ -34,7 +34,6 @@ public class FloatingActionButtonBasicFragment extends Fragment implements Float
         // Notify the listener
         if ( listener != null )
             listener.didLoad();
-
         return rootView;
     }
 

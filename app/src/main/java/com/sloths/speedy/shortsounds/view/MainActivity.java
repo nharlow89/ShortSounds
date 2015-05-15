@@ -24,6 +24,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.ViewAnimator;
+import android.content.Intent;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
@@ -531,7 +535,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * current tracks for this ShortSound
      */
     private void createNew() {
-        // TODO update to not use a fragment
         ShortSound newSound = new ShortSound();
         setTitle(newSound.getTitle());
         sounds.add(newSound);
@@ -540,6 +543,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, mShortSoundsTitles));
         selectShortSoundFromDrawer(sounds.size() - 1);
+        // hides seek bar and play button
+        setUpGlobalSeekBar();
+        setUpGlobalPlayButton();
+        // TODO: made record a sound text view visible
     }
 
     /*
