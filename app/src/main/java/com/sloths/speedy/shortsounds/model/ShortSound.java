@@ -56,24 +56,9 @@ public class ShortSound {
      * Play all the tracks associated with this ShortSound.
      */
     public void playAllTracks() {
-        for( ShortSoundTrack track: this.tracks ) {
-            track.stop();  // Just in case.
-            track.prepare();  // Note this prepare is synchronous.
-        }
-        for( ShortSoundTrack track: this.tracks ) {
+        for ( ShortSoundTrack track: this.tracks ) {
             track.play();
-        }
-        isPlaying = true;
-        isPaused = false;
-        tracksPlaying = tracks.size();
-    }
-
-    /**
-     * UnPause all tracks.
-     */
-    public void unPauseAllTracks() {
-        for( ShortSoundTrack track: this.tracks ) {
-            track.play();
+            tracksPlaying++;
         }
         isPlaying = true;
         isPaused = false;
@@ -115,9 +100,7 @@ public class ShortSound {
      * Release all the tracks to free up memory (called when done working with this ShortSound).
      */
     public void releaseAllTracks() {
-        for( ShortSoundTrack track: this.tracks ) {
-            track.release();
-        }
+        // TODO? or remove
     }
 
     /**
@@ -233,11 +216,8 @@ public class ShortSound {
      * @return Duration of the longest track in milliseconds
      */
     public int getDuration() {
-        int maxDuration = 0;
-        for (ShortSoundTrack track : this.tracks)
-            if (track.getDuration() > maxDuration)
-                maxDuration = track.getDuration();
-        return maxDuration;
+        // TODO? or remove
+        return 0;
     }
 
 

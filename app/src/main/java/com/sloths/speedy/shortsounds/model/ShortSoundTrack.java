@@ -1,15 +1,20 @@
 package com.sloths.speedy.shortsounds.model;
 
 import android.content.Context;
-import android.media.MediaPlayer;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.util.Log;
 
 import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
 
@@ -19,23 +24,34 @@ import java.util.HashMap;
  * file. A ShortSoundTrack should belong to a single ShortSound at any given time.
  */
 public class ShortSoundTrack {
+    public static final String DEBUG_TAG = "SHORT_SOUNDS";
+    // AudioTrack Params
+    public static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
+    public static final int SAMPLE_RATE = 44100;  // NOTE: also used for buffer size
+    public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO;
+    public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+    public static final int MODE = AudioTrack.MODE_STREAM;
+    public static int BUFFER_SIZE = 44100; // Default
 
-    /**
-     * Please note that the internal state of a ShortSoundTrack attempts to follow the state
-     * machine found here in the MediaPlayer class: http://developer.android.com/reference/android/media/MediaPlayer.html
-     */
 
     public static final String DEFAULT_TITLE = "Untitled Track";
     private static final String TAG = "Track";
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
+    private static final Context context = ShortSoundsApplication.getAppContext();
+    private static final String STORAGE_PATH = context.getFilesDir().getAbsolutePath();
     private final String originalFile;
     private final String file;
+    private InputStream audioInputStream;
     private long id;
     private String title;
     private final long parentId;
-    private MediaPlayer player;
-    private boolean preparingWhilePlayed;
-    private MediaState mState;
+    private AudioTrack audioTrack;
+    private Thread audioThread;
+    private byte[] audioFrame;
+    private TrackState trackState;
+    private enum TrackState{ PLAYING, PAUSED, STOPPED };
+    private OnCompleteListener onCompleteListener;
+
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -50,8 +66,9 @@ public class ShortSoundTrack {
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         this.originalFile = "ss" + shortSoundId + "-track" + id;
         this.file = originalFile + "-modified";
-        this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
-        initFiles( audioFile );
+        this.sqlHelper.updateShortSoundTrack(this);  // Had to update with filenames =(
+        initFiles(audioFile);
+        setupAudioTrack();
     }
 
     /**
@@ -65,129 +82,105 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_TRACK_FILENAME_MODIFIED ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TRACK_FILENAME_MODIFIED + " field.");
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TITLE + " field.");
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
-        this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
+        this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
         this.file = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
         this.originalFile = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
+        setupAudioTrack();
     }
 
-    public void setUpMediaPlayer() {
-        this.player = new MediaPlayer();
-        Context context = ShortSoundsApplication.getAppContext();
-        String path = context.getFilesDir().getAbsolutePath();
-        try {
-            Log.d("DEBUG", "setDataSource(" + path + "/" + this.file + ")");
-            this.player.setDataSource( path + "/" + this.file );
-            mState = MediaState.INITIALIZED;
-            this.player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mState = MediaState.PREPARED;
-                    if(preparingWhilePlayed)
-                        play();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    /**
+     * Sets up the AudioTrack for this ShortSoundTrack. This method needs to be called prior to
+     * any audio interaction (stop, play, etc..).
+     */
+    public void setupAudioTrack() {
+        BUFFER_SIZE = AudioTrack.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
+        audioTrack = new AudioTrack(STREAM_TYPE, SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, BUFFER_SIZE, MODE);
+        audioFrame = new byte[BUFFER_SIZE * 2];
+        trackState = TrackState.STOPPED;
     }
 
     /**
      * Play the audio track associated with this ShortSound.
      */
     public void play() {
-        if ( mState == MediaState.PREPARED || mState == MediaState.PAUSED ) {
-            Log.d(TAG, "play track ["+this.getId()+"]");
-            player.start();
-            mState = MediaState.STARTED;
-            preparingWhilePlayed = false;
-        } else if ( mState == MediaState.STOPPED ) {
+        // If the track is Stopped then we need to reset the input stream so the AudioTrack starts
+        // from the beginning again.
+        if ( trackState == TrackState.STOPPED ) {
+            setInputStream();
+        }
+        if ( audioThread != null ) {
+            audioThread.interrupt();
+        }
+        trackState = TrackState.PLAYING;
+        AudioTask task = new AudioTask();
+        audioThread = new Thread(task);
+        audioThread.start();
+        Log.d(DEBUG_TAG, "Play track ["+id+"] from new thread.");
+    }
+
+    private class AudioTask implements Runnable {
+        @Override
+        public void run() {
             try {
-                Log.d(TAG, "prepare and then play stopped track ["+this.getId()+"]");
-                player.prepare();
-                player.start();
-                preparingWhilePlayed = false;
+                Log.d(DEBUG_TAG, "Running thread to play ShortSoundTrack["+id+"]");
+                audioTrack.play();
+                int bytesRead;
+                while( (bytesRead = audioInputStream.read( audioFrame ) ) != -1 && trackState == TrackState.PLAYING ) {
+                    // NOTE: this is blocking, so the next frame will not be loaded until ready.
+                    // Look at AudioTrack docs for more info.
+                    Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack. PlaybackPosition["+audioTrack.getPlaybackHeadPosition()+"]");
+                    audioTrack.write( audioFrame, 0, bytesRead );
+                }
+                if ( trackState == TrackState.PLAYING ) {
+                    // We reached the end of the track
+                    Log.d(DEBUG_TAG, "Reached end of track["+id+"]");
+                    audioTrack.flush();  // Clear the playback buffer and set Playback position to 0
+                    trackState = TrackState.STOPPED;
+                    audioInputStream.close();
+                    onCompleteListener.onComplete();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (mState == MediaState.PREPARING) {
-            Log.d(TAG, "Preparing track ["+this.getId()+"]");
-            preparingWhilePlayed = true;
-        } else {
-            Log.e("DEBUG", "Attempted to play track ["+this.id+"] from invalid/undefined state?: " + mState);
         }
+    }
 
+    private void setInputStream() {
+        if ( audioInputStream != null ) {
+            try {
+                audioInputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream( new File(STORAGE_PATH, file) );
+            audioInputStream = new DataInputStream( fileInputStream );
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Stop playing this track and reset its position to the beginning of the audio file.
      */
     public void stop() {
-        if (mState != MediaState.INITIALIZED &&  (mState == MediaState.STARTED || mState == MediaState.PAUSED) ) {
-            Log.d(TAG, "stop track ["+this.getId()+"]");
-            player.stop();
-            player.prepareAsync();
-            mState = MediaState.PREPARING;
-        } else {
-            Log.e("DEBUG", "Attempted to stop track ["+this.id+"] from invalid state: " + mState);
-        }
+        // TODO
     }
 
+    /**
+     * Pause this track.
+     */
     public void pause() {
-        if ( mState == MediaState.STARTED || player.isPlaying() ) {
-            Log.d(TAG, "pause track ["+this.getId()+"]");
-            player.pause();
-            mState = MediaState.PAUSED;
+        if ( trackState == TrackState.PLAYING ) {
+            Log.d(DEBUG_TAG, "Pause track [" + id + "]");
+            audioTrack.pause();
+            trackState = TrackState.PAUSED;
         } else {
-            Log.e("DEBUG", "Attempted to pause track ["+this.id+"] from invalid state: " + mState);
-        }
-    }
-
-    /**
-     * Prepare this track for playing. Note: must be called after stopping the track or after init
-     * of the MediaPlayer.
-     */
-    public void prepare() {
-        if ( mState == MediaState.STOPPED || mState == MediaState.INITIALIZED ) {
-            try {
-                Log.d(TAG, "prepare track ["+this.getId()+"]");
-                player.prepare();
-                mState = MediaState.PREPARED;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            Log.e("DEBUG", "Attempted to prepare track ["+this.id+"] from invalid state: " + mState);
-        }
-    }
-
-    /**
-     * Release this track from the MediaPlayer when no longer in use.
-     */
-    public void release() {
-        player.release();
-    }
-
-    /**
-     * Return whether the current track is playing or not.
-     */
-    public boolean isPlaying() {
-        return player.isPlaying();
-    }
-
-    /**
-     * Prepare this track asynchronously.
-     */
-    public void prepareAsync() {
-        if ( player == null )
-            setUpMediaPlayer();
-        if ( mState == MediaState.INITIALIZED || mState == MediaState.STOPPED ) {
-            Log.d(TAG, "prepareAsync track ["+this.id+"]");
-            player.prepareAsync();
-            mState = MediaState.PREPARING;
-        } else {
-            Log.e("DEBUG", "Attempted to prepareAsync track ["+this.id+"] from invalid state: " + mState);
+            Log.e(DEBUG_TAG, "Tried to pause track ["+id+"] in invalid state ["+trackState+"]");
         }
     }
 
@@ -195,8 +188,8 @@ public class ShortSoundTrack {
      * Set the onCompletionListener for this ShortSoundTrack.
      * @param listener
      */
-    public void setOnPlayCompleteListener( MediaPlayer.OnCompletionListener listener ) {
-        player.setOnCompletionListener( listener );
+    public void setOnPlayCompleteListener( OnCompleteListener listener ) {
+        this.onCompleteListener = listener;
     }
 
     public void addEffect() {
@@ -225,10 +218,8 @@ public class ShortSoundTrack {
      * @param audioFile
      */
     private void initFiles( File audioFile ) {
-        Context context = ShortSoundsApplication.getAppContext();
-        String path = context.getFilesDir().getAbsolutePath();
-        File originalFile = new File( path, this.originalFile );
-        File file = new File( path , this.file );
+        File originalFile = new File( STORAGE_PATH, this.originalFile );
+        File file = new File( STORAGE_PATH , this.file );
         try {
             copyFile( audioFile, originalFile );
             copyFile( audioFile, file );
@@ -267,12 +258,6 @@ public class ShortSoundTrack {
     }
 
     /**
-     * Wrapper for the mediaPlayer's getDuration method
-     * @return Duration of the track in milliseconds
-     */
-    public int getDuration() { return player.getDuration(); }
-
-    /**
      * Get the title of this ShortSoundTrack.
      * @return String
      */
@@ -308,6 +293,10 @@ public class ShortSoundTrack {
      * @return id
      */
     public long getId() { return this.id; }
+
+    public interface OnCompleteListener {
+        public void onComplete();
+    }
 
     /**
      * This is the representation invarient of the ShortSoundTrack model.

@@ -283,12 +283,12 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         db.execSQL( trackSeed5 );
         db.execSQL( trackSeed6 );
         // Seed the internal storage with given audio files
-        seedSampleAudioFile(R.raw.guitar, "ss1-track1");
-        seedSampleAudioFile(R.raw.guitar, "ss1-track1-modified");
-        seedSampleAudioFile(R.raw.rhythm, "ss1-track2");
-        seedSampleAudioFile(R.raw.rhythm, "ss1-track2-modified");
-        seedSampleAudioFile(R.raw.drums, "ss1-track3");
-        seedSampleAudioFile(R.raw.drums, "ss1-track3-modified");
+        seedSampleAudioFile(R.raw.sample, "ss1-track1");
+        seedSampleAudioFile(R.raw.sample, "ss1-track1-modified");
+        seedSampleAudioFile(R.raw.sample, "ss1-track2");
+        seedSampleAudioFile(R.raw.sample, "ss1-track2-modified");
+        seedSampleAudioFile(R.raw.sample, "ss1-track3");
+        seedSampleAudioFile(R.raw.sample, "ss1-track3-modified");
         seedSampleAudioFile(R.raw.sundrums1, "ss2-track1");
         seedSampleAudioFile(R.raw.sundrums1, "ss2-track1-modified");
         seedSampleAudioFile(R.raw.sundrums2, "ss2-track2");

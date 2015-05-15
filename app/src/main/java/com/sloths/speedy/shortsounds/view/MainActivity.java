@@ -2,6 +2,7 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.app.ActionBar;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
@@ -18,18 +19,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.ViewAnimator;
-import android.content.Intent;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
+import android.widget.ViewAnimator;
 
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
@@ -106,19 +104,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             public void onClick(View v) {
                 if (mActiveShortSound != null) {
                     // TODO: we need to handle the case when the ShortSound finishes playing!
-                    if (mActiveShortSound.isPlaying()) {
-                        // The ShortSound is already playing, stop it.
+                    if ( mActiveShortSound.isPlaying() ) {
                         mActiveShortSound.pauseAllTracks();
-                        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
                     } else {
-                        if (mActiveShortSound.isPaused()) {
-                            // The ShortSound was previously playing, unpause it.
-                            mActiveShortSound.unPauseAllTracks();
-                        } else {
-                            // The ShortSound is not playing yet, play it.
-                            mActiveShortSound.playAllTracks();
-                        }
-                        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
+                        mActiveShortSound.playAllTracks();
                     }
                 }
             }
