@@ -55,7 +55,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     public RecyclerViewAdapter(ShortSound sound, Context context) {
         mShortSound = sound;
-        mMediaPlayerPool = new HashMap<>();
+        mMediaPlayerPool = new HashMap<Long, Pair<MediaPlayer, MediaState>>();
         this.mContext = context;
         mViews = new ArrayList<ViewHolder>();
     }

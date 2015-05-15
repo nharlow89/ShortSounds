@@ -59,6 +59,7 @@ public class ShortSoundTrack {
         this.file = originalFile + "-modified";
         this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
         initFiles( audioFile );
+        setUpEffects();
     }
 
     /**
@@ -168,6 +169,8 @@ public class ShortSoundTrack {
             try {
                 Log.d(TAG, "prepare track ["+this.getId()+"]");
                 player.prepare();
+                mEqEffect.prepare();
+                mReverbEffect.prepare();
                 mState = MediaState.PREPARED;
             } catch (IOException e) {
                 e.printStackTrace();

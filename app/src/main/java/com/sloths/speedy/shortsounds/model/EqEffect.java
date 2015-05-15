@@ -38,6 +38,7 @@ public class EqEffect extends Effect {
     private EqEffect(String[] parameters, MediaPlayer player) {
         this.player = player;
         this.effect = new Equalizer(0, player.getAudioSessionId());
+//        effect = new Equalizer(0, 0);
         this.active = parameters[INDEX_ACTIVE].equals("ON");
         for (int i = 0; i < NUM_BANDS; i++) {
             this.bandLevels[i] = Short.parseShort(parameters[INDEX_BAND_LEVELS + i]);
@@ -55,6 +56,7 @@ public class EqEffect extends Effect {
         this.active = false;
         this.player = player;
         effect = new Equalizer(0, player.getAudioSessionId());
+//        effect = new Equalizer(0, 0);
         bandLevels = new short[NUM_BANDS];
         for (int i = 0; i < NUM_BANDS; i++) {
             bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
@@ -64,7 +66,8 @@ public class EqEffect extends Effect {
 
     @Override
     public void prepare() {
-        if (effect == null) {
+        if (active && effect == null) {
+            effect = new Equalizer(0, 0);
             initAudioEffect();
         }
     }
