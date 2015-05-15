@@ -33,11 +33,13 @@ public class AudioPlayer {
     }
 
     /**
-     * Play all tracks that are in this AudioPlayer.
+     * Play all tracks that are in this AudioPlayer, starting from a given point
+     * (an integer percentage of the total length).
      */
-    public void playAll() {
+    public void playAll( int position ) {
+        Log.d(DEBUG_TAG, "Play all tracks starting at ["+position+"%]");
         for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
-            entry.getValue().play();
+            entry.getValue().play(position);
         }
         playerState = PlayerState.PLAYING_ALL;
     }
@@ -75,10 +77,10 @@ public class AudioPlayer {
      * Play a single track within this AudioPlayer.
      * @param track
      */
-    public void playTrack( ShortSoundTrack track ) {
+    public void playTrack( ShortSoundTrack track, int position ) {
         pauseAll();
         TrackPlayer targetPlayer = trackPlayers.get( track );
-        targetPlayer.play();
+        targetPlayer.play( position );
     }
 
     /**
@@ -114,7 +116,7 @@ public class AudioPlayer {
      * @param track
      */
     public void addTrack( ShortSoundTrack track ) {
-        trackPlayers.put( track, new TrackPlayer( track ) );
+        trackPlayers.put(track, new TrackPlayer(track));
     }
 
     /**
@@ -130,6 +132,7 @@ public class AudioPlayer {
         private File file;
         private InputStream audioInputStream;
         private Thread audioThread;
+        private long currentTrackPosition;
 
         public TrackPlayer( ShortSoundTrack track ) {
             this.track = track;
@@ -158,7 +161,7 @@ public class AudioPlayer {
             this.trackLength = file.length();
         }
 
-        private void setInputStream() {
+        private void setInputStream( int position ) {
             if ( audioInputStream != null ) {
                 try {
                     audioInputStream.close();
@@ -170,7 +173,12 @@ public class AudioPlayer {
             try {
                 fileInputStream = new FileInputStream( this.file );
                 audioInputStream = new DataInputStream( fileInputStream );
+                long bytesToSkip = (long)(trackLength * (position / 100.0));
+                currentTrackPosition = bytesToSkip;
+                audioInputStream.skip( bytesToSkip );
             } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -178,11 +186,11 @@ public class AudioPlayer {
         /**
          * Play the audio track associated with this ShortSound.
          */
-        public void play() {
+        public void play( int position ) {
             // If the track is Stopped then we need to reset the input stream so the AudioTrack starts
             // from the beginning again.
             if ( trackState == TrackState.STOPPED ) {
-                setInputStream();
+                setInputStream( position );
             }
             if ( audioThread != null ) {
                 audioThread.interrupt();
@@ -231,7 +239,7 @@ public class AudioPlayer {
          * @return integer value representing the position as a percentage of the overall track length.
          */
         public int getCurrentTrackPosition() {
-            return (int)Math.round((audioTrack.getPlaybackHeadPosition() * 4.0) / trackLength * 100.0) % 100;
+            return (int)Math.round(currentTrackPosition * 1.0 / trackLength * 100);
         }
 
         /**
@@ -252,6 +260,7 @@ public class AudioPlayer {
                     while( trackState == TrackState.PLAYING && (bytesRead = audioInputStream.read( audioTrackBuffer ) ) != -1 ) {
                         // NOTE: this is blocking, so the next frame will not be loaded until ready.
                         // Look at AudioTrack docs for more info.
+                        currentTrackPosition+= bytesRead;
                         Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
                         audioTrack.write( audioTrackBuffer, 0, bytesRead );
                     }

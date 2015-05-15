@@ -212,7 +212,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         mAudioPlayer.pauseTrack( mShortSoundTrack );
                         mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
                     } else {
-                        mAudioPlayer.playTrack( mShortSoundTrack );
+                        mAudioPlayer.playTrack( mShortSoundTrack, 0 );  // TODO: get the position from seekbar
                         mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_pause));
                     }
                 }

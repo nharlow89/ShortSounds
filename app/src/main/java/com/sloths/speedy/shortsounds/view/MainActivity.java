@@ -110,7 +110,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                         mActiveAudioPlayer.pauseAll();
                         mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
                     } else {
-                        mActiveAudioPlayer.playAll();
+                        int seekBarProgress = mGlobalSeekBar.getProgress();
+                        mActiveAudioPlayer.playAll( seekBarProgress );
                         mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
                     }
                 }
@@ -135,6 +136,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void setUpGlobalSeekBar() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
+        mGlobalSeekBar.setMax( 100 );  // Set the max value (0-100)
         mGlobalSeekBar.setVisibility(View.INVISIBLE);  // Default to invisible when ShortSound has not been clicked.
     }
 
@@ -568,7 +570,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void beginRecording() {
         // Play back other tracks if there are other tracks
         if (mActiveAudioPlayer != null)
-            mActiveAudioPlayer.playAll();
+            mActiveAudioPlayer.playAll( 0 );  // Play from the beginning
         // Setup the MediaRecorder
         mAudioRecorder.start();
     }
