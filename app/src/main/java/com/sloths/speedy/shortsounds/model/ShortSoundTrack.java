@@ -74,7 +74,6 @@ public class ShortSoundTrack {
         this.originalFileName = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
-        setUpMediaPlayer();
     }
 
     public void addEffect() {

@@ -24,10 +24,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.ViewAnimator;
-import android.content.Intent;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
@@ -593,6 +589,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             // Create the new ShortSound and add it the list.
             mActiveShortSound = new ShortSound();
             sounds.add( mActiveShortSound );
+            mActiveAudioPlayer = new AudioPlayer( mActiveShortSound );
             // Update the sidebar with the new ShortSound.
             mShortSoundsTitles = getShortSoundTitles(sounds);
             mDrawerList.setAdapter(new ArrayAdapter<String>(this,
