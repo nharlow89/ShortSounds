@@ -16,7 +16,7 @@ import android.widget.EditText;
 import com.sloths.speedy.shortsounds.R;
 
 /**
- * Created by mattiecarlson on 5/11/15.
+ * This DialogFragment inflates a dialog box to rename a ShortSound
  */
 public class NoticeDialogFragment extends DialogFragment {
     EditText newTitle;
@@ -24,17 +24,23 @@ public class NoticeDialogFragment extends DialogFragment {
     Button cancel;
     static String DialogboxTitle;
 
-    /* The activity that creates an instance of this dialog fragment must
-     * implement this interface in order to receive event callbacks.
-     * Each method passes the DialogFragment in case the host needs to query it. */
+    /*
+     * The interface that has an onOkay button for the MainAcitiviy to implement
+     */
     public interface NoticeDialogListener {
         void onOkay(String inputText);
     }
 
+    /*
+     * Creates a new Dialog Box
+     */
     public NoticeDialogFragment() {
         DialogboxTitle = "Rename ShortSound";
     }
 
+    /*
+     * Prepares the DialogBox
+     */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.dialog_rename, container);
         newTitle = (EditText) view.findViewById(R.id.newTitle);

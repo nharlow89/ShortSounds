@@ -21,12 +21,14 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Record a Sound or Load a Mix!"
+                    android:text="@string/recordASound"
                     android:layout_centerInParent="true"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"/>
+
             </RelativeLayout>
 
             <include layout="@layout/eq_canvas"/>
@@ -38,15 +40,6 @@
             <include layout="@layout/effect_view"/>
 
         </ViewAnimator>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/recordASound"
-                android:id="@+id/textRecordASound"
-                android:layout_centerVertical="true"
-                android:layout_centerHorizontal="true" />
 
 
         <!-- This is the bottom toolbar -->
