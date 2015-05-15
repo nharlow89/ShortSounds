@@ -39,6 +39,7 @@ public class AudioPlayer {
     public void playAll( int position ) {
         Log.d(DEBUG_TAG, "Play all tracks starting at ["+position+"%]");
         for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
+            entry.getValue().stop();
             entry.getValue().play(position);
         }
         playerState = PlayerState.PLAYING_ALL;
@@ -155,6 +156,16 @@ public class AudioPlayer {
                     ShortSoundTrack.AUDIO_FORMAT,
                     ShortSoundTrack.BUFFER_SIZE,
                     ShortSoundTrack.MODE);
+            audioTrack.setPositionNotificationPeriod( ShortSoundTrack.SAMPLE_RATE );
+            audioTrack.setPlaybackPositionUpdateListener( new AudioTrack.OnPlaybackPositionUpdateListener() {
+                @Override
+                public void onMarkerReached(AudioTrack track) {}
+                @Override
+                public void onPeriodicNotification(AudioTrack track) {
+                    Log.d(DEBUG_TAG, "PlaybackListener");
+                    // TODO: update seekbar
+                }
+            });
             audioTrackBuffer = new byte[ShortSoundTrack.BUFFER_SIZE * 2];
             trackState = TrackState.STOPPED;
             this.file = new File( ShortSoundTrack.STORAGE_PATH, track.getFileName() );
