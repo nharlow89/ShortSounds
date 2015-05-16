@@ -51,6 +51,20 @@ public class ShortSoundTrackTest extends AndroidTestCase {
     }
 
     /**
+     * Tests that an AssertionError is thrown if the ID is provided but nothing else.
+     */
+    public void testMapWithJustTrackIdCausesAssertionError() {
+        try {
+            HashMap<String, String> mapWithOnlyId = new HashMap<String, String>();
+            mapWithOnlyId.put(ShortSoundSQLHelper.KEY_ID, "0");
+            ShortSoundTrack test = new ShortSoundTrack(mapWithOnlyId);
+            assert(false);
+        } catch (AssertionError error) {
+            assert(true);
+        }
+    }
+
+    /**
      * Tests that a new ShortSoundTrack that was constructed with the single parameter
      * constructor gets the correct values for its fields.
      */
