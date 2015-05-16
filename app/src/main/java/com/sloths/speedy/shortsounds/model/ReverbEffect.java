@@ -1,11 +1,7 @@
 package com.sloths.speedy.shortsounds.model;
 
 import android.graphics.PointF;
-import android.media.MediaPlayer;
-import android.media.audiofx.EnvironmentalReverb;
 import android.util.Log;
-
-import com.sloths.speedy.shortsounds.model.Effect;
 
 /**
  * Created by caseympfischer on 4/28/15.
@@ -34,16 +30,22 @@ public class ReverbEffect extends Effect {
 
     // Constructor used when loading an effect from the database
     public ReverbEffect(String effectVals) {
-        // Parse string from DB to get point vals & on/off
-        // Stored in DB as "ON/OFF:float,float,float,float"
-        String[] params = effectVals.split(":");
-        if (params[0].equals(ON)) {
-            this.active = true;
-        } else {
+        if ( effectVals == "NULL" ) {
+            // Default values
             this.active = false;
+            this.pointVal = null;
+        } else {
+            // Parse string from DB to get point vals & on/off
+            // Stored in DB as "ON/OFF:float,float,float,float"
+            String[] params = effectVals.split(":");
+            if (params[0].equals(ON)) {
+                this.active = true;
+            } else {
+                this.active = false;
+            }
+            String[] pointVals = params[1].split(",");
+            pointVal = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
         }
-        String[] pointVals = params[1].split(",");
-        pointVal = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
     }
 
 

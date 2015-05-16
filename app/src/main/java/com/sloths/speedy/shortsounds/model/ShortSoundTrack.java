@@ -33,7 +33,6 @@ public class ShortSoundTrack {
     public static int BUFFER_SIZE = 48000; // Default
 
     public static final String DEFAULT_TITLE = "Untitled Track";
-    private static final String TAG = "Track";
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
     private static final Context context = ShortSoundsApplication.getAppContext();
     public static final String STORAGE_PATH = context.getFilesDir().getAbsolutePath();
@@ -41,14 +40,10 @@ public class ShortSoundTrack {
     private long id;
     private String title;
     private final long parentId;
-    private boolean preparingWhilePlayed;
-    private MediaState mState;
     private EqEffect mEqEffect;
     private ReverbEffect mReverbEffect;
 
-    public enum EFFECT {
-        EQ, REVERB, DISTORTION, BITCRUSH
-    }
+    public enum EFFECT { EQ, REVERB, DISTORTION, BITCRUSH }
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -60,11 +55,13 @@ public class ShortSoundTrack {
     public ShortSoundTrack( File audioFile, long shortSoundId ) {
         this.title = DEFAULT_TITLE;
         this.parentId = shortSoundId;
-        setUpEffects();
+        this.mEqEffect = new EqEffect();
+        this.mReverbEffect = new ReverbEffect();
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
         this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
         initFiles( audioFile );
+        repInvariant();
     }
 
     /**
@@ -84,39 +81,9 @@ public class ShortSoundTrack {
         this.fileName = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
-
-        String eqParams = map.get( sqlHelper.EQ_EFFECT_PARAMS );
-        String reverbParams = map.get( sqlHelper.REVERB_EFFECT_PARAMS);
-
-        loadEffectsFromDB(eqParams, reverbParams);
-    }
-
-    private void setUpEffects() {
-        this.mEqEffect = new EqEffect();
-        this.mReverbEffect = new ReverbEffect();
-    }
-
-    /**
-     * Loads teh effects given their held String state parameters in the database
-     * @param eqParams
-     * @param reverbParams
-     */
-    private void loadEffectsFromDB(String eqParams, String reverbParams) {
-        Log.d("ShortSoundTrack", "eq effect params received: "+ eqParams);
-        Log.d("ShortSoundTrack", "reverb effect params received: "+ reverbParams);
-
-        if (eqParams == null || eqParams.equals("NULL")) {
-            this.mEqEffect = new EqEffect();
-        } else {
-            this.mEqEffect = new EqEffect(eqParams);
-        }
-
-        // Reverb
-        if (reverbParams == null || reverbParams.equals("NULL")) {
-            this.mReverbEffect = new ReverbEffect();
-        } else {
-            this.mReverbEffect = new ReverbEffect(reverbParams);
-        }
+        this.mEqEffect = new EqEffect( map.get( sqlHelper.EQ_EFFECT_PARAMS ) );
+        this.mReverbEffect = new ReverbEffect( map.get( sqlHelper.REVERB_EFFECT_PARAMS ) );
+        repInvariant();
     }
 
     public void addEffect(EFFECT e) {
@@ -139,6 +106,7 @@ public class ShortSoundTrack {
                //throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
                break;
         }
+        repInvariant();
     }
 
     /***
@@ -161,11 +129,14 @@ public class ShortSoundTrack {
         switch (e) {
             case EQ:
                 this.mEqEffect.disable();
+                break;
             case REVERB:
                 this.mReverbEffect.disable();
+                break;
             default:
                 throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
         }
+        repInvariant();
     }
 
     /**
@@ -190,6 +161,7 @@ public class ShortSoundTrack {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        repInvariant();
     }
 
     /**
@@ -261,6 +233,8 @@ public class ShortSoundTrack {
     private void repInvariant() {
         if ( this.title == null || !(this.title instanceof String) ) throw new AssertionError("Invalid title");
         if ( this.fileName == null || !(this.fileName instanceof String) ) throw new AssertionError("Invalid filename");
+        if ( this.mEqEffect == null || !(this.mEqEffect instanceof EqEffect) ) throw new AssertionError("Missing EqEffect");
+        if ( this.mReverbEffect == null || !(this.mReverbEffect instanceof ReverbEffect) ) throw new AssertionError("Missing ReverbEffect");
         if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
         // Check that the files are on disk
         File file = new File( this.fileName);

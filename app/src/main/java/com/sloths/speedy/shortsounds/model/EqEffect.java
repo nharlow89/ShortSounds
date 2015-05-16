@@ -1,9 +1,6 @@
 package com.sloths.speedy.shortsounds.model;
 
 import android.graphics.PointF;
-import android.media.MediaPlayer;
-import android.media.audiofx.AudioEffect;
-import android.media.audiofx.Equalizer;
 import android.util.Log;
 
 /**
@@ -25,7 +22,6 @@ public class EqEffect extends Effect {
     public EqEffect() {
         this.active = false;
         this.eqPoints = null;
-//        effect = new Equalizer(0, player.getAudioSessionId());
         bandLevels = new short[NUM_BANDS];
         for (int i = 0; i < NUM_BANDS; i++) {
 //            bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
@@ -35,24 +31,30 @@ public class EqEffect extends Effect {
 
     // Constructor used when loading an effect from the database
     public EqEffect(String effectVals) {
-//        effect = new Equalizer(0, player.getAudioSessionId());
-        bandLevels = new short[NUM_BANDS];
-        for (int i = 0; i < NUM_BANDS; i++) {
-//            bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
-        }
-
-        // Parse string from DB to get point vals & on/off
-        // Stored in DB as "ON/OFF:float,float,float,float"
-        String[] params = effectVals.split(":");
-        if (params[0].equals(ON)) {
-            this.active = true;
-        } else {
+        if ( effectVals == "NULL" ) {
+            // This is the default effect values
             this.active = false;
+            this.eqPoints = null;
+            bandLevels = new short[NUM_BANDS];
+        } else {
+            bandLevels = new short[NUM_BANDS];
+            for (int i = 0; i < NUM_BANDS; i++) {
+                //            bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
+            }
+
+            // Parse string from DB to get point vals & on/off
+            // Stored in DB as "ON/OFF:float,float,float,float"
+            String[] params = effectVals.split(":");
+            if (params[0].equals(ON)) {
+                this.active = true;
+            } else {
+                this.active = false;
+            }
+            String[] pointVals = params[1].split(",");
+            eqPoints = new PointF[2];
+            eqPoints[0] = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
+            eqPoints[1] = new PointF(new Float(pointVals[2]), new Float(pointVals[3]));
         }
-        String[] pointVals = params[1].split(",");
-        eqPoints = new PointF[2];
-        eqPoints[0] = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
-        eqPoints[1] = new PointF(new Float(pointVals[2]), new Float(pointVals[3]));
     }
 
 
