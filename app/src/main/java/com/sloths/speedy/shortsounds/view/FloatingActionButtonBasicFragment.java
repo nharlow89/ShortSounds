@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.sloths.speedy.shortsounds.R;
 
 
@@ -20,6 +19,13 @@ public class FloatingActionButtonBasicFragment extends Fragment implements Float
     private FloatingActionButton mActionButton;
     private OnFragmentLoadedListener listener;
 
+    /**
+     * sets up FAB fragment view
+     * @param inflater the LayoutInflator
+     * @param container the ViewGroup
+     * @param savedInstanceState the Bundle
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -46,6 +52,11 @@ public class FloatingActionButtonBasicFragment extends Fragment implements Float
         return this.mActionButton;
     }
 
+    /**
+     * action for when FAB is changed
+     * @param fabView   The FAB view whose state has changed.
+     * @param isChecked The new checked state of buttonView.
+     */
     @Override
     public void onCheckedChanged(FloatingActionButton fabView, boolean isChecked) {
         // When a FAB is toggled, log the action.
@@ -60,7 +71,7 @@ public class FloatingActionButtonBasicFragment extends Fragment implements Float
 
     /**
      * Set the listener for the Fragment loading.
-     * @param listener
+     * @param listener the listener for the Fragment
      */
     public void setOnLoadListener( OnFragmentLoadedListener listener ) {
         this.listener = listener;
@@ -70,6 +81,6 @@ public class FloatingActionButtonBasicFragment extends Fragment implements Float
      * Listener for returning the action button once the fragment has loaded.
      */
     public interface OnFragmentLoadedListener {
-        public void didLoad();
+        void didLoad();
     }
 }

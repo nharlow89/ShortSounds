@@ -176,5 +176,8 @@ public class AudioRecorder {
     private void repInvariant() {
         int current_state = mTrackRecorder.getState();
         assert(current_state == AudioRecord.STATE_INITIALIZED);
+        assert(BUFFER_SIZE >= AudioRecord.getMinBufferSize(ShortSoundTrack.SAMPLE_RATE,
+                                                           CHANNEL_CONFIG,
+                                                           ShortSoundTrack.AUDIO_FORMAT));
     }
 }
