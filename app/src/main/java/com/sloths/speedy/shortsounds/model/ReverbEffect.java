@@ -1,6 +1,7 @@
 package com.sloths.speedy.shortsounds.model;
 
 import android.graphics.PointF;
+import android.media.audiofx.EnvironmentalReverb;
 import android.util.Log;
 
 /**
@@ -15,7 +16,6 @@ public class ReverbEffect extends Effect {
     private static final int DEFAULT_REFLECTION_LEVEL = 5000;
     private static final int DEFAULT_DENSITY = 500;
     private static final String ON = "ON";
-
 
     private PointF pointVal;
 
@@ -46,6 +46,15 @@ public class ReverbEffect extends Effect {
             String[] pointVals = params[1].split(",");
             pointVal = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
         }
+    }
+
+    /**
+     * Set the audio source that this effect is related to. This is required for the effect to show
+     * up on a given audio playback source.
+     * @param audioSessionId
+     */
+    public void setAudioSource( int audioSessionId ) {
+        effect = new EnvironmentalReverb(0, audioSessionId );
     }
 
 

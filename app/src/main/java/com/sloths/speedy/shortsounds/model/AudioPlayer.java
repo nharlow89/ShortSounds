@@ -3,8 +3,6 @@ package com.sloths.speedy.shortsounds.model;
 import android.media.AudioTrack;
 import android.util.Log;
 
-import com.sloths.speedy.shortsounds.PlaybackListener;
-
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -173,6 +171,14 @@ public class AudioPlayer {
             trackState = TrackState.STOPPED;
             this.file = new File( ShortSoundTrack.STORAGE_PATH, track.getFileName() );
             this.trackLength = file.length();
+            // Let the effects know about the audio playback object
+            track.getmEqEffect().setAudioSource( audioTrack.getAudioSessionId() );
+            track.getmReverbEffect().setAudioSource( audioTrack.getAudioSessionId() );
+            // Attach the audio effects
+            int eqId = track.getmEqEffect().getEffectId();
+            audioTrack.attachAuxEffect( eqId );
+            int reverbId = track.getmReverbEffect().getEffectId();
+            audioTrack.attachAuxEffect( eqId );
         }
 
         private void setInputStream( int position ) {
