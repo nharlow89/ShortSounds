@@ -763,7 +763,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     // TODO: Clean up resources & Save track state to DB
     @Override
     public void onDestroy() {
-
+        super.onDestroy();
     }
 
     /**
