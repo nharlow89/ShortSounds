@@ -16,6 +16,8 @@ public class ReverbEffect extends Effect {
     private static final int DEFAULT_REFLECTION_LEVEL = 5000;
     private static final int DEFAULT_DENSITY = 500;
     private static final String ON = "ON";
+    private static final float DEFAULT_X = 0.5f;
+    private static final float DEFAULT_Y = 0.5f;
 
     private PointF pointVal;
 
@@ -24,8 +26,9 @@ public class ReverbEffect extends Effect {
     public ReverbEffect() {
         Log.d("effects", "ReverbEffect initialized from scratch");
         this.active = false;
-        this.pointVal = null;
+        this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
         //initAudioEffect();
+        repInvariant();
     }
 
     // Constructor used when loading an effect from the database
@@ -46,6 +49,7 @@ public class ReverbEffect extends Effect {
             String[] pointVals = params[1].split(",");
             pointVal = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
         }
+        repInvariant();
     }
 
     /**
@@ -59,12 +63,16 @@ public class ReverbEffect extends Effect {
     }
 
 
-    // Stored in Track table for effect values & being on / off
+    /**
+     * This encodes the paramaters according to "ON/OFF:x,y" or "NULL"
+     * It is used when storing the reverb effect parameters in the databse
+     * @return
+     */
     public String encodeParameters() {
         if (pointVal == null) {
             return "NULL";
         }
-        String retVal = "REVERB:";
+        String retVal = new String();
         if (active) {
             retVal += "ON";
         } else {
@@ -85,6 +93,9 @@ public class ReverbEffect extends Effect {
 //        ((EnvironmentalReverb)effect).setDensity((short)DEFAULT_DENSITY);
 //    }
 
+    /***
+     * Prepares the effect
+     */
     @Override
     public void prepare() {
         if (effect == null) {
@@ -92,17 +103,27 @@ public class ReverbEffect extends Effect {
         }
     }
 
+    /**
+     * Enables the effect
+     */
     public void enable() {
 //        initAudioEffect();
         effect.setEnabled(true);
     }
 
+    /**
+     * Disables the effect
+     */
     public void disable() {
         effect.setEnabled(false);
         effect.release();
         effect = null;
     }
 
+    /**
+     * Gets the title for the reverb effect
+     * @return
+     */
     public String getTitleString() {
         return "Reverb";
     }
@@ -125,5 +146,13 @@ public class ReverbEffect extends Effect {
     public void setPointVal(PointF point) {
         Log.d("ReverbEffect", "Setting reverb effect values");
         this.pointVal = point;
+    }
+
+    /**
+     * A representation invariant of a reverb effect that essentially
+     * holds the point value for a reverb effect.
+     */
+    private void repInvariant() {
+        if (pointVal == null) throw new AssertionError("Invalid point value");
     }
 }
