@@ -15,7 +15,7 @@ import java.io.File;
  * Created by nj on 5/15/15.
  */
 public class ModelControl implements PlaybackListener {
-    public AudioPlayer mAudioPlayer;
+    private AudioPlayer mAudioPlayer;
     private AudioRecorder mAudioRecorder;
     private int seekBarPosition;
     private MainActivity main;
@@ -99,4 +99,16 @@ public class ModelControl implements PlaybackListener {
     public boolean isRecording() {
         return mAudioRecorder.isRecording();
     }
+
+    //TODO check for track solo
+    public boolean isTrackSolo(int track) {
+        return false;
+    }
+
+    //TODO implement solo track
+    public void soloTrack(int track) {
+
+    }
+
+
 }

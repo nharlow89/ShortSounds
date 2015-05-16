@@ -5,7 +5,6 @@ package com.sloths.speedy.shortsounds.view;
  */
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,9 +19,6 @@ import android.widget.TextView;
 
 import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.R;
-import com.sloths.speedy.shortsounds.model.AudioPlayer;
-import com.sloths.speedy.shortsounds.model.ShortSound;
-import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +27,8 @@ import java.util.List;
  * Provide views to RecyclerView with data from mDataSet.
  */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-    private ShortSound mShortSound;
     private Context mContext;
-    private AudioPlayer mAudioPlayer;
-//    private RVListener listener;
-    private ArrayList<Color> mColorPallete;
+    private ModelControl modelControl;
     private List<ViewHolder> mViews;
 
 
@@ -43,12 +36,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      * Initialize the dataset of the Adapter.
      *
      */
-    public RecyclerViewAdapter(ShortSound sound, Context context) {
-        mShortSound = sound;
+    public RecyclerViewAdapter(Context context) {
         this.mContext = context;
-//        modelControl = (ModelControl) context;
-        mAudioPlayer = ((MainActivity) this.mContext).getActiveAudioPlayer();
-        mViews = new ArrayList<ViewHolder>();
+        modelControl = ((MainActivity) context).getModelControl();
+        mViews = new ArrayList<>();
     }
 
     /**
@@ -62,7 +53,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // Create a new view.
         View v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.track_view, viewGroup, false);
-        // Define click mRVListener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
         mViews.add(vh);
         return vh;
@@ -78,7 +68,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
         viewHolder.setTitleView(position);
-        viewHolder.setShortSoundTrack(mShortSound.getTracks().get(position));
         dynamicallySetCardColor(viewHolder, position);
     }
 
@@ -148,7 +137,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     @Override
     public int getItemCount() {
-        return mShortSound.getTracks().size();
+        return ((MainActivity) mContext).getCurShortSoundNames().size();
     }
 
     /**
@@ -159,11 +148,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private final TextView vTitle;
         private final LinearLayout vTrackChild;
         private Button mPlayTrackButton;
-        private ShortSoundTrack mShortSoundTrack;
         private View vView;
         private int mPrimaryColor;
         private int mSecondaryColor;
         private boolean trackExpanded;
+        boolean[] trackIsSolo;
+        int soloOff;
 
         /**
          * Constructor for ViewHolder
@@ -176,8 +166,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             vTitle = (TextView) v.findViewById(R.id.track_title);
             vTitle.setOnClickListener(new TrackListener());
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
-            mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
+            mPlayTrackButton = (Button) v.findViewById(R.id.trackSolo);
             trackExpanded = false;
+            trackIsSolo = new boolean[]{false};// hacky.  will change to model value later
+            soloOff = mContext.getResources().getColor(R.color.button_material_light);
 
             // init buttons
             Button eqButton = ((Button) v.findViewById(R.id.eq_button));
@@ -192,8 +184,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             // perform setup
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
             setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
-            setPlayClickHandler(v);
-
+            setPlayClickHandler();
         }
 
         /**
@@ -207,16 +198,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         /**
          * Set the event handler for the Play button on a given track.
          */
-        private void setPlayClickHandler(View v) {
+        private void setPlayClickHandler() {
+
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    if ( mAudioPlayer.isPlayingTrack( mShortSoundTrack ) ) {
-                        mAudioPlayer.pauseTrack( mShortSoundTrack );
-                        mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
-                    } else {
-                        mAudioPlayer.playTrack( mShortSoundTrack, 0 );  // TODO: get the position from seekbar
-                        mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_pause));
-                    }
+                    if (!trackIsSolo[0])
+                        mPlayTrackButton.setBackgroundColor(mSecondaryColor);
+                    else
+                        mPlayTrackButton.setBackgroundColor(soloOff);
+
+                    trackIsSolo[0] = !trackIsSolo[0];
+                    // TODO solo button set volume
                 }
             });
         }
@@ -226,35 +218,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          * @param position The position of each track as int
          */
         public void setTitleView(int position) {
-            vTitle.setText(mShortSound.getTracks().get(position).getTitle());
+            vTitle.setText(((MainActivity) mContext).getCurShortSoundNames().get(position));
         }
-
-        /**
-         * Set the ShortSoundTrack that this view corresponds to.
-         * @param track
-         */
-        public void setShortSoundTrack(ShortSoundTrack track) {
-            mShortSoundTrack = track;
-            /*
-            mShortSoundTrack.setOnPlayCompleteListener(new ShortSoundTrack.OnCompleteListener() {
-                @Override
-                public void onComplete() {
-                    mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
-                    mShortSound.notifyTrackStopped();
-                }
-            });
-            */
-        }
-
-//        private List<Effect> getEffects() {
-//            List<Effect> retList = new ArrayList<Effect>();
-//            Effect effect1 = new EqEffect();
-//            retList.add(effect1);
-//            Effect effect2 = new ReverbEffect();
-//            retList.add(effect2);
-//            retList.add(effect2);
-//            return retList;
-//        }
 
         private void setUpButtons(Button[] bs) {
             for (int i = 0; i < 4; i++) {
@@ -285,24 +250,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
 
+
+
         /**
          * The click mRVListener for individual tracks
          */
         private class TrackListener implements View.OnClickListener  {
             @Override
             public void onClick(View v) {
-                if (!trackExpanded) {
-                    // Expand a track
-                    collapseAllOtherTracks();
-                    expandTrackChildView(vTrackChild);
-                    trackExpanded = true;
-                } else {
-                    // Close the current open track
-                    collapseTrackChildView(vTrackChild);
-                    trackExpanded = false;
-                    // Stop the track (just in case it was playing)
-                    mAudioPlayer.stopTrack( mShortSoundTrack );
-                    mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
+                if (!modelControl.isRecording()) {
+                    if (!trackExpanded) {
+                        // Expand a track
+                        collapseAllOtherTracks();
+                        expandTrackChildView(vTrackChild);
+                    } else {
+                        // Close the current open track
+                        collapseTrackChildView(vTrackChild);
+                    }
+                    trackExpanded = !trackExpanded;
                 }
             }
         }

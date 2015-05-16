@@ -35,8 +35,10 @@ import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.ShortSound;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +131,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void setUpGlobalSeekBar() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
-        mGlobalSeekBar.setMax( 100 );  // Set the max value (0-100)
+        mGlobalSeekBar.setMax(100);  // Set the max value (0-100)
         mGlobalSeekBar.setVisibility(View.INVISIBLE);  // Default to invisible when ShortSound has not been clicked.
     }
 
@@ -177,18 +179,23 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     /**
-     * Retrieve the currently selected ShortSound.
+     * Retrieve the currently selected ShortSound track names.
      * @return
      */
-    public ShortSound getCurShortSound() {
-        return mActiveShortSound;
+    public List<String> getCurShortSoundNames() {
+        List<String> list = new ArrayList<>();
+        if (mActiveShortSound != null) {
+            for (ShortSoundTrack track : mActiveShortSound.getTracks())
+                list.add(track.getTitle());
+        }
+        return list;
     }
 
     /**
      * Retrieve the current AudioPlayer.
      */
-    public AudioPlayer getActiveAudioPlayer() {
-        return modelControl.mAudioPlayer;
+    public ModelControl getModelControl() {
+        return modelControl;
     }
 
     /**

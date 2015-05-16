@@ -49,7 +49,17 @@ public class TrackView extends RecyclerView {
     public TrackView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
-        notifyNewSS();
+//        mShortSound = ((MainActivity) context).getCurShortSound();
+//        if (mShortSound != null) {
+//        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.track_view);
+            // create an mLayoutManager which is required for RecyclerViews
+            mLayoutManager = new LinearLayoutManager(context);
+            // set the LayoutManager for the RecyclerView
+            setLayoutManager(mLayoutManager);
+            // set the adapter for the RecyclerView, passing in the data
+            mAdapter = new RecyclerViewAdapter(context);
+            setAdapter(mAdapter);
+//        }
     }
 
     /**
@@ -61,26 +71,4 @@ public class TrackView extends RecyclerView {
         mAdapter.notifyItemInserted( index );
     }
 
-    public void notifyNewSS() {
-        mShortSound = ((MainActivity) context).getCurShortSound();
-        if (mShortSound != null) {
-//        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.track_view);
-            // create an mLayoutManager which is required for RecyclerViews
-            mLayoutManager = new LinearLayoutManager(context);
-            // set the LayoutManager for the RecyclerView
-            setLayoutManager(mLayoutManager);
-            // set the adapter for the RecyclerView, passing in the data
-            mAdapter = new RecyclerViewAdapter(mShortSound, context);
-            setAdapter(mAdapter);
-        }
-    }
-
-//    private void showToast(String text, int length) {
-//        Toast toast = Toast.makeText(getActivity(), text, length);
-//        LinearLayout layout =(LinearLayout)toast.getView();
-//        TextView textView = ((TextView)layout.getChildAt(0));
-//        textView.setTextSize(20);
-//        textView.setGravity(Gravity.CENTER);
-//        toast.show();
-//    }
 }

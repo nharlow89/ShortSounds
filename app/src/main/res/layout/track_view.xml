@@ -175,8 +175,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight=".13"
-                        android:id="@+id/trackPlay"
-                        android:background="@android:drawable/ic_media_play"
+                        android:id="@+id/trackSolo"
+                        android:background="@color/button_material_light"
+                        android:textColor="@color/accent_material_light"
+                        android:text="SOLO"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
                         android:layout_gravity="center_vertical" />
