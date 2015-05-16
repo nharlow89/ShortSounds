@@ -17,10 +17,9 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+
+import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.R;
-import com.sloths.speedy.shortsounds.model.AudioPlayer;
-import com.sloths.speedy.shortsounds.model.ShortSound;
-import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,23 +28,19 @@ import java.util.List;
  * with the RecyclerView
  */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-    private static final String TAG = "RecyclerViewAdapter";
-    private ShortSound mShortSound;
     private Context mContext;
-    private AudioPlayer mAudioPlayer;
+    private ModelControl modelControl;
     private List<ViewHolder> mViews;
 
 
     /**
      * Constructor for the RecyclerViewAdapter.
-     * @param sound The ShortSound associated with this RecyclerViewAdapter.
      * @param context The Context associated with this RecyclerViewAdapter.
      */
-    public RecyclerViewAdapter(ShortSound sound, Context context) {
-        mShortSound = sound;
-        mContext = context;
-        mAudioPlayer = ((MainActivity) this.mContext).getActiveAudioPlayer();
-        mViews = new ArrayList<ViewHolder>();
+    public RecyclerViewAdapter(Context context) {
+        this.mContext = context;
+        modelControl = ((MainActivity) context).getModelControl();
+        mViews = new ArrayList<>();
     }
 
     /**
@@ -59,7 +54,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // Create a new view.
         View v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.track_view, viewGroup, false);
-        // Define click listener for the ViewHolder's View.
         ViewHolder vh = new ViewHolder(v);
         mViews.add(vh);
         return vh;
@@ -75,7 +69,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
         viewHolder.setTitleView(position);
-        viewHolder.setShortSoundTrack(mShortSound.getTracks().get(position));
         dynamicallySetCardColor(viewHolder, position);
     }
 
@@ -145,7 +138,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     @Override
     public int getItemCount() {
-        return mShortSound.getTracks().size();
+        return ((MainActivity) mContext).getCurShortSoundNames().size();
     }
 
     /**
@@ -156,10 +149,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private final TextView vTitle;
         private final LinearLayout vTrackChild;
         private Button mPlayTrackButton;
-        private ShortSoundTrack mShortSoundTrack;
         private View vView;
         private int mPrimaryColor;
         private int mSecondaryColor;
+        boolean trackIsSolo;
+        int soloOff;
         private Switch eqToggle;
         private Switch reverbToggle;
         private Switch distToggle;
@@ -177,8 +171,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             vTitle = (TextView) v.findViewById(R.id.track_title);
             vTitle.setOnClickListener(new TrackListener());
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
-            mPlayTrackButton = (Button) v.findViewById(R.id.trackPlay);
-            mTrackExpanded = false;
+            mPlayTrackButton = (Button) v.findViewById(R.id.trackSolo);//TODO name change
+            trackIsSolo = false;// hacky.  will change to model value later
+            soloOff = mContext.getResources().getColor(R.color.button_material_light);
 
             // init buttons
             Button eqButton = ((Button) v.findViewById(R.id.eq_button));
@@ -193,8 +188,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             // perform setup
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
             setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
-            setPlayClickHandler(v);
-
+            setPlayClickHandler();
         }
 
         /**
@@ -207,18 +201,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         /**
          * Set the event handler for the Play button on a given track.
-         * @param v the Track View to set a play button on
          */
-        private void setPlayClickHandler(View v) {
+        private void setPlayClickHandler() {
+
             mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    if ( mAudioPlayer.isPlayingTrack( mShortSoundTrack ) ) {
-                        mAudioPlayer.pauseTrack( mShortSoundTrack );
-                        mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
-                    } else {
-                        mAudioPlayer.playTrack( mShortSoundTrack, 0 );  // TODO: get the position from seekbar
-                        mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_pause));
-                    }
+                    if (!trackIsSolo)
+                        mPlayTrackButton.setBackgroundColor(mSecondaryColor);
+                    else
+                        mPlayTrackButton.setBackgroundColor(soloOff);
+
+                    trackIsSolo = !trackIsSolo;
+                    // TODO solo button set volume
                 }
             });
         }
@@ -228,16 +222,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          * @param position The position of a track
          */
         public void setTitleView(int position) {
-            vTitle.setText(mShortSound.getTracks().get(position).getTitle());
+            vTitle.setText(((MainActivity) mContext).getCurShortSoundNames().get(position));
         }
 
-        /**
-         * Set the ShortSoundTrack that this view corresponds to.
-         * @param track
-         */
-        public void setShortSoundTrack( ShortSoundTrack track ) {
-            mShortSoundTrack = track;
-        }
 
         /**
          * sets up the buttons inside a TrackView
@@ -255,56 +242,56 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
 
-        // This is kind of frustratingly complicated, but there's no readily apparent way for me
-        // to attach an Effect object to a Switch.  If you see a better way feel free to change
-        // this.  -Casey
-        private void setUpToggles() {
-            Log.d("effects", "setUpToggle called");
-            reverbToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    Log.d("effects", "reverb switch clicked");
-                    if (isChecked) {
-                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.REVERB);
-                    } else {
-                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.REVERB);
-                    }
-                }
-            });
-            eqToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    Log.d("effects", "eq switch clicked");
-                    if (isChecked) {
-                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.EQ);
-                    } else {
-                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.EQ);
-                    }
-                }
-            });
-            distToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    Log.d("effects", "distortion switch clicked");
-                    if (isChecked) {
-                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.DISTORTION);
-                    } else {
-                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.DISTORTION);
-                    }
-                }
-            });
-            bitToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    Log.d("effects", "bitcrush switch clicked");
-                    if (isChecked) {
-                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.BITCRUSH);
-                    } else {
-                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.BITCRUSH);
-                    }
-                }
-            });
-        }
+//        // This is kind of frustratingly complicated, but there's no readily apparent way for me
+//        // to attach an Effect object to a Switch.  If you see a better way feel free to change
+//        // this.  -Casey
+//        private void setUpToggles() {
+//            Log.d("effects", "setUpToggle called");
+//            reverbToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    Log.d("effects", "reverb switch clicked");
+//                    if (isChecked) {
+//                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.REVERB);
+//                    } else {
+//                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.REVERB);
+//                    }
+//                }
+//            });
+//            eqToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    Log.d("effects", "eq switch clicked");
+//                    if (isChecked) {
+//                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.EQ);
+//                    } else {
+//                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.EQ);
+//                    }
+//                }
+//            });
+//            distToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    Log.d("effects", "distortion switch clicked");
+//                    if (isChecked) {
+//                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.DISTORTION);
+//                    } else {
+//                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.DISTORTION);
+//                    }
+//                }
+//            });
+//            bitToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    Log.d("effects", "bitcrush switch clicked");
+//                    if (isChecked) {
+//                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.BITCRUSH);
+//                    } else {
+//                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.BITCRUSH);
+//                    }
+//                }
+//            });
+//        }
 
         // TODO implement effect toggle
         private void setUpToggle(Switch[] sws) {
@@ -322,25 +309,28 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
 
+
+
         /**
          * The listener for when a track is clicked on
          */
         private class TrackListener implements View.OnClickListener  {
             @Override
             public void onClick(View v) {
-                //listener.onButtonClicked(v, getPosition());
-                if (!mTrackExpanded) {
-                    // Expand a track
-                    collapseAllOtherTracks();
-                    expandTrackChildView(vTrackChild);
-                    mTrackExpanded = true;
-                } else {
-                    // Close the current open track
-                    collapseTrackChildView(vTrackChild);
-                    mTrackExpanded = false;
-                    // Stop the track (just in case it was playing)
-                    mAudioPlayer.stopTrack( mShortSoundTrack );
-                    mPlayTrackButton.setBackground(mContext.getResources().getDrawable(R.drawable.ic_action_play));
+                if (!modelControl.isRecording()) {
+                    Log.i("Adapter", "vtrackchild == visible " + (vTrackChild.getVisibility() == View.VISIBLE));
+                    Log.i("Adapter", "vtrackchild.visible " + vTrackChild.getVisibility());
+                    Log.i("Adapter", "mtrackexpanded " + mTrackExpanded);
+                    Log.i("Adapter", "");
+                    if (vTrackChild.getVisibility() != View.VISIBLE) {
+                        // Expand a track
+                        collapseAllOtherTracks();
+                        expandTrackChildView(vTrackChild);
+                    } else {
+                        // Close the current open track
+                        collapseTrackChildView(vTrackChild);
+                    }
+
                 }
             }
         }

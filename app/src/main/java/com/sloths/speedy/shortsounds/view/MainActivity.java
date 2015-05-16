@@ -40,7 +40,9 @@ import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.EqEffect;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,19 +187,29 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     /**
+<<<<<<< HEAD
+     * Retrieve the currently selected ShortSound track names.
+     * @return
+=======
      * Retrieve the currently selected ShortSound.
      * @return the active ShortSound
+>>>>>>> 0df4b2a9b58578f46db1ce3995138df7383e668e
      */
-    public ShortSound getCurShortSound() {
-        return mActiveShortSound;
+    public List<String> getCurShortSoundNames() {
+        List<String> list = new ArrayList<>();
+        if (mActiveShortSound != null) {
+            for (ShortSoundTrack track : mActiveShortSound.getTracks())
+                list.add(track.getTitle());
+        }
+        return list;
     }
 
     /**
      * Retrieve the current AudioPlayer.
      * @return the current AudioPlayer.
      */
-    public AudioPlayer getActiveAudioPlayer() {
-        return modelControl.mAudioPlayer;
+    public ModelControl getModelControl() {
+        return modelControl;
     }
 
     /**
