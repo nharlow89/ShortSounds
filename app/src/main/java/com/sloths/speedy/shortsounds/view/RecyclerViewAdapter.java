@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +41,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     public RecyclerViewAdapter(Context context) {
         this.mContext = context;
-        modelControl = ((MainActivity) context).getModelControl();
+        modelControl = ModelControl.instance();
+//        modelControl = ((MainActivity) context).getModelControl();
         mViews = new ArrayList<>();
     }
 
@@ -148,7 +151,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView vTitle;
         private final LinearLayout vTrackChild;
-        private Button mPlayTrackButton;
+        private Button mSoloButton;
         private View vView;
         private int mPrimaryColor;
         private int mSecondaryColor;
@@ -158,7 +161,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private Switch reverbToggle;
         private Switch distToggle;
         private Switch bitToggle;
-        private boolean mTrackExpanded;
 
         /**
          * Constructor for a ViewHolder
@@ -169,9 +171,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             // init instance variables
             vView = v;
             vTitle = (TextView) v.findViewById(R.id.track_title);
-            vTitle.setOnClickListener(new TrackListener());
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
-            mPlayTrackButton = (Button) v.findViewById(R.id.trackSolo);//TODO name change
+            vTitle.setOnClickListener(new TrackListener());
+            mSoloButton = (Button) v.findViewById(R.id.trackSolo);//TODO name change
             trackIsSolo = false;// hacky.  will change to model value later
             soloOff = mContext.getResources().getColor(R.color.button_material_light);
 
@@ -186,9 +188,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Switch bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
 
             // perform setup
-            setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
-            setUpToggle(new Switch[]{eqToggle, reverbToggle, distToggle, bitToggle});
             setPlayClickHandler();
+            setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
+            setUpToggle(new Switch[]{eqToggle, reverbToggle, bitToggle, distToggle},
+                        new ShortSoundTrack.EFFECT[]{ShortSoundTrack.EFFECT.EQ,
+                            ShortSoundTrack.EFFECT.REVERB,
+                            ShortSoundTrack.EFFECT.BITCRUSH,
+                            ShortSoundTrack.EFFECT.DISTORTION}
+            );
         }
 
         /**
@@ -203,13 +210,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          * Set the event handler for the Play button on a given track.
          */
         private void setPlayClickHandler() {
-
-            mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
+            mSoloButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     if (!trackIsSolo)
-                        mPlayTrackButton.setBackgroundColor(mSecondaryColor);
+                        mSoloButton.setBackgroundColor(mSecondaryColor);
                     else
-                        mPlayTrackButton.setBackgroundColor(soloOff);
+                        mSoloButton.setBackgroundColor(soloOff);
 
                     trackIsSolo = !trackIsSolo;
                     // TODO solo button set volume
@@ -242,9 +248,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
 
-//        // This is kind of frustratingly complicated, but there's no readily apparent way for me
-//        // to attach an Effect object to a Switch.  If you see a better way feel free to change
-//        // this.  -Casey
+        // This is kind of frustratingly complicated, but there's no readily apparent way for me
+        // to attach an Effect object to a Switch.  If you see a better way feel free to change
+        // this.  -Casey
 //        private void setUpToggles() {
 //            Log.d("effects", "setUpToggle called");
 //            reverbToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -252,7 +258,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 //                    Log.d("effects", "reverb switch clicked");
 //                    if (isChecked) {
-//                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.REVERB);
+//                        mShortSoundTrack.turnOnEffect(ShortSoundTrack.EFFECT.REVERB);
 //                    } else {
 //                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.REVERB);
 //                    }
@@ -263,7 +269,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 //                    Log.d("effects", "eq switch clicked");
 //                    if (isChecked) {
-//                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.EQ);
+//                        mShortSoundTrack.turnOnEffect(ShortSoundTrack.EFFECT.EQ);
 //                    } else {
 //                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.EQ);
 //                    }
@@ -274,7 +280,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 //                    Log.d("effects", "distortion switch clicked");
 //                    if (isChecked) {
-//                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.DISTORTION);
+//                        mShortSoundTrack.turnOnEffect(ShortSoundTrack.EFFECT.DISTORTION);
 //                    } else {
 //                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.DISTORTION);
 //                    }
@@ -285,7 +291,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 //                    Log.d("effects", "bitcrush switch clicked");
 //                    if (isChecked) {
-//                        mShortSoundTrack.addEffect(ShortSoundTrack.EFFECT.BITCRUSH);
+//                        mShortSoundTrack.turnOnEffect(ShortSoundTrack.EFFECT.BITCRUSH);
 //                    } else {
 //                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.BITCRUSH);
 //                    }
@@ -294,22 +300,23 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //        }
 
         // TODO implement effect toggle
-        private void setUpToggle(Switch[] sws) {
-            for (Switch sw : sws) {
-                sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        private void setUpToggle(Switch[] sws, final ShortSoundTrack.EFFECT[] effects) {
+            for (int i = 0; i < sws.length; i++) {
+                final int i_ = i;
+                sws[i].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
-                            //effect on
+                            // effect on
+                            modelControl.turnOnEffect(effects[i_], getPosition());
                         } else {
                             //effect off
+                            modelControl.muteEffect(effects[i_], getPosition());
                         }
                     }
                 });
             }
         }
-
-
 
         /**
          * The listener for when a track is clicked on
@@ -320,101 +327,102 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 if (!modelControl.isRecording()) {
                     Log.i("Adapter", "vtrackchild == visible " + (vTrackChild.getVisibility() == View.VISIBLE));
                     Log.i("Adapter", "vtrackchild.visible " + vTrackChild.getVisibility());
-                    Log.i("Adapter", "mtrackexpanded " + mTrackExpanded);
                     Log.i("Adapter", "");
-                    if (vTrackChild.getVisibility() != View.VISIBLE) {
+                    if (vTrackChild.getVisibility() == View.GONE) {
                         // Expand a track
                         collapseAllOtherTracks();
                         expandTrackChildView(vTrackChild);
                     } else {
                         // Close the current open track
                         collapseTrackChildView(vTrackChild);
+
                     }
 
                 }
             }
-        }
-    }
-
-    /**
-     * Collapse all other tracks.
-     */
-    public void collapseAllOtherTracks() {
-        for(ViewHolder vh: mViews) {
-            if ( vh.mTrackExpanded) {
-                collapseTrackChildView(vh.vTrackChild);
-            }
-        }
-    }
-
-    /**
-     * Uses animation to expand the child view of a track
-     * @param v The view to expand
-     */
-    public void expandTrackChildView(final View v) {
-        v.measure(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT);
-        final int targetHeight = v.getMeasuredHeight();
-
-        v.getLayoutParams().height = 0;
-        v.setVisibility(View.VISIBLE);
-        Animation a = new Animation()
-        {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                v.getLayoutParams().height = interpolatedTime == 1
-                        ? RecyclerView.LayoutParams.WRAP_CONTENT
-                        : (int)(targetHeight * interpolatedTime);
-                v.requestLayout();
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        // 1 dp/ms
-        a.setDuration((int) (targetHeight / (v.getContext().getResources().getDisplayMetrics().density)));
-        v.startAnimation(a);
-    }
-
-    /**
-     * Uses animation to collapse the child view of a track
-     * @param v The view to collapse
-     */
-    public void collapseTrackChildView(final View v) {
-        final int initialHeight = v.getMeasuredHeight();
-
-        Animation a = new Animation()
-        {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if(interpolatedTime == 1){
-                    v.setVisibility(View.GONE);
-                }else{
-                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
-                    v.requestLayout();
+            /**
+             * Collapse all other tracks.
+             */
+            public void collapseAllOtherTracks() {
+                for(ViewHolder vh: mViews) {
+                    if ( vh.vTrackChild.getVisibility() == View.VISIBLE) {
+                        collapseTrackChildView(vh.vTrackChild);
+                    }
                 }
             }
 
-            @Override
-            public boolean willChangeBounds() {
-                return true;
+            /**
+             * Uses animation to expand the child view of a track
+             * @param v The view to expand
+             */
+            public void expandTrackChildView(final View v) {
+                v.measure(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT);
+                final int targetHeight = v.getMeasuredHeight();
+
+                v.getLayoutParams().height = 0;
+                v.setVisibility(View.VISIBLE);
+                Animation a = new Animation()
+                {
+                    @Override
+                    protected void applyTransformation(float interpolatedTime, Transformation t) {
+                        v.getLayoutParams().height = interpolatedTime == 1
+                                ? RecyclerView.LayoutParams.WRAP_CONTENT
+                                : (int)(targetHeight * interpolatedTime);
+                        v.requestLayout();
+                    }
+
+                    @Override
+                    public boolean willChangeBounds() {
+                        return true;
+                    }
+                };
+
+                // 1 dp/ms
+                a.setDuration((int) (targetHeight / (v.getContext().getResources().getDisplayMetrics().density)));
+                v.startAnimation(a);
             }
-        };
 
-        // 1 dp/ms
-        a.setDuration((int)(initialHeight / (v.getContext().getResources().getDisplayMetrics().density)));
-        v.startAnimation(a);
+            /**
+             * Uses animation to collapse the child view of a track
+             * @param v The view to collapse
+             */
+            public void collapseTrackChildView(final View v) {
+                final int initialHeight = v.getMeasuredHeight();
+
+                Animation a = new Animation()
+                {
+                    @Override
+                    protected void applyTransformation(float interpolatedTime, Transformation t) {
+                        if(interpolatedTime == 1){
+                            v.setVisibility(View.GONE);
+                        }else{
+                            v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                            v.requestLayout();
+                        }
+                    }
+
+                    @Override
+                    public boolean willChangeBounds() {
+                        return true;
+                    }
+                };
+
+                // 1 dp/ms
+                a.setDuration((int)(initialHeight / (v.getContext().getResources().getDisplayMetrics().density)));
+                v.startAnimation(a);
+            }
+        }
     }
 
-    // The button clicking implementation is actually implemented in the RecyclerViewFragment
-    // It holds the logic for populating an effect popup
-    public interface ChooseEffectListener {
-        void onButtonClicked(int track, String name);
-    }
 
-    public View getViewAtPos(int i) {
-        return mViews.get(i).getViewHoldersView();
-    }
+
+//    // The button clicking implementation is actually implemented in the RecyclerViewFragment
+//    // It holds the logic for populating an effect popup
+//    public interface ChooseEffectListener {
+//        void onButtonClicked(int track, String name);
+//    }
+//
+//    public View getViewAtPos(int i) {
+//        return mViews.get(i).getViewHoldersView();
+//    }
 }

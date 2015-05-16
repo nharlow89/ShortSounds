@@ -120,7 +120,7 @@ public class ShortSoundTrack {
     }
 
     public void addEffect(EFFECT e) {
-        Log.d("effects", "addEffect called");
+        Log.d("effects", "turnOnEffect called");
         switch (e) {
            case EQ:
                Log.d("effects", "EQ toggle switch clicked");
