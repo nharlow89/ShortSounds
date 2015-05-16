@@ -3,6 +3,8 @@ package com.sloths.speedy.shortsounds.model;
 import android.media.AudioTrack;
 import android.util.Log;
 
+import com.sloths.speedy.shortsounds.PlaybackListener;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,6 +20,7 @@ import java.util.Map;
  */
 public class AudioPlayer {
     public static final String DEBUG_TAG = "SHORT_SOUNDS";
+
     public static enum PlayerState { PLAYING_ALL, STOPPED_ALL, PAUSED_ALL };
     private static enum TrackState { PLAYING, PAUSED, STOPPED };
 
@@ -286,5 +289,9 @@ public class AudioPlayer {
                 }
             }
         }
+    }
+
+    public interface PlaybackCompleteListener {
+        public void playbackComplete();
     }
 }

@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -28,11 +29,11 @@ public class Fx_EQCanvas extends View {
     private Path linePath;
     private Paint linePaint;
     private Paint pointPaint;
-    private PointF left;
-    private PointF right;
+    private EQPointF left;
+    private EQPointF right;
     private PointGroup lo;
     private PointGroup hi;
-    private List<PointF> path;
+    private List<EQPointF> path;
 
 
 
@@ -57,10 +58,12 @@ public class Fx_EQCanvas extends View {
     }
 
     public void resetPoints() {
-        left = new PointF(0, getMeasuredHeight() / 2);
-        right = new PointF(getMeasuredWidth(), getMeasuredHeight() / 2);
-        lo = new PointGroup(PointInit.LO, getMeasuredWidth(), getMeasuredHeight());
-        hi = new PointGroup(PointInit.HI, getMeasuredWidth(), getMeasuredHeight());
+        left = new EQPointF(0, getMeasuredHeight() / 2);
+        right = new EQPointF(getMeasuredWidth(), getMeasuredHeight() / 2);
+        lo = new PointGroup(PointInit.LO);
+        hi = new PointGroup(PointInit.HI);
+        setPath();
+        invalidate();
     }
 
     void setStyles() {
@@ -86,6 +89,7 @@ public class Fx_EQCanvas extends View {
         if (firstDraw) {
             // Draw the line between initial points
             setStyles();
+
             resetPoints();
             setPath();
             firstDraw = false;
@@ -108,26 +112,26 @@ public class Fx_EQCanvas extends View {
         linePath.reset();
         for (int i = 0; i < path.size(); i++){
             if (i >= 0){
-                PointF point = path.get(i);
+                EQPointF point = path.get(i);
                 if (i == 0) {
-                    PointF next = path.get(i + 1);
+                    EQPointF next = path.get(i + 1);
                     point.dx = ((next.x - point.x) / 3);
                     point.dy = ((next.y - point.y) / 3);
                 } else if (i == path.size() - 1) {
-                    PointF prev =path.get(i - 1);
+                    EQPointF prev =path.get(i - 1);
                     point.dx = ((point.x - prev.x) / 3);
                     point.dy = ((point.y - prev.y) / 3);
                 } else {
-                    PointF next = path.get(i + 1);
-                    PointF prev = path.get(i - 1);
+                    EQPointF next = path.get(i + 1);
+                    EQPointF prev = path.get(i - 1);
                     point.dx = ((next.x - prev.x) / 5);
                     point.dy = ((next.y - prev.y) / 5);
                 }
             }
         }
 
-        PointF prev = path.get(0);
-        PointF point;
+        EQPointF prev = path.get(0);
+        EQPointF point;
         linePath.moveTo(prev.x, prev.y);
         for(int i = 1; i < path.size(); i++){
             point = path.get(i);
@@ -145,7 +149,7 @@ public class Fx_EQCanvas extends View {
             lg = hi;
             rg = lo;
         }
-        PointF p = new PointF((int) ((lg.rp.x + rg.lp.x) / 2), (int) lg.rp.y);
+        EQPointF p = new EQPointF((int) ((lg.rp.x + rg.lp.x) / 2), (int) lg.rp.y);
         path = Arrays.asList(left, lg.lp, lg.cp, p, rg.cp, rg.rp, right);
     }
 
@@ -192,20 +196,51 @@ public class Fx_EQCanvas extends View {
     }
 
 
-    private class PointF implements Comparable<PointF> {
+    private class EQPointF implements Comparable<EQPointF> {
         float x, y;
         float dx, dy;
 
 
-        public PointF(int x, int y) {
+        public EQPointF(int x, int y) {
             this.x = x;
             this.y = y;
         }
 
         @Override
-        public int compareTo(PointF o) {
+        public int compareTo(EQPointF o) {
             return (int) (x - o.x);
         }
+    }
+
+    public PointF getBandA() {
+        return getBand(lo.cp);
+    }
+
+    public PointF getBandB() {
+        return getBand(hi.cp);
+    }
+
+    private PointF getBand(EQPointF point) {
+        float midY = (float) getMeasuredHeight() / (float) 2;
+
+        // lo point to return as percentage
+        float loXPercent = point.x / (float) getMeasuredWidth();
+        float loYPercent = (midY - point.y) / midY;
+        return new PointF(loXPercent, loYPercent);
+    }
+
+    public void setValues(PointF[] points) {
+        if (points == null || points.length == 0) {
+            // Nothing pulled from model --> Set to default
+            resetPoints();
+            return;
+        }
+        float width = getMeasuredWidth();
+        float height = getMeasuredHeight() / (float) 2;
+        lo.set(points[0].x * width, height - points[0].y * height);
+        hi.set(points[1].x * width, height - points[1].y * height);
+        setPath();
+        invalidate();
     }
 
     class PointGroup {
@@ -215,21 +250,21 @@ public class Fx_EQCanvas extends View {
         private PointInit init;
         boolean enabled;
         RectF rect;
-        private PointF lp;
-        private PointF cp;
-        private PointF rp;
+        private EQPointF lp;
+        private EQPointF cp;
+        private EQPointF rp;
 
-        PointGroup(PointInit init, int width, int height) {
-            BANDWIDTH = width / 8;
+        PointGroup(PointInit init) {
+            BANDWIDTH = getMeasuredWidth() / 8;
             RECTSIZE = BANDWIDTH / 2;
             this.init = init;
-            int x = width / 4;
-            int y = height / 2;
+            int x = getMeasuredWidth() / 4;
+            int y = getMeasuredHeight() / 2;
             if (init == PointInit.HI)
                 x *= 3;
-            lp = new PointF(x - BANDWIDTH, y);
-            cp = new PointF(x, y);
-            rp = new PointF(x + BANDWIDTH, y);
+            lp = new EQPointF(x - BANDWIDTH, y);
+            cp = new EQPointF(x, y);
+            rp = new EQPointF(x + BANDWIDTH, y);
 
             rect = new RectF(cp.x - RECTSIZE, cp.y - RECTSIZE,
                              cp.x + RECTSIZE, cp.y + RECTSIZE);
