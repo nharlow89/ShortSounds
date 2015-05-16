@@ -12,6 +12,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.sloths.speedy.shortsounds.controller.EQEffectController;
+import com.sloths.speedy.shortsounds.model.EqEffect;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,6 +37,7 @@ public class Fx_EQCanvas extends View {
     private PointGroup lo;
     private PointGroup hi;
     private List<EQPointF> path;
+    private EQEffectController controller;
 
 
 
@@ -62,6 +66,8 @@ public class Fx_EQCanvas extends View {
         right = new EQPointF(getMeasuredWidth(), getMeasuredHeight() / 2);
         lo = new PointGroup(PointInit.LO);
         hi = new PointGroup(PointInit.HI);
+        setPath();
+        invalidate();
     }
 
     void setStyles() {
@@ -183,14 +189,27 @@ public class Fx_EQCanvas extends View {
                     setPath();
                     invalidate();
                 }
+                controlEffect();
                 break;
 
             // If user lifts up --> set new touch area & draw line & point
             case MotionEvent.ACTION_UP:
                 currentGroup = PointInit.NONE;
+                controlEffect();
                 break;
         }
         return true;
+    }
+
+    /**
+     * Uses the controller to update the backend model
+     * This will let the backend change its parameters for controlling
+     * the effect
+     */
+    private void controlEffect() {
+        if (controller != null) {
+            controller.updateEffectValues(new PointF[]{getBandA(), getBandB()});
+        }
     }
 
 
@@ -208,35 +227,6 @@ public class Fx_EQCanvas extends View {
         public int compareTo(EQPointF o) {
             return (int) (x - o.x);
         }
-    }
-
-    public PointF getBandA() {
-        return getBand(lo.cp);
-    }
-
-    public PointF getBandB() {
-        return getBand(hi.cp);
-    }
-
-    private PointF getBand(EQPointF point) {
-        float midY = getMeasuredHeight() / 2;
-
-        // lo point to return as percentage
-        float loXPercent = point.x / getMeasuredWidth();
-        float loYPercent = (midY - point.y) / midY;
-        return new PointF((int) loXPercent, (int) loYPercent);
-    }
-
-    public void setValues(PointF[] points) {
-        if (points == null || points.length == 0) {
-            // Nothing pulled from model --> Set to default
-            resetPoints();
-            return;
-        }
-        float width = getMeasuredWidth();
-        float height = getMeasuredHeight() / 2;
-        lo.set(points[0].x * width, points[0].y * height);
-        hi.set(points[1].x * width, points[1].y * height);
     }
 
     class PointGroup {
@@ -281,4 +271,45 @@ public class Fx_EQCanvas extends View {
                     cp.x + RECTSIZE, cp.y + RECTSIZE);;
         }
     }
+    public PointF getBandA() {
+        return getBand(lo.cp);
+    }
+
+    public PointF getBandB() {
+        return getBand(hi.cp);
+    }
+
+    private PointF getBand(EQPointF point) {
+        float midY = (float) getMeasuredHeight() / (float) 2;
+
+        // lo point to return as percentage
+        float loXPercent = point.x / (float) getMeasuredWidth();
+        float loYPercent = (midY - point.y) / midY;
+        return new PointF(loXPercent, loYPercent);
+    }
+
+    public void setValues(PointF[] points) {
+        if (points == null || points.length == 0 ||
+                (points[0].x == EqEffect.DEFAULT_X1 && points[1].x == EqEffect.DEFAULT_X2)) {
+            // Nothing pulled from model --> Set to default
+            resetPoints();
+            return;
+        }
+        if (lo == null || hi == null) {
+            // View being pulled for the first time
+            resetPoints();
+        }
+
+        float width = getMeasuredWidth();
+        float height = getMeasuredHeight() / (float) 2;
+        lo.set(points[0].x * width, height - points[0].y * height);
+        hi.set(points[1].x * width, height - points[1].y * height);
+        setPath();
+        invalidate();
+    }
+
+    public void setController(EQEffectController controller) {
+        this.controller = controller;
+    }
+
 }
