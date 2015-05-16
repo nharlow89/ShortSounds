@@ -35,6 +35,8 @@ import android.widget.ShareActionProvider;
 import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.PlaybackListener;
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.controller.EQEffectController;
+import com.sloths.speedy.shortsounds.controller.ReverbEffectController;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.EqEffect;
@@ -535,23 +537,34 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         // Set effect view with values pulled from model
         PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
         if (effect.equals(EQ)) {
+            // EQ
+            Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
             if (values != null) {
                 // Set saved values
-                ((Fx_EQCanvas) findViewById(R.id.eq_canvas)).setValues(values);;
+                eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
+                eqCanvas.setValues(values);
             } else {
                 // Set default values for EQ
-                ((Fx_EQCanvas) findViewById(R.id.eq_canvas)).resetPoints();
+                eqCanvas.resetPoints();
             }
+//            // Attach the EQ effect controller to the view
+//            EqEffect eqEffect = mActiveShortSound.getTracks().get(track).getmEqEffect();
+//            eqCanvas.setController(new EQEffectController(eqEffect));
             // Set button listeners on save & cancel on EQ
             findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(track, effect));
             findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(effect));
         } else if (effect.equals(REVERB)) {
+            //REVERB
+            Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
             if (values != null) {
-                ((Fx_ReverbCanvas) findViewById(R.id.reverb_canvas)).setValue(values[0]);
+                reverbCanvas.setValue(values[0]);
             } else {
                 // Set default values for Reverb
-                ((Fx_ReverbCanvas) findViewById(R.id.reverb_canvas)).resetPoint();
+                reverbCanvas.resetPoint();
             }
+//            // Attach the EQ effect controller to the view
+//            ReverbEffect reverbEffect = mActiveShortSound.getTracks().get(track).getmReverbEffect();
+//            reverbCanvas.setController(new ReverbEffectController(reverbEffect));
             // Set button listeners on save & cancel on Reverb
             findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(track, effect));
             findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
