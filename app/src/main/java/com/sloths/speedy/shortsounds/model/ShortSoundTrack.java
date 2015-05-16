@@ -237,8 +237,8 @@ public class ShortSoundTrack {
         if ( this.mReverbEffect == null || !(this.mReverbEffect instanceof ReverbEffect) ) throw new AssertionError("Missing ReverbEffect");
         if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
         // Check that the files are on disk
-        File file = new File( this.fileName);
-        if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
+//        File file = new File( this.fileName);
+//        if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
     }
 
     public String getEQEffectString() {

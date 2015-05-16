@@ -31,7 +31,7 @@ public class EqEffect extends Effect {
 
     // Constructor used when loading an effect from the database
     public EqEffect(String effectVals) {
-        if ( effectVals == "NULL" ) {
+        if ( effectVals.equals( "NULL" ) ) {
             // This is the default effect values
             this.active = false;
             this.eqPoints = null;
@@ -165,6 +165,7 @@ public class EqEffect extends Effect {
         this.eqPoints[0] = points[0];
         this.eqPoints[1] = points[1];
         Log.d("EqEffect", eqPoints[0].x + ", " + eqPoints[0].y + "),(" + eqPoints[1].x + ", " + eqPoints[1].y + ")");
+
 
     }
 }

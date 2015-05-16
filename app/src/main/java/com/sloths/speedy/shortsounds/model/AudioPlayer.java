@@ -175,10 +175,10 @@ public class AudioPlayer {
             track.getmEqEffect().setAudioSource( audioTrack.getAudioSessionId() );
             track.getmReverbEffect().setAudioSource( audioTrack.getAudioSessionId() );
             // Attach the audio effects
-            int eqId = track.getmEqEffect().getEffectId();
-            audioTrack.attachAuxEffect( eqId );
-            int reverbId = track.getmReverbEffect().getEffectId();
-            audioTrack.attachAuxEffect( eqId );
+//            int eqId = track.getmEqEffect().getEffectId();
+//            audioTrack.attachAuxEffect( eqId );
+//            int reverbId = track.getmReverbEffect().getEffectId();
+//            audioTrack.attachAuxEffect( reverbId );
         }
 
         private void setInputStream( int position ) {

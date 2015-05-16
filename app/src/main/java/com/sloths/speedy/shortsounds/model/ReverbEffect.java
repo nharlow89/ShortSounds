@@ -30,7 +30,7 @@ public class ReverbEffect extends Effect {
 
     // Constructor used when loading an effect from the database
     public ReverbEffect(String effectVals) {
-        if ( effectVals == "NULL" ) {
+        if ( effectVals.equals( "NULL" ) ) {
             // Default values
             this.active = false;
             this.pointVal = null;
@@ -54,7 +54,8 @@ public class ReverbEffect extends Effect {
      * @param audioSessionId
      */
     public void setAudioSource( int audioSessionId ) {
-        effect = new EnvironmentalReverb(0, audioSessionId );
+        effect = new EnvironmentalReverb( 0, audioSessionId );
+        effect.setEnabled( this.active );
     }
 
 
