@@ -8,11 +8,9 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -95,8 +93,6 @@ public class Fx_ReverbCanvas extends View {
         }
 
         echoG.draw(canvas);
-//        canvas.drawPoint(left.x, left.y, pointPaint);
-//        canvas.drawPoint(right.x, right.y, pointPaint);
         linePaint.setColor(Color.BLUE);
         canvas.drawPath(linePath, linePaint);
         linePaint.setColor(Color.BLUE);
@@ -129,8 +125,6 @@ public class Fx_ReverbCanvas extends View {
     private void setLine() {
         float h0 = YMIN - (Math.abs(point.y - YMIN) * 3f  / 4);
         float deltaH = 16f * XMIN / point.x;
-//        Log.d(TAG, "xmin / point.x: " + (float)XMIN / point.x);
-//        Log.d(TAG, "delta H: " + deltaH);
         float h1 = h0 + (XMAX - XMIN) * deltaH;
 
         if (h1 > YMIN) {
@@ -163,7 +157,7 @@ public class Fx_ReverbCanvas extends View {
             // Drag points
             case MotionEvent.ACTION_MOVE:
                 if (currentTouch == TOUCH_POINT) {
-                    point.update(x, y);
+                    point.set(x, y);
                     setLine();
                     echoG.setEchos();
                     invalidate();
@@ -172,7 +166,7 @@ public class Fx_ReverbCanvas extends View {
             // If user lifts up --> set new touch area & draw line & point
             case MotionEvent.ACTION_UP:
                 if (currentTouch == TOUCH_POINT) {
-                    point.update(x, y);
+                    point.set(x, y);
                         invalidate();
                         currentTouch = NONE;
                 }
@@ -181,20 +175,30 @@ public class Fx_ReverbCanvas extends View {
         return true;
     }
 
-//    // This is for setting the x & y values that will come
-//    // from the database
-//    public void setReverbVals(float x, float y) {
-//        this.x = x;
-//        this.y = y;
-//    }
-//
-//    public List<Float> getReverbVals() {
-//        List<Float> retList = new ArrayList<Float>();
-//        retList.add(x);
-//        retList.add(y);
-//        return retList;
-//    }
-//
+    public PointF getValue() {
+        float percentX = point.x / (float) getMeasuredWidth();
+        float percentY = point.y / (float) getMeasuredHeight();
+        return new PointF(percentX, percentY);
+    }
+
+    public void setValue(PointF value) {
+        if (value == null || value.length() == 0) {
+            // No values are pulled from model --> Set to default
+            point = new ControlPoint();
+            echoG = new EchoGraphics();
+        }
+        float x = value.x * getMeasuredWidth();
+        float y = value.y * getMeasuredHeight();
+        point.set(x, y);
+        setLine();
+        echoG.setEchos();
+        invalidate();
+    }
+
+    public void resetPoint() {
+        setUpGraph();
+        invalidate();
+    }
 
     class EchoGraphics {
         final int ECHO_SIZE = 40;
@@ -274,7 +278,7 @@ public class Fx_ReverbCanvas extends View {
                                    x + RECTSIZE, y + RECTSIZE);
         }
 
-        void update(float x, float y) {
+        void set(float x, float y) {
             if (x > XMIN + 4 * MARGIN && x < XMAX - 4 * MARGIN)
                 this.x = x;
             if (y  < YMIN - 4 * MARGIN && y  > YMAX + 4 * MARGIN)

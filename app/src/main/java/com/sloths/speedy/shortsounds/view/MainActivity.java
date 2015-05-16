@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,34 +25,37 @@ import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ViewAnimator;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
-import android.widget.TextView;
-import android.widget.ViewAnimator;
-
 import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.PlaybackListener;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
+import com.sloths.speedy.shortsounds.model.EqEffect;
+import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * The MainActivity for the application. Contains setup for the framework of the UI.
+ */
 public class MainActivity extends FragmentActivity implements NoticeDialogFragment.NoticeDialogListener, PlaybackListener {
     public static final String EQ = "EQ";
     public static final String REVERB = "Reverb";
     public static final String BIT = "Bit Crush";
     public static final String DIST = "Distortion";
     public static final String TRACKS = "tracks";
-
     public static final int SLIDE_DURATION = 400;
 
     private String[] mShortSoundsTitles;
@@ -71,8 +76,13 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private int position;
     private ModelControl modelControl;
 
+    /**
+     * Sets up MainActivity
+     * @param savedInstanceState the Bundle
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         Log.d("DB_TEST", "MainActivity:onCreate()");
         sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
@@ -80,14 +90,12 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         modelControl = new ModelControl( this );
         final AudioRecorder mAudioRecorder = new AudioRecorder( getCacheDir() );
         modelControl.setmAudioRecorder(mAudioRecorder);
-
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpGlobalPlayButton();
         setUpGlobalSeekBar();
         setUpLibraryDrawer();
         enableActionBarLibraryToggleButton();
-        setUpViews();
+        setUpAnimatorViews();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setUpFloatingActionButton();
         } else {
@@ -179,8 +187,13 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     /**
+<<<<<<< HEAD
      * Retrieve the currently selected ShortSound track names.
      * @return
+=======
+     * Retrieve the currently selected ShortSound.
+     * @return the active ShortSound
+>>>>>>> 0df4b2a9b58578f46db1ce3995138df7383e668e
      */
     public List<String> getCurShortSoundNames() {
         List<String> list = new ArrayList<>();
@@ -193,6 +206,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
     /**
      * Retrieve the current AudioPlayer.
+     * @return the current AudioPlayer.
      */
     public ModelControl getModelControl() {
         return modelControl;
@@ -205,7 +219,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void setUpFloatingActionButton() {
         FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
         mActionBarFragment = new FloatingActionButtonBasicFragment();
-        mActionBarFragment.setOnLoadListener( new FloatingActionButtonBasicFragment.OnFragmentLoadedListener() {
+        mActionBarFragment.setOnLoadListener(new FloatingActionButtonBasicFragment.OnFragmentLoadedListener() {
             @Override
             public void didLoad() {
                 setUpRecordButton();
@@ -256,7 +270,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
-//                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
                 R.string.drawer_open,  /* "open drawer" description for accessibility */
                 R.string.drawer_close  /* "close drawer" description for accessibility */
         ) {
@@ -275,6 +288,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
+    /**
+     * onPostCreate setup
+     * @param savedInstanceState The Bundle
+     */
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -282,13 +299,21 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         mDrawerToggle.syncState();
     }
 
+    /**
+     * onConfigurationChanged
+     * @param newConfig the Configuration
+     */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    /* Called whenever we call invalidateOptionsMenu() */
+    /**
+     * Called whenever we call invalidateOptionsMenu()
+     * @param menu The drawer menu
+     * @return boolean true if prepared successfully, false else
+     */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
@@ -298,10 +323,13 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         menu.findItem(R.id.action_delete).setVisible(!drawerOpen && shortSoundSelected);
         menu.findItem(R.id.action_share).setVisible(!drawerOpen && shortSoundSelected);
         menu.findItem(R.id.action_new).setVisible(!drawerOpen && shortSoundSelected);
-
         return super.onPrepareOptionsMenu(menu);
     }
 
+    /**
+     * Toggles the play and pause buttons
+     * @return boolean true of toggled, false else
+     */
     @Override
     public boolean onPlayToggle() {
         if ( !modelControl.onPlayToggle() )
@@ -311,33 +339,46 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return true;
     }
 
+    /**
+     * handles events when recording starts
+     */
     @Override
     public void onRecordStart() {
         mGlobalPlayButton.setEnabled(false);
     }
 
+    /**
+     * handles events when recording stops
+     * @param sound The ShortSound stopped
+     * @return null
+     */
     @Override
     public ShortSound onRecordStop( ShortSound sound ) {
         mGlobalPlayButton.setEnabled(true);
         return null;  // TODO fix later, seems hacky
     }
 
+    // TODO
     @Override
     public void soloOn() {
 
     }
 
+    // TODO
     @Override
     public void soloOff() {
 
     }
 
+    // TODO
     @Override
     public void updateCurrentPosition(int position) {
 
     }
 
-    /* The click listener for ListView in the navigation drawer */
+    /**
+     * The click listener for ListView in the navigation drawer
+     */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -345,7 +386,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
-    private void setUpViews() {
+    /**
+     * sets up Views for the animator
+     */
+    private void setUpAnimatorViews() {
         viewMap = new HashMap<>();
         viewMap.put(TRACKS, 0);
         viewMap.put(EQ, 1);
@@ -373,7 +417,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void selectShortSoundFromDrawer(int position) {
         mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
-        modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound ));  // Setup the new AudioPlayer for this SS.
+        modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
         setGlobalPlayButtonClickHandler();
         enableFunctionalityOfGlobalSeekBar();
         if (this.position != position) {
@@ -391,6 +435,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             animator.addView(add, viewMap.get(TRACKS) + 1);
             animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
             animator.removeViewAt(viewMap.get(TRACKS));
+
             invalidateOptionsMenu();
 
             // TODO: Set a listener to update the SeekBar based on play position.
@@ -400,6 +445,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
+    /**
+     * handles event when back is pressed on android device
+     */
     @Override
     public void onBackPressed() {
 
@@ -417,6 +465,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
+    /**
+     * Animation for sliding views in from the right
+     * @return the Animation
+     */
     private Animation inFromRightAnimation() {
         Animation inFromRight = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, +1.0f,
@@ -429,6 +481,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
 
+    /**
+     * Animation for sliding views out to right
+     * @return the Animation
+     */
     private Animation outToRightAnimation() {
         Animation outtoRight = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, 0.0f,
@@ -439,6 +495,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         outtoRight.setInterpolator(new AccelerateInterpolator());
         return outtoRight;
     }
+
+    /**
+     * Animation for sliding views in from left
+     * @return the Animation
+     */
     private Animation inFromLeftAnimation() {
         Animation inFromLeft = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, -1.0f,
@@ -450,6 +511,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return inFromLeft;
     }
 
+    /**
+     * Animation for sliding views out to left
+     * @return the Animation
+     */
     private Animation outToLeftAnimation() {
         Animation outtoLeft = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, 0.0f,
@@ -461,20 +526,56 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return outtoLeft;
     }
 
-    // This is used for loading the popup when clicking a specific effect
+    /**
+     * This is used for loading the popup when clicking a specific effect
+     * @param track the track to load the effect on
+     * @param effect the effect to load on the track
+     */
     public void effectEditSelected(int track, String effect) {
+        // Set effect view with values pulled from model
+        PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
+        if (effect.equals(EQ)) {
+            if (values != null) {
+                // Set saved values
+                ((Fx_EQCanvas) findViewById(R.id.eq_canvas)).setValues(values);;
+            } else {
+                // Set default values for EQ
+                ((Fx_EQCanvas) findViewById(R.id.eq_canvas)).resetPoints();
+            }
+            // Set button listeners on save & cancel on EQ
+            findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(track, effect));
+            findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(effect));
+        } else if (effect.equals(REVERB)) {
+            if (values != null) {
+                ((Fx_ReverbCanvas) findViewById(R.id.reverb_canvas)).setValue(values[0]);
+            } else {
+                // Set default values for Reverb
+                ((Fx_ReverbCanvas) findViewById(R.id.reverb_canvas)).resetPoint();
+            }
+            // Set button listeners on save & cancel on Reverb
+            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(track, effect));
+            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
+        } else {
+            // Set cancel and save for other effects
+            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(track, effect));
+            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
+        }
+
+        // Change the view to the effect
         animator.setDisplayedChild(viewMap.get(effect));
         currentView = effect;
         mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
+
         mDrawerLayout.closeDrawer(mDrawerList);
         setTitle(mShortSoundsTitles[position]);
         invalidateOptionsMenu();
     }
 
-    /*
+    /**
      * Sets the Title on the action bar to the parameter title
+     * @param title the title of a shortSound
      */
     @Override
     public void setTitle(CharSequence title) {
@@ -482,28 +583,27 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         getActionBar().setTitle(mTitle);
     }
 
-    /*
+    /**
      * Creates the Action Bar Options Menu
+     * @param menu The Action Bar menu
+     * @return true if menu created, false else
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
-
         // Locate MenuItem with ShareActionProvider
         MenuItem shareItem = menu.findItem(R.id.action_share);
-
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
-
         mShareActionProvider.setShareIntent(createShareIntent());
-
         return true;
     }
 
-    /*
+    /**
      * Specifies the share intent
+     * @return the share Intent
      */
     private Intent createShareIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
@@ -519,9 +619,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return shareIntent;
     }
 
-    /*
+    /**
      * Determines what to do when a button is pressed on the menu bar
      * based on what the MenuItem that is passed in as a parameter is
+     * @param item The MenuItem selected
+     * @return true if selected, false else
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -547,7 +649,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
  
     }
 
-    /*
+    /**
      * Deletes the current ShortSound from the library.
      * If there are other ShortSounds in the library, opens the first
      * ShortSound.
@@ -577,7 +679,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
-    /*
+    /**
      * Creates a new ShortSound and takes it to an empty screen with no
      * current tracks for this ShortSound
      */
@@ -596,7 +698,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         // TODO: made record a sound text view visible
     }
 
-    /*
+    /**
      * Renames a ShortSound
      */
     private void rename() {
@@ -605,9 +707,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         inputNameDialog.show(fragmentManager, "Input Dialog");
     }
 
-    /*
-     * Changes the ShortSound name to inputText if
-     * inputText is not only whitespace or the empty string
+    /**
+     * Handles event okay selected from NoticeDialogFragment
+     * @param inputText
      */
     @Override
     public void onOkay(String inputText) {
@@ -620,7 +722,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
-    /** Ends the recording process. */
+    /**
+     * Ends the recording process.
+     */
     private void endRecording() {
         ShortSound newShortSound = modelControl.onRecordStop( mActiveShortSound );
         if ( newShortSound != null ) {
@@ -641,5 +745,104 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         if (mActiveShortSound.getTracks().size() == 1) {
             setGlobalPlayButtonClickHandler();
         }
+    }
+
+    // TODO: Clean up resources & Save track state to DB
+    @Override
+    public void onDestroy() {
+
+    }
+
+    /**
+     * Cancels button listeners
+     */
+    public class CancelButtonListener implements View.OnClickListener {
+        private String effect;
+
+        /**
+         * Constructor for a CancelButtonListener
+         * @param effect The effect to cancel the b utton on
+         */
+        public CancelButtonListener(String effect) {
+            this.effect = effect;
+        }
+
+        /**
+         * Switch view back w/o saving anything to backend
+         * @param v the View associated with button
+         */
+        @Override
+        public void onClick(View v) {
+            Log.d("Main", "Cancel clicked");
+            // Show message
+            showToast("Canceled " + effect);
+            // Got back to track view
+            onBackPressed();
+        }
+    }
+
+    /**
+     * Class used for saving an effect on the UI.
+     * Should save the values to the model
+     */
+    public class SaveButtonListener implements View.OnClickListener {
+        private int track;
+        private String effect;
+
+        /**
+         * Constructor for a SaveButtonListener
+         * @param track the track associated with the listener
+         * @param effect the effect associated with the track
+         */
+        public SaveButtonListener(int track, String effect) {
+            this.track = track;
+            this.effect = effect;
+            String trackName = mActiveShortSound.getTracks().get(track).toString();
+        }
+
+        /**
+         * handles the click events
+         * @param v View associated with the click events
+         */
+        @Override
+        public void onClick(View v) {
+            String trackName = mActiveShortSound.getTracks().get(track).toString();
+
+            // Save values to backend effect (EQ/Reverb) & change view
+            if (effect.equals(EQ)) {
+                Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
+                PointF lo = eqCanvas.getBandA();
+                PointF hi = eqCanvas.getBandB();
+                EqEffect effect = mActiveShortSound.getTracks().get(track).getmEqEffect();
+                PointF[] newVals = new PointF[]{lo, hi};
+                effect.setPointVals(newVals);
+            } else if (effect.equals(REVERB)) {
+                Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
+                PointF point = reverbCanvas.getValue();
+                ReverbEffect effect = mActiveShortSound.getTracks().get(track).getmReverbEffect();
+                effect.setPointVal(point);
+            } else {
+                // Don't do anything for other effects
+            }
+
+            // Show message
+            showToast("Saved " + effect);
+
+            // Switch view back
+            onBackPressed();
+        }
+    }
+
+    /**
+     * shows toast
+     * @param text The String text associated with the toast
+     */
+    private void showToast(String text) {
+        Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        LinearLayout layout =(LinearLayout)toast.getView();
+        TextView textView = ((TextView)layout.getChildAt(0));
+        textView.setTextSize(20);
+        textView.setGravity(Gravity.CENTER);
+        toast.show();
     }
 }

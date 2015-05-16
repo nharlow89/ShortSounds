@@ -1,11 +1,13 @@
 package com.sloths.speedy.shortsounds.model;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 
+import com.sloths.speedy.shortsounds.view.MainActivity;
 import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
 import java.io.File;
@@ -39,6 +41,14 @@ public class ShortSoundTrack {
     private long id;
     private String title;
     private final long parentId;
+    private boolean preparingWhilePlayed;
+    private MediaState mState;
+    private EqEffect mEqEffect;
+    private ReverbEffect mReverbEffect;
+
+    public enum EFFECT {
+        EQ, REVERB, DISTORTION, BITCRUSH
+    }
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -50,10 +60,11 @@ public class ShortSoundTrack {
     public ShortSoundTrack( File audioFile, long shortSoundId ) {
         this.title = DEFAULT_TITLE;
         this.parentId = shortSoundId;
+        setUpEffects();
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
-        this.sqlHelper.updateShortSoundTrack(this);  // Had to update with filenames =(
-        initFiles(audioFile);
+        this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
+        initFiles( audioFile );
     }
 
     /**
@@ -63,22 +74,98 @@ public class ShortSoundTrack {
      */
     public ShortSoundTrack( HashMap<String, String> map ) {
         if ( !map.containsKey( sqlHelper.KEY_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_ID + " field.");
-        if ( !map.containsKey( sqlHelper.KEY_TRACK_FILENAME_ORIGINAL ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TRACK_FILENAME_ORIGINAL + " field.");
         if ( !map.containsKey( sqlHelper.KEY_TRACK_FILENAME_MODIFIED ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TRACK_FILENAME_MODIFIED + " field.");
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TITLE + " field.");
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
+        if ( !map.containsKey( sqlHelper.EQ_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.EQ_EFFECT_PARAMS + " field.");
+        if ( !map.containsKey( sqlHelper.REVERB_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.REVERB_EFFECT_PARAMS + " field.");
+
         this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
         this.fileName = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
+
+        String eqParams = map.get( sqlHelper.EQ_EFFECT_PARAMS );
+        String reverbParams = map.get( sqlHelper.REVERB_EFFECT_PARAMS);
+
+        loadEffectsFromDB(eqParams, reverbParams);
     }
 
-    public void addEffect() {
-        // TODO
+    private void setUpEffects() {
+        this.mEqEffect = new EqEffect();
+        this.mReverbEffect = new ReverbEffect();
     }
 
-    public void removeEffect() {
-        // TODO
+    /**
+     * Loads teh effects given their held String state parameters in the database
+     * @param eqParams
+     * @param reverbParams
+     */
+    private void loadEffectsFromDB(String eqParams, String reverbParams) {
+        Log.d("ShortSoundTrack", "eq effect params received: "+ eqParams);
+        Log.d("ShortSoundTrack", "reverb effect params received: "+ reverbParams);
+
+        if (eqParams == null || eqParams.equals("NULL")) {
+            this.mEqEffect = new EqEffect();
+        } else {
+            this.mEqEffect = new EqEffect(eqParams);
+        }
+
+        // Reverb
+        if (reverbParams == null || reverbParams.equals("NULL")) {
+            this.mReverbEffect = new ReverbEffect();
+        } else {
+            this.mReverbEffect = new ReverbEffect(reverbParams);
+        }
+    }
+
+    public void addEffect(EFFECT e) {
+        Log.d("effects", "addEffect called");
+        switch (e) {
+           case EQ:
+               Log.d("effects", "EQ toggle switch clicked");
+               this.mEqEffect.enable();
+               break;
+           case REVERB:
+               Log.d("effects", "REVERB toggle switch clicked");
+               this.mReverbEffect.enable();
+               break;
+           case DISTORTION:
+               Log.d("effects", "DISTORTION toggle switch clicked");
+               //throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+               break;
+           case BITCRUSH:
+               Log.d("effects", "BITCRUSH toggle switch clicked");
+               //throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+               break;
+        }
+    }
+
+    /***
+     *
+     * @param effect
+     * @return
+     */
+    public PointF[] getEffectVals(String effect) {
+        if (effect.equals(MainActivity.EQ)) {
+            PointF[] points = mEqEffect.getPointVals();
+            return points;
+        } else {
+            // Reverb point being returned
+            PointF[] points = mReverbEffect.getPointVal();
+            return points;
+        }
+    }
+
+    public void removeEffect(EFFECT e) {
+        switch (e) {
+            case EQ:
+                this.mEqEffect.disable();
+            case REVERB:
+                this.mReverbEffect.disable();
+            default:
+                throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
+        }
     }
 
     /**
@@ -178,5 +265,21 @@ public class ShortSoundTrack {
         // Check that the files are on disk
         File file = new File( this.fileName);
         if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
+    }
+
+    public String getEQEffectString() {
+        return mEqEffect.encodeParameters();
+    }
+
+    public String getReverbEffectString() {
+        return mReverbEffect.encodeParameters();
+    }
+
+    public EqEffect getmEqEffect() {
+        return mEqEffect;
+    }
+
+    public ReverbEffect getmReverbEffect() {
+        return mReverbEffect;
     }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/reverbCanvasParent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -16,7 +17,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="Reverb"
-            android:textSize="100dp"
+            android:textSize="60dp"
             android:minHeight="30dp">
         </TextView>
         <!-- If the client uses a customTitle, it will be added here. -->
@@ -37,7 +38,8 @@
 
         <com.sloths.speedy.shortsounds.view.Fx_ReverbCanvas
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:id="@+id/reverb_canvas"/>
         <View
             android:layout_width="match_parent"
             android:layout_height="10dp"
@@ -55,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cancel"
-            android:id="@+id/cancelEffectButton"
+            android:id="@+id/cancelReverbButton"
             android:layout_gravity="center_vertical"
             android:layout_toLeftOf="@+id/effectSpace"
             android:layout_alignParentBottom="true"
@@ -64,14 +66,14 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="20dp"
-            android:layout_alignTop="@+id/saveEffectButton"
-            android:textSize="30dp" />
+            android:layout_alignTop="@+id/saveReverbButton"
+            android:textSize="20dp" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Save"
-            android:id="@+id/saveEffectButton"
+            android:id="@+id/saveReverbButton"
             android:layout_gravity="center_vertical"
             android:layout_toRightOf="@+id/effectSpace"
             android:layout_alignParentTop="true"
@@ -79,7 +81,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_margin="20dp"
-            android:textSize="30dp" />
+            android:textSize="20dp" />
 
         <Space
             android:layout_width="100px"
