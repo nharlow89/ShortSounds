@@ -2,6 +2,7 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.app.ActionBar;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PointF;
 import android.net.Uri;
@@ -20,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,18 +30,20 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
-import android.content.Intent;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
+import android.widget.ViewAnimator;
 
+import com.sloths.speedy.shortsounds.ModelControl;
+import com.sloths.speedy.shortsounds.PlaybackListener;
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.EqEffect;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
-import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.io.File;
 import java.util.HashMap;
@@ -49,7 +51,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends FragmentActivity implements NoticeDialogFragment.NoticeDialogListener {
+public class MainActivity extends FragmentActivity implements NoticeDialogFragment.NoticeDialogListener, PlaybackListener {
     public static final String EQ = "EQ";
     public static final String REVERB = "Reverb";
     public static final String BIT = "Bit Crush";
@@ -69,14 +71,12 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private Map<String, Integer> viewMap;
     private String currentView;
     private ViewAnimator animator;
-    private Animation slideLeft;
-    private Animation slideRight;
     private ShareActionProvider mShareActionProvider;
     private ShortSound mActiveShortSound;
-    private AudioRecorder mAudioRecorder;
     private FloatingActionButtonBasicFragment mActionBarFragment;
     private SeekBar mGlobalSeekBar;
     private int position;
+    private ModelControl modelControl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +84,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
         mShortSoundsTitles = getShortSoundTitles(sounds);
-        mAudioRecorder = new AudioRecorder( getCacheDir() );
+        modelControl = new ModelControl( this );
+        final AudioRecorder mAudioRecorder = new AudioRecorder( getCacheDir() );
+        modelControl.setmAudioRecorder(mAudioRecorder);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpGlobalPlayButton();
@@ -105,29 +108,15 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * button's click handler to play all tracks associated with this ShortSound.
      */
     private void setGlobalPlayButtonClickHandler() {
+
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
         mGlobalPlayButton.setVisibility(View.VISIBLE);
+        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mActiveShortSound != null) {
-                    // TODO: we need to handle the case when the ShortSound finishes playing!
-                    if (mActiveShortSound.isPlaying()) {
-                        // The ShortSound is already playing, stop it.
-                        mActiveShortSound.pauseAllTracks();
-                        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
-                    } else {
-                        if (mActiveShortSound.isPaused()) {
-                            // The ShortSound was previously playing, unpause it.
-                            mActiveShortSound.unPauseAllTracks();
-                        } else {
-                            // The ShortSound is not playing yet, play it.
-                            mActiveShortSound.playAllTracks();
-                        }
-                        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
-                    }
-                }
+                onPlayToggle();
             }
         });
     }
@@ -149,6 +138,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void setUpGlobalSeekBar() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
+        mGlobalSeekBar.setMax( 100 );  // Set the max value (0-100)
         mGlobalSeekBar.setVisibility(View.INVISIBLE);  // Default to invisible when ShortSound has not been clicked.
     }
 
@@ -176,7 +166,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                     if ( !isChecked ) {
                         endRecording();
                     } else {
-                        beginRecording();
+                        modelControl.onRecordStart();
                     }
                 }
             });
@@ -185,18 +175,29 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             recordButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mAudioRecorder.isRecording()) {
+                    if (modelControl.isRecording()) {
                         endRecording();
                     } else {
-                        beginRecording();
+                        modelControl.onRecordStart();
                     }
                 }
             });
         }
     }
 
+    /**
+     * Retrieve the currently selected ShortSound.
+     * @return
+     */
     public ShortSound getCurShortSound() {
         return mActiveShortSound;
+    }
+
+    /**
+     * Retrieve the current AudioPlayer.
+     */
+    public AudioPlayer getActiveAudioPlayer() {
+        return modelControl.mAudioPlayer;
     }
 
     /**
@@ -303,6 +304,41 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return super.onPrepareOptionsMenu(menu);
     }
 
+    @Override
+    public boolean onPlayToggle() {
+        if ( !modelControl.onPlayToggle() )
+            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
+        else
+            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+        return true;
+    }
+
+    @Override
+    public void onRecordStart() {
+        mGlobalPlayButton.setEnabled(false);
+    }
+
+    @Override
+    public ShortSound onRecordStop( ShortSound sound ) {
+        mGlobalPlayButton.setEnabled(true);
+        return null;  // TODO fix later, seems hacky
+    }
+
+    @Override
+    public void soloOn() {
+
+    }
+
+    @Override
+    public void soloOff() {
+
+    }
+
+    @Override
+    public void updateCurrentPosition(int position) {
+
+    }
+
     /* The click listener for ListView in the navigation drawer */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
@@ -339,6 +375,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void selectShortSoundFromDrawer(int position) {
         mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
+        modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound ));  // Setup the new AudioPlayer for this SS.
         setGlobalPlayButtonClickHandler();
         enableFunctionalityOfGlobalSeekBar();
         if (this.position != position) {
@@ -358,8 +395,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             animator.removeViewAt(viewMap.get(TRACKS));
 
             invalidateOptionsMenu();
+
+            // TODO: Set a listener to update the SeekBar based on play position.
         } else {
-            // selected mix is already loaded so cloase the drawer
+            // selected mix is already loaded so close the drawer
             mDrawerLayout.closeDrawer(mDrawerList);
         }
     }
@@ -529,15 +568,12 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
         switch (item.getItemId()) {
             case R.id.action_delete:
-                //TODO: Add delete functionality
                 deleteShortSound();
                 return true;
             case R.id.action_new:
-                //TODO: Add new shortsound functionality
                 createNew();
                 return true;
             case R.id.action_rename:
-                //TODO: Don't allow only white space
                 rename();
                 return true;
             default:
@@ -547,13 +583,32 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     /*
-     * Deletes a ShortSound from the library.
+     * Deletes the current ShortSound from the library.
+     * If there are other ShortSounds in the library, opens the first
+     * ShortSound.
+     * If there are no ShortSounds in the library, creates and opens a new
+     * ShortSound
      */
     private void deleteShortSound() {
         if (mActiveShortSound != null) {
-            // Delete sound from database.
-            // Reset library
-            // Return to start screen
+            this.position = -1;
+            Log.d("CHECK", "" + sounds.size());
+            sounds.remove(mActiveShortSound);
+            Log.d("CHECK", "" + sounds.size());
+            mActiveShortSound.delete();
+            if (sounds.size() > 0) {
+                mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
+                Log.d("CHECK", "" + mShortSoundsTitles.length);
+                mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                        R.layout.drawer_list_item, mShortSoundsTitles));
+                Log.d("CHECK", sounds.get(0).getTitle());
+                selectShortSoundFromDrawer(0);
+                // hides seek bar and play button
+                setUpGlobalSeekBar();
+                setUpGlobalPlayButton();
+            } else {
+                createNew();
+            }
         }
     }
 
@@ -600,51 +655,33 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
-    /** Begins the recording process. */
-    private void beginRecording() {
-        // Play back other tracks if there are other tracks
-        if (mActiveShortSound != null)
-            mActiveShortSound.playAllTracks();
-        // Setup the MediaRecorder
-        mAudioRecorder.start();
-    }
-
     /** Ends the recording process. */
     private void endRecording() {
-        File recordedFile = mAudioRecorder.end();
-        Log.d("DEBUG", "endRecording() recordedFile: " + recordedFile.getAbsolutePath());
-
-        boolean isNewShortSound = mActiveShortSound == null;
-        if ( isNewShortSound ) {
-            // Case 1. There is no active ShortSound, create one and continue.
-            // Create the new ShortSound and add it the list.
-            mActiveShortSound = new ShortSound();
-            sounds.add( mActiveShortSound );
+        ShortSound newShortSound = modelControl.onRecordStop( mActiveShortSound );
+        if ( newShortSound != null ) {
             // Update the sidebar with the new ShortSound.
+            sounds.add(newShortSound);
             mShortSoundsTitles = getShortSoundTitles(sounds);
             mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                     R.layout.drawer_list_item, mShortSoundsTitles));
-        } else {
-            mActiveShortSound.stopAllTracks();
-        }
-        Log.d("DEBUG", "Finished Recording new track to ShortSound[" + mActiveShortSound.getId() + "]");
-        // Create the new ShortSoundTrack (that this will record to)
-        ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
-        mActiveShortSound.addTrack(newTrack);
-
-        if ( isNewShortSound ) {
             // Select the new ShortSound to be active.
             selectShortSoundFromDrawer(sounds.size() - 1);
         } else {
             // Update the existing fragment manager to add new track to list
             ((TrackView) findViewById(R.id.track_list)).notifyTrackAdded(mActiveShortSound.getTracks().size() - 1);
         }
-        mAudioRecorder.reset();  // Have to reset for the next recording
+
+        // Activate GlobalPlayButton so that tracks are playable
+        // If there is only one track, this must've been an empty ShortSound before
+        if (mActiveShortSound.getTracks().size() == 1) {
+            setGlobalPlayButtonClickHandler();
+        }
     }
 
+    // TODO: Clean up resources & Save track state to DB
     @Override
     public void onDestroy() {
-        mActiveShortSound.releaseAllTracks();
+
     }
 
 

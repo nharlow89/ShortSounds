@@ -2,7 +2,9 @@ package com.sloths.speedy.shortsounds.model;
 
 import android.content.Context;
 import android.graphics.PointF;
-import android.media.MediaPlayer;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.util.Log;
 
 import com.sloths.speedy.shortsounds.view.MainActivity;
@@ -21,21 +23,24 @@ import java.util.HashMap;
  * file. A ShortSoundTrack should belong to a single ShortSound at any given time.
  */
 public class ShortSoundTrack {
-
-    /**
-     * Please note that the internal state of a ShortSoundTrack attempts to follow the state
-     * machine found here in the MediaPlayer class: http://developer.android.com/reference/android/media/MediaPlayer.html
-     */
+    public static final String DEBUG_TAG = "SHORT_SOUNDS";
+    // AudioTrack Params
+    public static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
+    public static final int SAMPLE_RATE = 48000;  // NOTE: also used for buffer size
+    public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_MONO;
+    public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+    public static final int MODE = AudioTrack.MODE_STREAM;
+    public static int BUFFER_SIZE = 48000; // Default
 
     public static final String DEFAULT_TITLE = "Untitled Track";
     private static final String TAG = "Track";
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
-    private final String originalFile;
-    private final String file;
+    private static final Context context = ShortSoundsApplication.getAppContext();
+    public static final String STORAGE_PATH = context.getFilesDir().getAbsolutePath();
+    private final String fileName;
     private long id;
     private String title;
     private final long parentId;
-    private MediaPlayer player;
     private boolean preparingWhilePlayed;
     private MediaState mState;
     private EqEffect mEqEffect;
@@ -55,13 +60,11 @@ public class ShortSoundTrack {
     public ShortSoundTrack( File audioFile, long shortSoundId ) {
         this.title = DEFAULT_TITLE;
         this.parentId = shortSoundId;
+        setUpEffects();
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
-        this.originalFile = "ss" + shortSoundId + "-track" + id;
-        this.file = originalFile + "-modified";
+        this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
         this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
         initFiles( audioFile );
-        setUpMediaPlayer();
-        setUpEffects();
     }
 
     /**
@@ -71,7 +74,6 @@ public class ShortSoundTrack {
      */
     public ShortSoundTrack( HashMap<String, String> map ) {
         if ( !map.containsKey( sqlHelper.KEY_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_ID + " field.");
-        if ( !map.containsKey( sqlHelper.KEY_TRACK_FILENAME_ORIGINAL ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TRACK_FILENAME_ORIGINAL + " field.");
         if ( !map.containsKey( sqlHelper.KEY_TRACK_FILENAME_MODIFIED ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TRACK_FILENAME_MODIFIED + " field.");
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_TITLE + " field.");
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
@@ -79,42 +81,19 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.REVERB_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.REVERB_EFFECT_PARAMS + " field.");
 
         this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
-        this.file = map.get(sqlHelper.KEY_TRACK_FILENAME_MODIFIED);
-        this.originalFile = map.get(sqlHelper.KEY_TRACK_FILENAME_ORIGINAL);
-        this.title = map.get(sqlHelper.KEY_TITLE);
+        this.fileName = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
+        this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
-        this.player = new MediaPlayer();
 
         String eqParams = map.get( sqlHelper.EQ_EFFECT_PARAMS );
         String reverbParams = map.get( sqlHelper.REVERB_EFFECT_PARAMS);
-        setUpMediaPlayer();
+
         loadEffectsFromDB(eqParams, reverbParams);
     }
 
-    public void setUpMediaPlayer() {
-        this.player = new MediaPlayer();
-        Context context = ShortSoundsApplication.getAppContext();
-        String path = context.getFilesDir().getAbsolutePath();
-        try {
-            Log.d("DEBUG", "setDataSource(" + path + "/" + this.file + ")");
-            this.player.setDataSource( path + "/" + this.file );
-            mState = MediaState.INITIALIZED;
-            this.player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mState = MediaState.PREPARED;
-                    if(preparingWhilePlayed)
-                        play();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void setUpEffects() {
-        this.mEqEffect = new EqEffect(player);
-        this.mReverbEffect = new ReverbEffect(player);
+        this.mEqEffect = new EqEffect();
+        this.mReverbEffect = new ReverbEffect();
     }
 
     /**
@@ -127,131 +106,17 @@ public class ShortSoundTrack {
         Log.d("ShortSoundTrack", "reverb effect params received: "+ reverbParams);
 
         if (eqParams == null || eqParams.equals("NULL")) {
-            this.mEqEffect = new EqEffect(player);
+            this.mEqEffect = new EqEffect();
         } else {
-            this.mEqEffect = new EqEffect(player, eqParams);
+            this.mEqEffect = new EqEffect(eqParams);
         }
 
         // Reverb
         if (reverbParams == null || reverbParams.equals("NULL")) {
-            this.mReverbEffect = new ReverbEffect(player);
+            this.mReverbEffect = new ReverbEffect();
         } else {
-            this.mReverbEffect = new ReverbEffect(player, reverbParams);
+            this.mReverbEffect = new ReverbEffect(reverbParams);
         }
-    }
-
-    /**
-     * Play the audio track associated with this ShortSound.
-     */
-    public void play() {
-        if ( mState == MediaState.PREPARED || mState == MediaState.PAUSED ) {
-            Log.d(TAG, "play track ["+this.getId()+"]");
-            player.start();
-            mState = MediaState.STARTED;
-            preparingWhilePlayed = false;
-        } else if ( mState == MediaState.STOPPED ) {
-            try {
-                Log.d(TAG, "prepare and then play stopped track ["+this.getId()+"]");
-                player.prepare();
-                player.start();
-                preparingWhilePlayed = false;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (mState == MediaState.PREPARING) {
-            Log.d(TAG, "Preparing track ["+this.getId()+"]");
-            preparingWhilePlayed = true;
-        } else {
-            Log.e("DEBUG", "Attempted to play track ["+this.id+"] from invalid/undefined state?: " + mState);
-        }
-
-    }
-
-    /**
-     * Stop playing this track and reset its position to the beginning of the audio file.
-     */
-    public void stop() {
-        if (mState != MediaState.INITIALIZED &&  (mState == MediaState.STARTED || mState == MediaState.PAUSED) ) {
-            Log.d(TAG, "stop track ["+this.getId()+"]");
-            player.stop();
-            player.prepareAsync();
-            mState = MediaState.PREPARING;
-        } else {
-            Log.e("DEBUG", "Attempted to stop track ["+this.id+"] from invalid state: " + mState);
-        }
-    }
-
-    public void pause() {
-        if ( mState == MediaState.STARTED || player.isPlaying() ) {
-            Log.d(TAG, "pause track ["+this.getId()+"]");
-            player.pause();
-            mState = MediaState.PAUSED;
-        } else {
-            Log.e("DEBUG", "Attempted to pause track ["+this.id+"] from invalid state: " + mState);
-        }
-    }
-
-    /**
-     * Prepare this track for playing. Note: must be called after stopping the track or after init
-     * of the MediaPlayer.
-     */
-    public void prepare() {
-        if ( mState == MediaState.STOPPED || mState == MediaState.INITIALIZED ) {
-            try {
-                Log.d(TAG, "prepare track ["+this.getId()+"]");
-                player.prepare();
-                mState = MediaState.PREPARED;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            Log.e("DEBUG", "Attempted to prepare track ["+this.id+"] from invalid state: " + mState);
-        }
-    }
-
-    /**
-     * Release this track from the MediaPlayer when no longer in use.
-     */
-    public void release() {
-        if (player != null) {
-            player.release();
-        }
-        if (mEqEffect != null) {
-            mEqEffect.release();
-        }
-        if (mReverbEffect != null) {
-            mReverbEffect.release();
-        }
-    }
-
-    /**
-     * Return whether the current track is playing or not.
-     */
-    public boolean isPlaying() {
-        return player.isPlaying();
-    }
-
-    /**
-     * Prepare this track asynchronously.
-     */
-    public void prepareAsync() {
-        if ( player == null )
-            setUpMediaPlayer();
-        if ( mState == MediaState.INITIALIZED || mState == MediaState.STOPPED ) {
-            Log.d(TAG, "prepareAsync track ["+this.id+"]");
-            player.prepareAsync();
-            mState = MediaState.PREPARING;
-        } else {
-            Log.e("DEBUG", "Attempted to prepareAsync track ["+this.id+"] from invalid state: " + mState);
-        }
-    }
-
-    /**
-     * Set the onCompletionListener for this ShortSoundTrack.
-     * @param listener
-     */
-    public void setOnPlayCompleteListener( MediaPlayer.OnCompletionListener listener ) {
-        player.setOnCompletionListener( listener );
     }
 
     public void addEffect(EFFECT e) {
@@ -260,12 +125,10 @@ public class ShortSoundTrack {
            case EQ:
                Log.d("effects", "EQ toggle switch clicked");
                this.mEqEffect.enable();
-               this.player.attachAuxEffect(mEqEffect.getEffectId());
                break;
            case REVERB:
                Log.d("effects", "REVERB toggle switch clicked");
                this.mReverbEffect.enable();
-               this.player.attachAuxEffect(mReverbEffect.getEffectId());
                break;
            case DISTORTION:
                Log.d("effects", "DISTORTION toggle switch clicked");
@@ -312,23 +175,17 @@ public class ShortSoundTrack {
      *      will be removed.
      */
     public void delete() {
-        // TODO: cleanup any resources (audio players and stuff)
         sqlHelper.removeShortSoundTrack( this );
         deleteFiles();
     }
 
     /**
-     * Initialize the files for a new ShortSoundTrack. This makes a copy of the original audio file
-     * into the proper location.
+     * Initialize the files for a new ShortSoundTrack.
      * @param audioFile
      */
     private void initFiles( File audioFile ) {
-        Context context = ShortSoundsApplication.getAppContext();
-        String path = context.getFilesDir().getAbsolutePath();
-        File originalFile = new File( path, this.originalFile );
-        File file = new File( path , this.file );
+        File file = new File( STORAGE_PATH , this.fileName);
         try {
-            copyFile( audioFile, originalFile );
             copyFile( audioFile, file );
         } catch (IOException e) {
             e.printStackTrace();
@@ -336,15 +193,10 @@ public class ShortSoundTrack {
     }
 
     /**
-     * Remove this ShortSoundTrack's files from memory (both the original and
-     * any modified)
+     * Remove this ShortSoundTrack's files from memory.
      */
     private void deleteFiles() {
-        File originalFile = new File( this.originalFile );
-        if( originalFile.exists() ) {
-            originalFile.delete();
-        }
-        File file = new File( this.file );
+        File file = new File( this.fileName);
         if( file.exists() ) {
             file.delete();
         }
@@ -363,12 +215,6 @@ public class ShortSoundTrack {
                 outChannel.close();
         }
     }
-
-    /**
-     * Wrapper for the mediaPlayer's getDuration method
-     * @return Duration of the track in milliseconds
-     */
-    public int getDuration() { return player.getDuration(); }
 
     /**
      * Get the title of this ShortSoundTrack.
@@ -399,7 +245,7 @@ public class ShortSoundTrack {
      * Get the filename associated with this track.
      * @return filename
      */
-    public String getFile() { return this.file; }
+    public String getFileName() { return this.fileName; }
 
     /**
      * Get this tracks id.
@@ -414,18 +260,11 @@ public class ShortSoundTrack {
      */
     private void repInvariant() {
         if ( this.title == null || !(this.title instanceof String) ) throw new AssertionError("Invalid title");
-        if ( this.file == null || !(this.file instanceof String) ) throw new AssertionError("Invalid filename");
-        if ( this.originalFile == null || !(this.originalFile instanceof String) ) throw new AssertionError("Invalid filename");
+        if ( this.fileName == null || !(this.fileName instanceof String) ) throw new AssertionError("Invalid filename");
         if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
         // Check that the files are on disk
-        File originalFile = new File( this.originalFile );
-        if ( !originalFile.exists() ) throw new AssertionError("File does not exist: " + originalFile);
-        File file = new File( this.file );
+        File file = new File( this.fileName);
         if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
-    }
-
-    public String getOriginalFile() {
-        return originalFile;
     }
 
     public String getEQEffectString() {

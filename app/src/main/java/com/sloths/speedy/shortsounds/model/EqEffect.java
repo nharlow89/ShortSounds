@@ -22,25 +22,23 @@ public class EqEffect extends Effect {
     private short[] bandLevels;
 
     // Constructor used when loading a track from a recorded file
-    public EqEffect(MediaPlayer player) {
+    public EqEffect() {
         this.active = false;
-        this.player = player;
         this.eqPoints = null;
-        effect = new Equalizer(0, player.getAudioSessionId());
+//        effect = new Equalizer(0, player.getAudioSessionId());
         bandLevels = new short[NUM_BANDS];
         for (int i = 0; i < NUM_BANDS; i++) {
-            bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
+//            bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
         }
         //initAudioEffect();
     }
 
     // Constructor used when loading an effect from the database
-    public EqEffect(MediaPlayer player, String effectVals) {
-        this.player = player;
-        effect = new Equalizer(0, player.getAudioSessionId());
+    public EqEffect(String effectVals) {
+//        effect = new Equalizer(0, player.getAudioSessionId());
         bandLevels = new short[NUM_BANDS];
         for (int i = 0; i < NUM_BANDS; i++) {
-            bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
+//            bandLevels[i] = ((Equalizer)effect).getBandLevelRange()[1];
         }
 
         // Parse string from DB to get point vals & on/off
@@ -79,26 +77,26 @@ public class EqEffect extends Effect {
 
     private void initAudioEffect() {
         for (int i = 0; i < bandLevels.length; i++){
-            ((Equalizer)effect).setBandLevel((short)i, bandLevels[i]);
+//            ((Equalizer)effect).setBandLevel((short)i, bandLevels[i]);
         }
     }
 
     @Override
     public void prepare() {
-        if (effect == null) {
-            initAudioEffect();
-        }
+//        if (effect == null) {
+//            initAudioEffect();
+//        }
     }
 
     public void enable() {
         initAudioEffect();
-        effect.setEnabled(true);
+//        effect.setEnabled(true);
     }
 
     public void disable() {
-        effect.setEnabled(false);
-        effect.release();
-        effect = null;
+//        effect.setEnabled(false);
+//        effect.release();
+//        effect = null;
     }
 
     /**

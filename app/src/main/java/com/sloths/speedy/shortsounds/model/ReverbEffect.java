@@ -25,18 +25,15 @@ public class ReverbEffect extends Effect {
 
 
     // Constructor used when loading a track from a recorded file
-    public ReverbEffect(MediaPlayer player) {
+    public ReverbEffect() {
         Log.d("effects", "ReverbEffect initialized from scratch");
-        this.player = player;
         this.active = false;
         this.pointVal = null;
         //initAudioEffect();
     }
 
     // Constructor used when loading an effect from the database
-    public ReverbEffect(MediaPlayer player, String effectVals) {
-        this.player = player;
-
+    public ReverbEffect(String effectVals) {
         // Parse string from DB to get point vals & on/off
         // Stored in DB as "ON/OFF:float,float,float,float"
         String[] params = effectVals.split(":");
@@ -68,23 +65,23 @@ public class ReverbEffect extends Effect {
     }
 
     // TODO: grab converted values from point
-    private void initAudioEffect() {
-        this.effect = new EnvironmentalReverb(0, player.getAudioSessionId());
-        ((EnvironmentalReverb)effect).setDecayTime(DEFAULT_DECAY);
-        ((EnvironmentalReverb)effect).setReflectionsLevel((short) DEFAULT_REFLECTION_LEVEL);
-        ((EnvironmentalReverb)effect).setReflectionsDelay((short) DEFAULT_REFLECTION_DELAY);
-        ((EnvironmentalReverb)effect).setDensity((short)DEFAULT_DENSITY);
-    }
+//    private void initAudioEffect() {
+//        this.effect = new EnvironmentalReverb(0, player.getAudioSessionId());
+//        ((EnvironmentalReverb)effect).setDecayTime(DEFAULT_DECAY);
+//        ((EnvironmentalReverb)effect).setReflectionsLevel((short) DEFAULT_REFLECTION_LEVEL);
+//        ((EnvironmentalReverb)effect).setReflectionsDelay((short) DEFAULT_REFLECTION_DELAY);
+//        ((EnvironmentalReverb)effect).setDensity((short)DEFAULT_DENSITY);
+//    }
 
     @Override
     public void prepare() {
         if (effect == null) {
-            initAudioEffect();
+//            initAudioEffect();
         }
     }
 
     public void enable() {
-        initAudioEffect();
+//        initAudioEffect();
         effect.setEnabled(true);
     }
 

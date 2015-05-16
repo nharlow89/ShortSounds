@@ -63,7 +63,6 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                     KEY_ID + " INTEGER PRIMARY KEY," +
                     KEY_TITLE + " TEXT, " +
                     KEY_SHORT_SOUND_ID + " INTEGER, " +
-                    KEY_TRACK_FILENAME_ORIGINAL + " TEXT, " +
                     KEY_TRACK_FILENAME_MODIFIED + " TEXT, " +
                     KEY_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
                     KEY_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
@@ -220,14 +219,13 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      */
     public long insertShortSoundTrack(ShortSoundTrack track, long id) {
         if ( !db.isOpen() ) db = getWritableDatabase();
-        Log.d("DB_TEST", "ShortSoundSQLHelper:insertShortSoundTrack[file:"+track.getFile()+"][originalFile:"+track.getOriginalFile()+"]");
+        Log.d("DB_TEST", "ShortSoundSQLHelper:insertShortSoundTrack[file:"+track.getFileName()+"]");
         ContentValues values = new ContentValues();
         values.put( KEY_TITLE, track.getTitle() );
         values.put( KEY_SHORT_SOUND_ID, id );
-        values.put( KEY_TRACK_FILENAME_ORIGINAL, track.getOriginalFile() );
-        values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFile() );
         values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
         values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
+        values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFileName() );
         return db.insert( TRACK_TABLE_NAME, null, values );  // Returns the new entry id
     }
 
@@ -237,13 +235,12 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      */
     public void updateShortSoundTrack( ShortSoundTrack track ) {
         if ( !db.isOpen() ) db = getWritableDatabase();
-        Log.d("DB_TEST", "ShortSoundSQLHelper:updateShortSoundTrack[file:"+track.getFile()+"][originalFile:"+track.getOriginalFile()+"]");
+        Log.d("DB_TEST", "ShortSoundSQLHelper:updateShortSoundTrack[file:"+track.getFileName()+"]");
         ContentValues values = new ContentValues();
         values.put( KEY_TITLE, track.getTitle() );
-        values.put( KEY_TRACK_FILENAME_ORIGINAL, track.getOriginalFile() );
-        values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFile() );
         values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
         values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
+        values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFileName() );
         db.update( TRACK_TABLE_NAME, values, "id=" + track.getId(), null );  // Returns the new entry id
     }
 
@@ -274,35 +271,47 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         db.execSQL(SHORT_SOUND_TABLE_CREATE);
         db.execSQL(SHORT_SOUND_TRACK_TABLE_CREATE);
         // Seed the DB
-        String ssSeed1 = "INSERT INTO " + TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + ") VALUES(1,\"Fury of the Storm\")";
-        String trackSeed1 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(1,\"Guitar\",1,\"ss1-track1\",\"ss1-track1-modified\")";
-        String trackSeed2 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(2,\"Rhythm\",1,\"ss1-track2\",\"ss1-track2-modified\")";
-        String trackSeed3 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(3,\"Drums\",1,\"ss1-track3\",\"ss1-track3-modified\")";
-        String ssSeed2 = "INSERT INTO " + TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + ") VALUES(2,\"Here Comes the Sun\")";
-        String trackSeed4 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(4,\"Drums 1\",2,\"ss2-track1\",\"ss2-track1-modified\")";
-        String trackSeed5 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(5,\"Drums 2\",2,\"ss2-track2\",\"ss2-track2-modified\")";
-        String trackSeed6 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(6,\"The Bass\",2,\"ss2-track3\",\"ss2-track3-modified\")";
+        String ssSeed1 = "INSERT INTO " + TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + ") VALUES(2,\"Here Comes the Sun\")";
+        String trackSeed4 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(4,\"track 1\",2,\"ss2-track1\")";
+        String trackSeed5 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(5,\"track 2\",2,\"ss2-track2\")";
+        String trackSeed6 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(6,\"track 3\",2,\"ss2-track3\")";
+        String trackSeed7 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(7,\"track 4\",2,\"ss2-track4\")";
+        String trackSeed8 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(8,\"track 5\",2,\"ss2-track5\")";
         db.execSQL( ssSeed1 );
-        db.execSQL( ssSeed2 );
-        db.execSQL( trackSeed1 );
-        db.execSQL( trackSeed2 );
-        db.execSQL( trackSeed3 );
         db.execSQL( trackSeed4 );
-        db.execSQL( trackSeed5 );
-        db.execSQL( trackSeed6 );
+        db.execSQL(trackSeed5);
+        db.execSQL(trackSeed6);
+        db.execSQL(trackSeed7);
+        db.execSQL(trackSeed8);
         // Seed the internal storage with given audio files
-        seedSampleAudioFile(R.raw.guitar, "ss1-track1");
-        seedSampleAudioFile(R.raw.guitar, "ss1-track1-modified");
-        seedSampleAudioFile(R.raw.rhythm, "ss1-track2");
-        seedSampleAudioFile(R.raw.rhythm, "ss1-track2-modified");
-        seedSampleAudioFile(R.raw.drums, "ss1-track3");
-        seedSampleAudioFile(R.raw.drums, "ss1-track3-modified");
-        seedSampleAudioFile(R.raw.sundrums1, "ss2-track1");
-        seedSampleAudioFile(R.raw.sundrums1, "ss2-track1-modified");
-        seedSampleAudioFile(R.raw.sundrums2, "ss2-track2");
-        seedSampleAudioFile(R.raw.sundrums2, "ss2-track2-modified");
-        seedSampleAudioFile(R.raw.sunbass1, "ss2-track3");
-        seedSampleAudioFile(R.raw.sunbass1, "ss2-track3-modified");
+        seedSampleAudioFile(R.raw.sun01, "ss2-track1");
+        seedSampleAudioFile(R.raw.sun02, "ss2-track2");
+        seedSampleAudioFile(R.raw.sun03, "ss2-track3");
+        seedSampleAudioFile(R.raw.sun04, "ss2-track4");
+        seedSampleAudioFile(R.raw.sun05, "ss2-track5");
+
+//        String ssSeed2 = "INSERT INTO " + TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + ") VALUES(3,\"I Want You (She's so Heavy)\")";
+//        String trackSeed9 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(9,\"track 1\",3,\"ss3-track1\",\"ss3-track1-modified\")";
+//        String trackSeed10 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(10,\"track 2\",3,\"ss3-track2\",\"ss3-track2-modified\")";
+//        String trackSeed11 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(11,\"track 3\",3,\"ss3-track3\",\"ss3-track3-modified\")";
+//        String trackSeed12 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(12,\"track 4\",3,\"ss3-track4\",\"ss3-track4-modified\")";
+//        String trackSeed13 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(13,\"track 5\",3,\"ss3-track5\",\"ss3-track5-modified\")";
+//        db.execSQL( ssSeed2 );
+//        db.execSQL( trackSeed9);
+//        db.execSQL(trackSeed10);
+//        db.execSQL(trackSeed11);
+//        db.execSQL(trackSeed12);
+//        db.execSQL(trackSeed13);
+//        seedSampleAudioFile(R.raw.shessoheavy01, "ss3-track1");
+//        seedSampleAudioFile(R.raw.shessoheavy01, "ss3-track1-modified");
+//        seedSampleAudioFile(R.raw.shessoheavy02, "ss3-track2");
+//        seedSampleAudioFile(R.raw.shessoheavy02, "ss3-track2-modified");
+//        seedSampleAudioFile(R.raw.shessoheavy03, "ss3-track3");
+//        seedSampleAudioFile(R.raw.shessoheavy03, "ss3-track3-modified");
+//        seedSampleAudioFile(R.raw.shessoheavy04, "ss3-track4");
+//        seedSampleAudioFile(R.raw.shessoheavy04, "ss3-track4-modified");
+//        seedSampleAudioFile(R.raw.shessoheavy05, "ss3-track5");
+//        seedSampleAudioFile(R.raw.shessoheavy05, "ss3-track5-modified");
     }
 
     private void seedSampleAudioFile( int rawId, String outputFileName ) {
