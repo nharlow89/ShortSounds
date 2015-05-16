@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.tests;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
