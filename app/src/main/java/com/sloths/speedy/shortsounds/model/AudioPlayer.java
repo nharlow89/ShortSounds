@@ -1,6 +1,7 @@
 package com.sloths.speedy.shortsounds.model;
 
 import android.media.AudioTrack;
+import android.media.audiofx.AudioEffect;
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -135,6 +136,7 @@ public class AudioPlayer {
         private InputStream audioInputStream;
         private Thread audioThread;
         private long currentTrackPosition;
+        private AudioEffect mEffect;  // TODO: remove when done debugging
 
         public TrackPlayer( ShortSoundTrack track ) {
             this.track = track;
@@ -172,14 +174,22 @@ public class AudioPlayer {
             this.file = new File( ShortSoundTrack.STORAGE_PATH, track.getFileName() );
             this.trackLength = file.length();
             // Let the effects know about the audio playback object
-//            track.getmEqEffect().setAudioSource( audioTrack.getAudioSessionId() );
-            track.getmReverbEffect().setAudioSource( audioTrack.getAudioSessionId() );
-            audioTrack.setAuxEffectSendLevel(1.0f);
-            // Attach the audio effects (NOT required if passing audioTrack id to the effect constructor).
+
+            int reverbId = track.getmReverbEffect().getEffectId();
+            int reverbSuccess = audioTrack.attachAuxEffect(reverbId);
+            if ( reverbSuccess != AudioTrack.SUCCESS )
+                Log.e(DEBUG_TAG, "ERROR: unable to attach Reverb effect.");
+
 //            int eqId = track.getmEqEffect().getEffectId();
-//            audioTrack.attachAuxEffect( eqId );
-//            int reverbId = track.getmReverbEffect().getEffectId();
-//            audioTrack.attachAuxEffect( reverbId );
+//            int eqSuccess = audioTrack.attachAuxEffect(eqId);
+//            if ( eqSuccess != AudioTrack.SUCCESS )
+//                Log.e(DEBUG_TAG, "ERROR: unable to attach EQ effect.");
+
+            // Important: set the volume of the effect.
+            float maxVolume = AudioTrack.getMaxVolume();
+            int result = audioTrack.setAuxEffectSendLevel(maxVolume);
+            if ( result != AudioTrack.SUCCESS )
+                Log.e(DEBUG_TAG, "ERROR: unable to set the effect volume");
         }
 
         private void setInputStream( int position ) {
