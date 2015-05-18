@@ -36,13 +36,4 @@ public class TrackView extends RecyclerView {
         mAdapter.notifyDataSetChanged();
         mAdapter.notifyItemInserted( index );
     }
-
-
-    /**
-     * Returns the RecyclerViewAdapter associated with this TrackView.
-     * @return RecyclerViewAdapter associated with this TrackView
-     */
-    public RecyclerViewAdapter getmAdapter() {
-        return mAdapter;
-    }
 }

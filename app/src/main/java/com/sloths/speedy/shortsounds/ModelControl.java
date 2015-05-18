@@ -15,15 +15,23 @@ import java.io.File;
  * Created by nj on 5/15/15.
  */
 public class ModelControl implements PlaybackListener {
+    public static final String TAG = "ModelControl";
     private AudioPlayer mAudioPlayer;
     private AudioRecorder mAudioRecorder;
     private int seekBarPosition;
-    private MainActivity main;
+    private static ModelControl instance = null;
+//    private MainActivity main;
 
 
-    public ModelControl(Context context) {
+    private ModelControl() {
         seekBarPosition = 0;
-        main = (MainActivity) context;
+//        main = (MainActivity) context;
+    }
+
+    public static ModelControl instance() {
+        if (instance == null)
+            instance = new ModelControl();
+        return instance;
     }
 
     //returns true ifPlaying and non null;
@@ -40,7 +48,7 @@ public class ModelControl implements PlaybackListener {
 
     @Override
     public void onRecordStart() {
-        main.onRecordStart();
+//        main.onRecordStart();
         if (mAudioPlayer != null)
             mAudioPlayer.playAll( 0 );  // Play from the beginning
         // Setup the MediaRecorder
@@ -49,7 +57,7 @@ public class ModelControl implements PlaybackListener {
 
     @Override
     public ShortSound onRecordStop( ShortSound mActiveShortSound ) {
-        main.onRecordStop( null );
+//        main.onRecordStop( null );
         File recordedFile = mAudioRecorder.end();
         Log.d("DEBUG", "endRecording() recordedFile: " + recordedFile.getAbsolutePath());
 
@@ -74,18 +82,28 @@ public class ModelControl implements PlaybackListener {
     }
 
     @Override
-    public void soloOn() {
-
+    public void soloOn(int track) {
+        Log.i(TAG, "solo track " + track + "on");
     }
 
     @Override
-    public void soloOff() {
-
+    public void soloOff(int track) {
+        Log.i(TAG, "solo track " + track + " on");
     }
 
     @Override
     public void updateCurrentPosition(int position) {
         this.seekBarPosition = position;
+    }
+
+    @Override
+    public void muteEffect(ShortSoundTrack.EFFECT effect, int track) {
+        Log.i(TAG, "mute effect on track " + track);
+    }
+
+    @Override
+    public void turnOnEffect(ShortSoundTrack.EFFECT effect, int track) {
+        Log.i(TAG, "turn on effect on track " + track);
     }
 
     public void setmAudioPlayer(AudioPlayer mAudioPlayer) {
