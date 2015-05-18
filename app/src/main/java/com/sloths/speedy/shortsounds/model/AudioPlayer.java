@@ -172,7 +172,7 @@ public class AudioPlayer {
             this.file = new File( ShortSoundTrack.STORAGE_PATH, track.getFileName() );
             this.trackLength = file.length();
             // Let the effects know about the audio playback object
-//            track.getmEqEffect().setAudioSource( audioTrack.getAudioSessionId() );
+//            track.getmEqEffect().setAudioSource( fpay.getAudioSessionId() );
             track.getmReverbEffect().setAudioSource( audioTrack.getAudioSessionId() );
             audioTrack.setAuxEffectSendLevel(1.0f);
             // Attach the audio effects (NOT required if passing audioTrack id to the effect constructor).
