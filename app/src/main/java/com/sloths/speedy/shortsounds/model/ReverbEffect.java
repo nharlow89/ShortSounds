@@ -36,7 +36,7 @@ public class ReverbEffect extends Effect {
         if ( effectVals.equals( "NULL" ) ) {
             // Default values
             this.active = false;
-            this.pointVal = null;
+            this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
         } else {
             // Parse string from DB to get point vals & on/off
             // Stored in DB as "ON/OFF:float,float,float,float"
@@ -58,8 +58,12 @@ public class ReverbEffect extends Effect {
      * @param audioSessionId
      */
     public void setAudioSource( int audioSessionId ) {
-        effect = new EnvironmentalReverb( 0, audioSessionId );
+        Log.d("DEBUG", "Creating EnvironmentalReverb(0, "+audioSessionId+")");
+        effect = new EnvironmentalReverb( 1, audioSessionId );
         effect.setEnabled( this.active );
+        EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
+        reverb.setReverbLevel((short)1000);
+        reverb.setDecayTime(3000);
     }
 
 

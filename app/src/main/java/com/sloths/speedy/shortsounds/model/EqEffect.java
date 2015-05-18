@@ -41,7 +41,9 @@ public class EqEffect extends Effect {
         if ( effectVals.equals( "NULL" ) ) {
             // This is the default effect values
             this.active = false;
-            this.eqPoints = null;
+            PointF lo = new PointF(DEFAULT_X1, DEFAULT_Y);
+            PointF hi = new PointF(DEFAULT_X2, DEFAULT_Y);
+            this.eqPoints = new PointF[]{lo, hi};
             bandLevels = new short[NUM_BANDS];
         } else {
             bandLevels = new short[NUM_BANDS];
@@ -71,7 +73,13 @@ public class EqEffect extends Effect {
      * @param audioSessionId
      */
     public void setAudioSource( int audioSessionId ) {
-        effect = new Equalizer(0, audioSessionId);
+        Log.d("DEBUG", "Creating Equalizer(0, "+audioSessionId+")");
+        effect = new Equalizer(1, audioSessionId);
+        Equalizer eq = (Equalizer)effect;
+        short max = eq.getBandLevelRange()[1];
+        for ( int i = 0; i < eq.getNumberOfBands(); i++ ) {
+            eq.setBandLevel((short)i, (short)(max*Math.random()) );
+        }
         effect.setEnabled( this.active );
     }
 
