@@ -59,7 +59,7 @@ public class ReverbEffect extends Effect {
         eReverb.reflectionsDelay = 100;
         EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
         reverb.setProperties( eReverb );
-        enable();
+//        enable();
     }
 
     private EnvironmentalReverb.Settings convertParamsToSettings() {

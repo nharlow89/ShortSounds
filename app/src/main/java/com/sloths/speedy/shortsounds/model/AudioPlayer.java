@@ -173,17 +173,22 @@ public class AudioPlayer {
             trackState = TrackState.STOPPED;
             this.file = new File( ShortSoundTrack.STORAGE_PATH, track.getFileName() );
             this.trackLength = file.length();
-            // Let the effects know about the audio playback object
+            attachEffects();
+        }
 
-            int reverbId = track.getmReverbEffect().getEffectId();
-            int reverbSuccess = audioTrack.attachAuxEffect(reverbId);
+        /**
+         * Private helper to attach all the effects associated with this track.
+         */
+        private void attachEffects () {
+            // Reverb
+            Effect reverb = track.getmReverbEffect();
+            int reverbSuccess = audioTrack.attachAuxEffect( reverb.getEffectId() );
             if ( reverbSuccess != AudioTrack.SUCCESS )
                 Log.e(DEBUG_TAG, "ERROR: unable to attach Reverb effect.");
 
-//            int eqId = track.getmEqEffect().getEffectId();
-//            int eqSuccess = audioTrack.attachAuxEffect(eqId);
-//            if ( eqSuccess != AudioTrack.SUCCESS )
-//                Log.e(DEBUG_TAG, "ERROR: unable to attach EQ effect.");
+            // Equalizer
+            EqEffect eq = track.getmEqEffect();
+            eq.setupEqEffect( audioTrack.getAudioSessionId() );
 
             // Important: set the volume of the effect.
             float maxVolume = AudioTrack.getMaxVolume();
@@ -260,6 +265,7 @@ public class AudioPlayer {
                 Log.d(DEBUG_TAG, "Pause track [" + track.getId() + "]");
                 audioTrack.pause();
                 trackState = TrackState.PAUSED;
+                track.getmEqEffect().disable();  // TODO remove after eq debugging
             } else {
                 Log.e(DEBUG_TAG, "Tried to pause track ["+track.getId()+"] in invalid state ["+trackState+"]");
             }
@@ -292,7 +298,7 @@ public class AudioPlayer {
                         // NOTE: this is blocking, so the next frame will not be loaded until ready.
                         // Look at AudioTrack docs for more info.
                         currentTrackPosition+= bytesRead;
-                        Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
+//                        Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
                         audioTrack.write( audioTrackBuffer, 0, bytesRead );
                     }
                     if ( trackState == TrackState.PLAYING ) {
