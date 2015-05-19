@@ -26,11 +26,11 @@ public class ShortSoundTrack {
     public static final String DEBUG_TAG = "SHORT_SOUNDS";
     // AudioTrack Params
     public static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
-    public static final int SAMPLE_RATE = 48000;  // NOTE: also used for buffer size
+    public static final int SAMPLE_RATE = 44100;  // NOTE: also used for buffer size
     public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_MONO;
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     public static final int MODE = AudioTrack.MODE_STREAM;
-    public static int BUFFER_SIZE = 48000; // Default
+    public static int BUFFER_SIZE = 44100; // Default
 
     public static final String DEFAULT_TITLE = "Untitled Track";
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
