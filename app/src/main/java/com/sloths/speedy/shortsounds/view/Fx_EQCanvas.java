@@ -208,6 +208,7 @@ public class Fx_EQCanvas extends View {
      */
     private void controlEffect() {
         if (controller != null) {
+            Log.d("EQCANVAS", "Updating eq controller to points: (" + getBandA().x +", "+getBandA().y+") ("+getBandB().x+", "+getBandB().y+")");
             controller.updateEffectValues(new PointF[]{getBandA(), getBandB()});
         }
     }

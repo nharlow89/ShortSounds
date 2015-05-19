@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -195,6 +196,7 @@ public class Fx_ReverbCanvas extends View {
      */
     private void controlEffect() {
         if (controller != null) {
+            Log.d("REVERBCANVAS", "Updating rev controller to point: ("+getValue().x+", "+getValue().y+")");
             controller.updateEffectValues(getValue());
         }
     }
@@ -342,21 +344,20 @@ public class Fx_ReverbCanvas extends View {
 
     /**
      * Sets the value for the point that controls the UI
-     * @param value
+     * @param values
      */
-    public void setValue(PointF value) {
-        if (value == null || value.length() == 0) {
+    public void setValue(PointF[] values) {
+        if (values == null || values.length == 0) {
             // No values are pulled from model --> Set to default
-            point = new ControlPoint();
-            echoG = new EchoGraphics();
+            resetPoint();
         } else {
             // Data coming from database
             if (point == null) {
                 // View being setup for the first time
                 setUpGraph();
             }
-            float x = value.x * getMeasuredWidth();
-            float y = value.y * getMeasuredHeight();
+            float x = values[0].x * getMeasuredWidth();
+            float y = values[0].y * getMeasuredHeight();
             point.set(x, y);
         }
         setLine();

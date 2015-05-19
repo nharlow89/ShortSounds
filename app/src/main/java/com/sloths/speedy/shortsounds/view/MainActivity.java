@@ -34,6 +34,9 @@ import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
 import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.controller.EQEffectController;
+import com.sloths.speedy.shortsounds.controller.EffectController;
+import com.sloths.speedy.shortsounds.controller.ReverbEffectController;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.EqEffect;
@@ -74,6 +77,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private SeekBar mGlobalSeekBar;
     private int position;
     private ModelControl modelControl;
+    private EffectController effectController;
 
     /**
      * Sets up MainActivity
@@ -81,6 +85,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        effectController = null;
         super.onCreate(savedInstanceState);
         Log.d("DB_TEST", "MainActivity:onCreate()");
         sounds = ShortSound.getAll();
@@ -454,16 +459,28 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         if (currentView.equals(TRACKS)) {
             super.onBackPressed();
         } else {
-            Animation in = animator.getInAnimation();
-            Animation out = animator.getOutAnimation();
-            animator.setInAnimation(inFromLeftAnimation());
-            animator.setOutAnimation(outToRightAnimation());
-            animator.setDisplayedChild(viewMap.get(TRACKS));
-            animator.setInAnimation(in);
-            animator.setOutAnimation(out);
-            currentView = TRACKS;
+            animateToTrack();
+        }
+
+        // This is done globally because BackPressed is global
+        // for effect's views
+        if (effectController != null) {
+            // Resets model to default values
+            effectController.resetModel();
+            effectController = null;
         }
     }
+
+    private void animateToTrack() {
+        Animation in = animator.getInAnimation();
+        Animation out = animator.getOutAnimation();
+        animator.setInAnimation(inFromLeftAnimation());
+        animator.setOutAnimation(outToRightAnimation());
+        animator.setDisplayedChild(viewMap.get(TRACKS));
+        animator.setInAnimation(in);
+        animator.setOutAnimation(out);
+        currentView = TRACKS;}
+
 
     /**
      * Animation for sliding views in from the right
@@ -532,45 +549,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * @param effect the effect to load on the track
      */
     public void effectEditSelected(int track, String effect) {
-        // Set effect view with values pulled from model
-        PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
-        if (effect.equals(EQ)) {
-            // EQ
-            Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
-            if (values != null) {
-                // Set saved values
-                eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
-                eqCanvas.setValues(values);
-            } else {
-                // Set default values for EQ
-                eqCanvas.resetPoints();
-            }
-//            // Attach the EQ effect controller to the view
-//            EqEffect eqEffect = mActiveShortSound.getTracks().get(track).getmEqEffect();
-//            eqCanvas.setController(new EQEffectController(eqEffect));
-            // Set button listeners on save & cancel on EQ
-            findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(track, effect));
-            findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(effect));
-        } else if (effect.equals(REVERB)) {
-            //REVERB
-            Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
-            if (values != null) {
-                reverbCanvas.setValue(values[0]);
-            } else {
-                // Set default values for Reverb
-                reverbCanvas.resetPoint();
-            }
-//            // Attach the EQ effect controller to the view
-//            ReverbEffect reverbEffect = mActiveShortSound.getTracks().get(track).getmReverbEffect();
-//            reverbCanvas.setController(new ReverbEffectController(reverbEffect));
-            // Set button listeners on save & cancel on Reverb
-            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(track, effect));
-            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
-        } else {
-            // Set cancel and save for other effects
-            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(track, effect));
-            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
-        }
+
+        // Setups the effect to be shown (connects model-controller-view)
+        setupEffect(track, effect);
 
         // Change the view to the effect
         animator.setDisplayedChild(viewMap.get(effect));
@@ -583,6 +564,58 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         setTitle(mShortSoundsTitles[position]);
         invalidateOptionsMenu();
     }
+
+    /**
+     * This method sets up the effect views.  Its main two purposes are currently
+     * for the EQ & Reverb effect.  It gets the view, attaches the controller to it,
+     * attaches the model to the controller, and then sets the click listeners for cancel
+     * and save.
+     * @param track
+     * @param effect
+     */
+    private void setupEffect(int track, String effect) {
+        // Resets effect controller
+        // Set effect view with values pulled from model
+        PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
+        if (effect.equals(EQ)) {
+            // EQ
+            Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
+            // Set saved values -- if null it defaults
+            eqCanvas.setValues(values);
+            // Attach the EQ model to the EQ controller
+            EqEffect eqEffect = mActiveShortSound.getTracks().get(track).getmEqEffect();
+            EQEffectController eqController = new EQEffectController(eqEffect);
+            // Attach the EQ controller to the EQ view
+            eqCanvas.setController(eqController);
+            eqController.setCancel(values);
+            // Set current controller
+            effectController = eqController;
+            // Set button listeners on save & cancel on EQ
+            findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(effect));
+            findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(effect));
+        } else if (effect.equals(REVERB)) {
+            //REVERB
+            Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
+            // Set saved point value (if null it defaults)
+            reverbCanvas.setValue(values);
+            // Attach the Reverb model to the Reverb controller
+            ReverbEffect reverbEffect = mActiveShortSound.getTracks().get(track).getmReverbEffect();
+            ReverbEffectController reverbController = new ReverbEffectController(reverbEffect);
+            // Attach the Reverb controller to the Reverb view
+            reverbCanvas.setController(reverbController);
+            reverbController.setCancel(values);
+            // Set current controller
+            effectController = reverbController;
+            // Set button listeners on save & cancel on Reverb
+            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect));
+            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
+        } else {
+            // Set cancel and save for other effects
+            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect));
+            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
+        }
+    }
+
 
     /**
      * Sets the Title on the action bar to the parameter title
@@ -773,10 +806,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     public class CancelButtonListener implements View.OnClickListener {
         private String effect;
 
-        /**
-         * Constructor for a CancelButtonListener
-         * @param effect The effect to cancel the b utton on
-         */
         public CancelButtonListener(String effect) {
             this.effect = effect;
         }
@@ -787,7 +816,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
          */
         @Override
         public void onClick(View v) {
-            Log.d("Main", "Cancel clicked");
             // Show message
             showToast("Canceled " + effect);
             // Got back to track view
@@ -800,18 +828,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * Should save the values to the model
      */
     public class SaveButtonListener implements View.OnClickListener {
-        private int track;
         private String effect;
 
-        /**
-         * Constructor for a SaveButtonListener
-         * @param track the track associated with the listener
-         * @param effect the effect associated with the track
-         */
-        public SaveButtonListener(int track, String effect) {
-            this.track = track;
+        public SaveButtonListener(String effect) {
             this.effect = effect;
-            String trackName = mActiveShortSound.getTracks().get(track).toString();
         }
 
         /**
@@ -820,30 +840,12 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
          */
         @Override
         public void onClick(View v) {
-//            String trackName = mActiveShortSound.getTracks().get(track).toString();
-
-            // Save values to backend effect (EQ/Reverb) & change view
-            if (effect.equals(EQ)) {
-                Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
-                PointF lo = eqCanvas.getBandA();
-                PointF hi = eqCanvas.getBandB();
-                EqEffect effect = mActiveShortSound.getTracks().get(track).getmEqEffect();
-                PointF[] newVals = new PointF[]{lo, hi};
-                effect.setPointVals(newVals);
-            } else if (effect.equals(REVERB)) {
-                Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
-                PointF point = reverbCanvas.getValue();
-                ReverbEffect effect = mActiveShortSound.getTracks().get(track).getmReverbEffect();
-                effect.setPointVal(point);
-            } else {
-                // Don't do anything for other effects
-            }
-
             // Show message
-            showToast("Saved " + effect);
+            showToast("Saved " + this.effect);
 
             // Switch view back
-            onBackPressed();
+            animateToTrack();
+            effectController = null;
         }
     }
 
