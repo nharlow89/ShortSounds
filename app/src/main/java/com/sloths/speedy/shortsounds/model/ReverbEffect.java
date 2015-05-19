@@ -58,14 +58,13 @@ public class ReverbEffect extends Effect {
         eReverb.reverbLevel = (short) 1000;
         eReverb.reflectionsDelay = 100;
         EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
-//        reverb.setProperties( eReverb );
-        enable();
+        reverb.setProperties( eReverb );
+//        enable();
     }
 
     private EnvironmentalReverb.Settings convertParamsToSettings() {
         return new EnvironmentalReverb.Settings(); // TODO
     }
-
 
     /**
      * This encodes the paramaters according to "ON/OFF:x,y" or "NULL"
@@ -135,6 +134,7 @@ public class ReverbEffect extends Effect {
      */
     public void resetPointVal() {
         this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
+        setEffectProperties();
     }
 
 
