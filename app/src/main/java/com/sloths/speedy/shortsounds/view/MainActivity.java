@@ -168,6 +168,12 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 public void onCheckedChanged(FloatingActionButton fabView, boolean isChecked) {
                     if ( !isChecked ) {
                         endRecording();
+                        if (mGlobalPlayButton.getVisibility() == View.INVISIBLE) {
+                            mGlobalPlayButton.setVisibility(View.VISIBLE);
+                        }
+                        if (mGlobalSeekBar.getVisibility() == View.INVISIBLE) {
+                            mGlobalSeekBar.setVisibility(View.VISIBLE);
+                        }
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
@@ -181,6 +187,12 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 public void onClick(View v) {
                     if (modelControl.isRecording()) {
                         endRecording();
+                        if (mGlobalPlayButton.getVisibility() == View.INVISIBLE) {
+                            mGlobalPlayButton.setVisibility(View.VISIBLE);
+                        }
+                        if (mGlobalSeekBar.getVisibility() == View.INVISIBLE) {
+                            mGlobalSeekBar.setVisibility(View.VISIBLE);
+                        }
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
