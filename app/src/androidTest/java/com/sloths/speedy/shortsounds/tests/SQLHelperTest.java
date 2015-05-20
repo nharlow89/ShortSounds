@@ -43,7 +43,7 @@ public class SQLHelperTest extends AndroidTestCase {
 
     /**
      * Test that the seed works as expected.
-     */
+     *
     public void testDBSeed(){
         List<ShortSound> sounds = db.queryAllShortSounds();
         assertEquals(sounds.toString(), 2, sounds.size() );
@@ -72,7 +72,7 @@ public class SQLHelperTest extends AndroidTestCase {
 
     /**
      * Test creating a ShortSound updates the database.
-     */
+     *
     public void testCreateShortSound() {
         ShortSound ss = new ShortSound();
         List<ShortSound> sounds = db.queryAllShortSounds();
@@ -85,7 +85,7 @@ public class SQLHelperTest extends AndroidTestCase {
             }
         }
         assertTrue( found );
-    }
+    }/*
 
 /*    *//**
      * Test that we can create a ShortSound and then remove it from the database.
