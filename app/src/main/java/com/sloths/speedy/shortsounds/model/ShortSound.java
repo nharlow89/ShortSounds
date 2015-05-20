@@ -2,6 +2,8 @@ package com.sloths.speedy.shortsounds.model;
 
 import android.util.Log;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,8 +69,10 @@ public class ShortSound {
     /**
      * Generate audio file (with all compiled tracks)
      */
-    public void generateAudioFile() {
-        // TODO: Here we go.
+    public File generateAudioFile() throws IOException {
+        AudioMixer mixer = new AudioMixer( this );
+        File mixedAudioFile = mixer.generateAudioFile();
+        return mixedAudioFile;
     }
 
     /**
