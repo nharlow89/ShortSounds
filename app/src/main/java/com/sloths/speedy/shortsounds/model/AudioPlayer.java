@@ -123,6 +123,15 @@ public class AudioPlayer {
     }
 
     /**
+     * Getter for the state of the player
+     * Used for testing
+     * @return playerState as an Enum
+     */
+    public PlayerState getPlayerState() {
+        return playerState;
+    }
+
+    /**
      * TrackPlayer represents an AudioPlayer for a single track. This class helps us keep track
      * of the state of any given ShortSoundTrack and acts as a helper to the AudioPlayer.
      */
