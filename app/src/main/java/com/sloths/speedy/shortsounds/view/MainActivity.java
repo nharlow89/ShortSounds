@@ -116,7 +116,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( !modelControl.onPlayToggle() )
+                if (!modelControl.onPlayToggle())
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
                 else
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
@@ -152,12 +152,32 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void enableFunctionalityOfGlobalSeekBar() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mGlobalSeekBar.setVisibility(View.VISIBLE);
+        mGlobalSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // TODO Auto-generated method stub
+
+
+            }
+        });
     }
 
-    /**
-     * This sets up the Record button and attaches the click handler which gives it the record
-     * functionality.
-     */
+                /**
+                 * This sets up the Record button and attaches the click handler which gives it the record
+                 * functionality.
+                 */
+
     private void setUpRecordButton() {
         // Looks a little ugly, but we have to account for the FAB because it uses a different view
         // element.
@@ -217,14 +237,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
         return list;
     }
-
-//    /**
-//     * Retrieve the current AudioPlayer.
-//     * @return the current AudioPlayer.
-//     */
-//    public ModelControl getModelControl() {
-//        return modelControl;
-//    }
 
     /**
      * Sets up the floating action button used as record button. Will
@@ -353,24 +365,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 //        return true;
 //    }
 
-//    /**
-//     * handles events when recording starts
-//     */
-//    @Override
-//    public void onRecordStart() {
-//        mGlobalPlayButton.setEnabled(false);
-//    }
-
-//    /**
-//     * handles events when recording stops
-//     * @param sound The ShortSound stopped
-//     * @return null
-//     */
-//    @Override
-//    public ShortSound onRecordStop( ShortSound sound ) {
-//        mGlobalPlayButton.setEnabled(true);
-//        return null;  // TODO fix later, seems hacky
-//    }
 //
 //    // TODO
 //    @Override
