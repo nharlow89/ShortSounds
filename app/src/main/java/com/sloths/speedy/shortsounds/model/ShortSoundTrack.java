@@ -42,6 +42,7 @@ public class ShortSoundTrack {
     private final long parentId;
     private EqEffect mEqEffect;
     private ReverbEffect mReverbEffect;
+    private long mLengthInBytes;
 
     public enum EFFECT { EQ, REVERB, DISTORTION, BITCRUSH }
 
@@ -60,6 +61,7 @@ public class ShortSoundTrack {
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
         this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
+        this.mLengthInBytes = audioFile.length();
         initFiles( audioFile );
         repInvariant();
     }
@@ -218,6 +220,12 @@ public class ShortSoundTrack {
      * @return filename
      */
     public String getFileName() { return this.fileName; }
+
+    /**
+     * Returns the length of this track in Bytes
+     * @return long the length in bytes
+     */
+    public long getLengthInBytes() { return this.mLengthInBytes; }
 
     /**
      * Get this tracks id.
