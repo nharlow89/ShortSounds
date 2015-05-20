@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
 import java.io.File;
@@ -48,6 +47,8 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     public static final String KEY_TRACK_FILENAME_MODIFIED = "filename_modified";
     public static final String EQ_EFFECT_PARAMS = "eq_effects";
     public static final String REVERB_EFFECT_PARAMS = "reverb_effects";
+    public static final String VOLUME_PARAMS = "volume";
+    public static final String SOLO_PARAMS = "solo";
 
 
     // Table Create Query
@@ -66,6 +67,8 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                     KEY_TRACK_FILENAME_MODIFIED + " TEXT, " +
                     KEY_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
                     KEY_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                    VOLUME_PARAMS + " REAL," +
+                    SOLO_PARAMS + " TEXT," +
                     EQ_EFFECT_PARAMS + " TEXT DEFAULT 'NULL'," +
                     REVERB_EFFECT_PARAMS + " TEXT DEFAULT 'NULL');";
 
@@ -219,10 +222,12 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      */
     public long insertShortSoundTrack(ShortSoundTrack track, long id) {
         if ( !db.isOpen() ) db = getWritableDatabase();
-        Log.d("DB_TEST", "ShortSoundSQLHelper:insertShortSoundTrack[file:"+track.getFileName()+"]");
+        Log.d("DB_TEST", "ShortSoundSQLHelper:insertShortSoundTrack[file:" + track.getFileName() + "]");
         ContentValues values = new ContentValues();
         values.put( KEY_TITLE, track.getTitle() );
         values.put( KEY_SHORT_SOUND_ID, id );
+        values.put( VOLUME_PARAMS, track.getVolume());
+        values.put( SOLO_PARAMS, track.getSQLSolo());
         values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
         values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
         values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFileName() );
@@ -235,9 +240,11 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
      */
     public void updateShortSoundTrack( ShortSoundTrack track ) {
         if ( !db.isOpen() ) db = getWritableDatabase();
-        Log.d("DB_TEST", "ShortSoundSQLHelper:updateShortSoundTrack[file:"+track.getFileName()+"]");
+        Log.d("DB_TEST", "ShortSoundSQLHelper:updateShortSoundTrack[file:" + track.getFileName()+"]");
         ContentValues values = new ContentValues();
         values.put( KEY_TITLE, track.getTitle() );
+        values.put( VOLUME_PARAMS, track.getVolume());
+        values.put( SOLO_PARAMS, track.getSQLSolo());
         values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
         values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
         values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFileName() );

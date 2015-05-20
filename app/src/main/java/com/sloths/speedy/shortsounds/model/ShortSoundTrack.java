@@ -31,6 +31,7 @@ public class ShortSoundTrack {
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     public static final int MODE = AudioTrack.MODE_STREAM;
     public static int BUFFER_SIZE = 44100; // Default
+    public static float DEFAULT_VOLUME = 0.8f;
 
     public static final String DEFAULT_TITLE = "Untitled Track";
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
@@ -42,8 +43,9 @@ public class ShortSoundTrack {
     private final long parentId;
     private EqEffect mEqEffect;
     private ReverbEffect mReverbEffect;
+    private float volume;
+    private boolean isSolo;
 
-    public enum EFFECT { EQ, REVERB, DISTORTION, BITCRUSH }
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -59,6 +61,8 @@ public class ShortSoundTrack {
         this.mReverbEffect = new ReverbEffect();
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
+        this.volume = 0.8f;
+        this.isSolo = false;
         this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
         initFiles( audioFile );
         repInvariant();
@@ -76,20 +80,24 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
         if ( !map.containsKey( sqlHelper.EQ_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.EQ_EFFECT_PARAMS + " field.");
         if ( !map.containsKey( sqlHelper.REVERB_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.REVERB_EFFECT_PARAMS + " field.");
+        if ( !map.containsKey( sqlHelper.VOLUME_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.VOLUME_PARAMS + " field.");
+        if ( !map.containsKey( sqlHelper.SOLO_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.SOLO_PARAMS + " field.");
 
         this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
-        this.fileName = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
-        this.title = map.get( sqlHelper.KEY_TITLE );
-        this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
+        this.fileName = map.get(sqlHelper.KEY_TRACK_FILENAME_MODIFIED);
+        this.title = map.get(sqlHelper.KEY_TITLE);
+        this.parentId = Long.parseLong(map.get(sqlHelper.KEY_SHORT_SOUND_ID));
         this.mEqEffect = new EqEffect( map.get( sqlHelper.EQ_EFFECT_PARAMS ) );
         this.mReverbEffect = new ReverbEffect( map.get( sqlHelper.REVERB_EFFECT_PARAMS ) );
+        this.volume = Float.parseFloat(map.get(sqlHelper.VOLUME_PARAMS));
+        this.isSolo = map.get(sqlHelper.SOLO_PARAMS).equals("t");
         repInvariant();
     }
 
-    public void addEffect(EFFECT e) {
+    public void addEffect(Effect.Type e) {
         Log.d("effects", "turnOnEffect called");
         switch (e) {
-           case EQ:
+            case EQ:
                Log.d("effects", "EQ toggle switch clicked");
                this.mEqEffect.enable();
                break;
@@ -125,7 +133,7 @@ public class ShortSoundTrack {
         }
     }
 
-    public void removeEffect(EFFECT e) {
+    public void removeEffect(Effect.Type e) {
         switch (e) {
             case EQ:
                 this.mEqEffect.disable();
@@ -253,7 +261,14 @@ public class ShortSoundTrack {
         return mEqEffect;
     }
 
-    public ReverbEffect getmReverbEffect() {
-        return mReverbEffect;
+    public ReverbEffect getmReverbEffect() { return mReverbEffect; }
+
+    public float getVolume() { return volume; }
+    public void setTrackVolume(float volume) {
+        if (volume >= 0.0f && volume <= 1.0f)
+            this.volume = volume;
     }
+    public String getSQLSolo() { if (isSolo) return "t"; return "f";}
+    public boolean isSolo() { return isSolo; }
+    public void toggleSolo() { isSolo = !isSolo; }
 }
