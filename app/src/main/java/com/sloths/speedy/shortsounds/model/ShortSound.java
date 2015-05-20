@@ -74,6 +74,12 @@ public class ShortSound {
     }
 
     /**
+     * Returns the longest ShortSoundTrack in this ShortSound
+     * @return ShortSoundTrack the longest ShortSoundTrack in this ShortSound.
+     */
+    public ShortSoundTrack getLongestTrack() { return this.mLongestTrack; };
+
+    /**
      * Get the tracks for this ShortSound.
      * @return A list of the ShortSoundTracks associated with this ShortSound.
      */

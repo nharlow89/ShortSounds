@@ -24,11 +24,13 @@ public class AudioPlayer {
 
     private PlayerState playerState;
     private Map<ShortSoundTrack, TrackPlayer> trackPlayers;
+    private ShortSound mCurrentShortSound;
 
     public AudioPlayer( ShortSound ss ) {
         trackPlayers = new HashMap<>();
+        mCurrentShortSound = ss;
         for ( ShortSoundTrack track : ss.getTracks() ) {
-            trackPlayers.put( track, new TrackPlayer( track ) );
+            trackPlayers.put(track, new TrackPlayer(track));
         }
         playerState = PlayerState.STOPPED_ALL;
     }
@@ -39,10 +41,30 @@ public class AudioPlayer {
      */
     public void playAll( int position ) {
         Log.d(DEBUG_TAG, "Play all tracks starting at ["+position+"%]");
-        // TODO: normalize the position so tracks start at same relative time
+
+        long longestTrackMaxByteOffset = mCurrentShortSound.getLongestTrack().getLengthInBytes();
+
+        long longestBytePosition = (longestTrackMaxByteOffset * position) / 100 ;
+
+        Log.d(DEBUG_TAG, "longestTrackMaxByteOffset ["+longestTrackMaxByteOffset+"]");
+        Log.d(DEBUG_TAG, "longestBytePosition ["+longestBytePosition+"]");
+
         for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
             entry.getValue().stop();
-            entry.getValue().play(position);
+            if (position == 0) {
+                entry.getValue().play(position);
+            } else {
+                ShortSoundTrack currentTrack = entry.getKey();
+                long currentTrackMaxByteOffset = currentTrack.getLengthInBytes();
+                boolean isPlayable = currentTrackMaxByteOffset >= longestBytePosition;
+                if ( isPlayable ) {
+                    // play with a normalized position
+                    Log.d(DEBUG_TAG, "DIV " + longestBytePosition + "/" + currentTrackMaxByteOffset);
+                    double normalizedPosition = ((double)longestBytePosition / (double)currentTrackMaxByteOffset) * 100.0 ;
+                    Log.d(DEBUG_TAG, "normalized position ["+(int)Math.round(normalizedPosition)+"]");
+                    entry.getValue().play((int)Math.round(normalizedPosition));
+                }
+            }
         }
         playerState = PlayerState.PLAYING_ALL;
     }
@@ -52,7 +74,7 @@ public class AudioPlayer {
      * is reset.
      */
     public void stopAll() {
-        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
+        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
             entry.getValue().stop();
         }
         playerState = PlayerState.STOPPED_ALL;
@@ -63,7 +85,7 @@ public class AudioPlayer {
      * is saved and the audio buffer remains in memory.
      */
     public void pauseAll() {
-        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
+        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
             entry.getValue().pause();
         }
         playerState = PlayerState.PAUSED_ALL;
@@ -120,6 +142,22 @@ public class AudioPlayer {
      */
     public void addTrack( ShortSoundTrack track ) {
         trackPlayers.put(track, new TrackPlayer(track));
+    }
+
+    /**
+     * Removes ShortSoundTrack from this AudioPlayer
+     * @param track the ShortSoundTrack to be removed
+     */
+    public void removeTrack( ShortSoundTrack track ) {
+        trackPlayers.remove(track);
+    }
+
+    /**
+     * Returns the ShortSound associated with this AudioPlayer
+     * @return ShortSound the Shortsound associate with this AudioPlayer
+     */
+    public ShortSound getCurrentShortSound() {
+        return mCurrentShortSound;
     }
 
     /**
