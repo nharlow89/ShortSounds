@@ -86,7 +86,7 @@ public class ShortSound {
      * @postcondition track will be the last element in the list of tracks.
      */
     public void addTrack( ShortSoundTrack track ) {
-        this.tracks.add( track );  // Add track to list
+        this.tracks.add(track);  // Add track to list
         if ( mLongestTrack == null ) {
             mLongestTrack = track;
         } else {
@@ -104,8 +104,18 @@ public class ShortSound {
      */
     public void removeTrack( ShortSoundTrack track ) {
         this.tracks.remove(track);
-        if ( this.mLongestTrack == track ) {
+        boolean isLongestTrack = this.mLongestTrack == track;
+        boolean isLastTrack = tracks.size() == 0;
+        if ( isLastTrack ) {
             this.mLongestTrack = null;
+        } else if ( isLongestTrack && !isLastTrack ) {
+            this.mLongestTrack = tracks.get(0);
+            for ( ShortSoundTrack sst : tracks ) {
+                boolean isLongerThanLongest = this.mLongestTrack.getLengthInBytes() < sst.getLengthInBytes();
+                if ( isLongerThanLongest ) {
+                    mLongestTrack = sst;
+                }
+            }
         }
         track.delete();
         repInvariant();
