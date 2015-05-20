@@ -42,24 +42,34 @@ public class ReverbEffect extends Effect {
             active = params[0].equals(ON);
             String[] pointVals = params[1].split(",");
             pointVal = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
-            setEffectProperties();
+//            setEffectProperties();
         }
         effect.setEnabled( active );
         repInvariant();
     }
 
     private void setEffectProperties() {
+        disable();
+        System.out.println();
+        Log.d("ReverbEffect", "setting reverb effect properties");
+        System.out.println();
         EnvironmentalReverb.Settings eReverb = convertParamsToSettings();
         // TODO: remove after conversion function is implemented
-        eReverb.decayHFRatio = (short) 1000;
-        eReverb.decayTime = 10000;
-        eReverb.density = (short) 1000;
-        eReverb.diffusion = (short) 1000;
-        eReverb.reverbLevel = (short) 1000;
-        eReverb.reflectionsDelay = 100;
+//        eReverb.decayHFRatio = (short) 1000;
+//        eReverb.decayTime = 10000;
+//        eReverb.density = (short) 1000;
+//        eReverb.diffusion = (short) 1000;
+//        eReverb.reverbLevel = (short) 1000;
+//        eReverb.reflectionsDelay = 100;
         EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
-        reverb.setProperties( eReverb );
-//        enable();
+//        reverb.setDecayHFRatio((short) 1000);
+//        reverb.setDensity((short) 1000);
+//        reverb.setDiffusion((short) 1000);
+//        reverb.setReverbLevel((short) 1000);
+//        reverb.setReflectionsDelay(100);
+//
+//        reverb.setProperties( eReverb );
+        enable();
     }
 
     private EnvironmentalReverb.Settings convertParamsToSettings() {
@@ -126,7 +136,7 @@ public class ReverbEffect extends Effect {
      */
     public void setPointVal(PointF point) {
         this.pointVal = point;
-        setEffectProperties();  // Update the effect params.
+//        setEffectProperties();  // Update the effect params.
     }
 
     /**
@@ -134,7 +144,7 @@ public class ReverbEffect extends Effect {
      */
     public void resetPointVal() {
         this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
-        setEffectProperties();
+//        setEffectProperties();
     }
 
 

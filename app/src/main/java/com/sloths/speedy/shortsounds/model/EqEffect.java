@@ -26,7 +26,7 @@ public class EqEffect extends Effect {
         PointF lo = new PointF(DEFAULT_X1, DEFAULT_Y);
         PointF hi = new PointF(DEFAULT_X2, DEFAULT_Y);
         this.eqPoints = new PointF[]{lo, hi};
-        isActive = false;
+        isActive = true;
         repInvariant();
     }
 
@@ -62,6 +62,7 @@ public class EqEffect extends Effect {
      * Set the properties of the Equalizer effect class.
      */
     private void setEffectProperties() {
+        Log.d("EQEFFECT", "Setting eq params");
         short bandLevels[] = convertParamsToSettings();
         Equalizer eq = (Equalizer) effect;
         for (int i = 0; i < eq.getNumberOfBands(); i++) {
