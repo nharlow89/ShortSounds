@@ -39,6 +39,7 @@ public class AudioPlayer {
      */
     public void playAll( int position ) {
         Log.d(DEBUG_TAG, "Play all tracks starting at ["+position+"%]");
+        // TODO: normalize the position so tracks start at same relative time
         for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
             entry.getValue().stop();
             entry.getValue().play(position);

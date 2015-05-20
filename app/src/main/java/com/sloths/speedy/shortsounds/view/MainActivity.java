@@ -166,7 +166,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // The current progress level. This will be in the range 0..max
+                // where max was set by setMax(int). (The default value for max is 100.)
                 // TODO Auto-generated method stub
+                modelControl.updateCurrentPosition(progress);
 
 
             }
