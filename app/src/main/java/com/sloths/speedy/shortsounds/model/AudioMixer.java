@@ -73,7 +73,12 @@ public class AudioMixer {
             for (int j = 0; j < chunksToMix.size(); j++) {
                 mixedByte+= chunksToMix.get(i)[j];
             }
-            mixedBuf[i] = (byte)(mixedByte / chunksToMix.size());
+            // Hard cap
+            if ( mixedByte > Byte.MAX_VALUE )
+                mixedByte = Byte.MAX_VALUE;
+            else if ( mixedByte < Byte.MIN_VALUE )
+                mixedByte = Byte.MIN_VALUE;
+            mixedBuf[i] = (byte)(mixedByte);
         }
         return mixedBuf;
     }
