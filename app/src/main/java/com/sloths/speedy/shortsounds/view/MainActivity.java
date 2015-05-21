@@ -116,7 +116,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( !modelControl.onPlayToggle() )
+                if (!modelControl.onPlayToggle())
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
                 else
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
@@ -152,12 +152,39 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void enableFunctionalityOfGlobalSeekBar() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mGlobalSeekBar.setVisibility(View.VISIBLE);
+        SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // The current progress level. This will be in the range 0..max
+                // where max was set by setMax(int). (The default value for max is 100.)
+                // TODO Auto-generated method stub
+
+                if(fromUser) {
+                    Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
+                    modelControl.updateCurrentPosition(progress);
+                }
+            }
+        };
+        mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
+        modelControl.setGlobalSeekBar(mGlobalSeekBar);
     }
 
-    /**
-     * This sets up the Record button and attaches the click handler which gives it the record
-     * functionality.
-     */
+                /**
+                 * This sets up the Record button and attaches the click handler which gives it the record
+                 * functionality.
+                 */
+
     private void setUpRecordButton() {
         // Looks a little ugly, but we have to account for the FAB because it uses a different view
         // element.
@@ -217,14 +244,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
         return list;
     }
-
-//    /**
-//     * Retrieve the current AudioPlayer.
-//     * @return the current AudioPlayer.
-//     */
-//    public ModelControl getModelControl() {
-//        return modelControl;
-//    }
 
     /**
      * Sets up the floating action button used as record button. Will
@@ -297,7 +316,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
-
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
@@ -353,24 +371,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 //        return true;
 //    }
 
-//    /**
-//     * handles events when recording starts
-//     */
-//    @Override
-//    public void onRecordStart() {
-//        mGlobalPlayButton.setEnabled(false);
-//    }
-
-//    /**
-//     * handles events when recording stops
-//     * @param sound The ShortSound stopped
-//     * @return null
-//     */
-//    @Override
-//    public ShortSound onRecordStop( ShortSound sound ) {
-//        mGlobalPlayButton.setEnabled(true);
-//        return null;  // TODO fix later, seems hacky
-//    }
 //
 //    // TODO
 //    @Override
@@ -431,7 +431,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void selectShortSoundFromDrawer(int position) {
         mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
-        modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
+        modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound,modelControl));  // Setup the new AudioPlayer for this SS.
         setGlobalPlayButtonClickHandler();
         enableFunctionalityOfGlobalSeekBar();
         if (this.position != position) {
@@ -452,7 +452,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
             invalidateOptionsMenu();
 
-            // TODO: Set a listener to update the SeekBar based on play position.
+            mGlobalSeekBar.setProgress(0);
+            modelControl.updateCurrentPosition(0);
         } else {
             // selected mix is already loaded so close the drawer
             mDrawerLayout.closeDrawer(mDrawerList);
@@ -720,7 +721,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         // hides seek bar and play button
         setUpGlobalSeekBar();
         setUpGlobalPlayButton();
-        // TODO: made record a sound text view visible
+        enableFunctionalityOfGlobalSeekBar();
+        mGlobalSeekBar.setProgress(0);
+        modelControl.updateCurrentPosition(0);
+        mGlobalSeekBar.setVisibility(View.INVISIBLE);
     }
 
     /**

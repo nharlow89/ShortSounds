@@ -5,6 +5,9 @@ import android.media.AudioTrack;
 import android.os.Build;
 import android.util.Log;
 
+import com.sloths.speedy.shortsounds.ModelControl;
+import com.sloths.speedy.shortsounds.view.MainActivity;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,14 +36,28 @@ public class AudioPlayer {
 
     private Map<ShortSoundTrack, TrackPlayer> trackPlayers;
     private List<ShortSoundTrack> tracks;
+    private ShortSound mCurrentShortSound;
+    private ShortSoundTrack mLongestTrack;
+    private TrackPlayer mLongestTrackPlayer;
+    private ModelControl mModelControl;
 
-
-    public AudioPlayer( ShortSound ss ) {
+    public AudioPlayer( ShortSound ss, ModelControl mc ) {
         trackPlayers = new HashMap<>();
+
         tracks = new ArrayList<>();
         for ( ShortSoundTrack track : ss.getTracks() ) {
-            trackPlayers.put( track, new TrackPlayer(track) );
+            trackPlayers.put(track, new TrackPlayer(track, this));
             tracks.add(track);
+        }
+        mModelControl = mc;
+        mCurrentShortSound = ss;
+        mLongestTrack = ss.getLongestTrack();
+        for ( ShortSoundTrack sst : ss.getTracks() ) {
+            TrackPlayer tp = new TrackPlayer(sst, this);
+            trackPlayers.put(sst, tp);
+            if (sst == mLongestTrack) {
+                mLongestTrackPlayer = tp;
+            }
         }
         playerState = PlayerState.STOPPED_ALL;
     }
@@ -51,11 +68,44 @@ public class AudioPlayer {
      */
     public void playAll( int position ) {
         Log.d(DEBUG_TAG, "Play all tracks starting at ["+position+"%]");
+        if (mCurrentShortSound.getLongestTrack() == null) {
+            return;
+        }
+        long longestTrackMaxByteOffset = mCurrentShortSound.getLongestTrack().getLengthInBytes();
+        long longestBytePosition = (longestTrackMaxByteOffset * position) / 100 ;
+        //if (longestBytePosition % 2 == 1) longestBytePosition--;
+        Log.d(DEBUG_TAG, "longestTrackMaxByteOffset ["+longestTrackMaxByteOffset+"]");
+        Log.d(DEBUG_TAG, "longestBytePosition ["+longestBytePosition+"]");
+
         for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
             entry.getValue().stop();
-            entry.getValue().play(position);
+
+            if (position == 0) {
+                entry.getValue().play(position);
+            } else {
+                ShortSoundTrack currentTrack = entry.getKey();
+                long currentTrackMaxByteOffset = currentTrack.getLengthInBytes();
+                boolean isPlayable = currentTrackMaxByteOffset >= longestBytePosition;
+                if ( isPlayable ) {
+                    // play with a normalized position
+                    Log.d(DEBUG_TAG, "DIV " + longestBytePosition + "/" + currentTrackMaxByteOffset);
+                    double normalizedPosition = ((double)longestBytePosition / (double)currentTrackMaxByteOffset) * 100.0 ;
+                    Log.d(DEBUG_TAG, "normalized position ["+(int)Math.round(normalizedPosition)+"]");
+                    entry.getValue().play((int)Math.round(normalizedPosition));
+                }
+            }
         }
         playerState = PlayerState.PLAYING_ALL;
+    }
+
+    public void notifyModelControlOfTrackPosition(TrackPlayer notifier, int position) {
+        if (notifier == mLongestTrackPlayer) {
+            notifyProgressChanged(position);
+        }
+    }
+
+    public void notifyProgressChanged(int position) {
+        mModelControl.notifySeekBarOfChangeInPos(position);
     }
 
     /**
@@ -63,7 +113,7 @@ public class AudioPlayer {
      * is reset.
      */
     public void stopAll() {
-        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
+        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
             entry.getValue().stop();
         }
         playerState = PlayerState.STOPPED_ALL;
@@ -74,7 +124,7 @@ public class AudioPlayer {
      * is saved and the audio buffer remains in memory.
      */
     public void pauseAll() {
-        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
+        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
             entry.getValue().pause();
         }
         playerState = PlayerState.PAUSED_ALL;
@@ -122,7 +172,7 @@ public class AudioPlayer {
     public void playTrack( ShortSoundTrack track, int position ) {
         pauseAll();
         TrackPlayer targetPlayer = trackPlayers.get( track );
-        targetPlayer.play( position );
+        targetPlayer.play(position);
     }
 
     /**
@@ -158,8 +208,34 @@ public class AudioPlayer {
      * @param track
      */
     public void addTrack( ShortSoundTrack track ) {
-        trackPlayers.put(track, new TrackPlayer(track));
         tracks.add(track);
+        TrackPlayer tp = new TrackPlayer(track, this);
+        trackPlayers.put(track, tp);
+        if(mLongestTrack != null && track.getLengthInBytes() >= mLongestTrack.getLengthInBytes()) {
+            mLongestTrack = track;
+            mLongestTrackPlayer = tp;
+        } else if (mLongestTrack == null) {
+            mLongestTrack = track;
+        }
+    }
+
+    /**
+     * Removes ShortSoundTrack from this AudioPlayer
+     * @param track the ShortSoundTrack to be removed
+     */
+    public void removeTrack( ShortSoundTrack track ) {
+        trackPlayers.remove(track);
+        if(mLongestTrack == track) {
+            // TODO: find new longest track
+        }
+    }
+
+    /**
+     * Returns the ShortSound associated with this AudioPlayer
+     * @return ShortSound the Shortsound associate with this AudioPlayer
+     */
+    public ShortSound getCurrentShortSound() {
+        return mCurrentShortSound;
     }
 
     /**
@@ -185,9 +261,11 @@ public class AudioPlayer {
         private InputStream audioInputStream;
         private Thread audioThread;
         private long currentTrackPosition;
+        private AudioPlayer mAudioPlayerListener;
 
-        public TrackPlayer( ShortSoundTrack track ) {
+        public TrackPlayer( ShortSoundTrack track, AudioPlayer parent) {
             this.track = track;
+            this.mAudioPlayerListener = parent;
             setupTrack();
         }
 
@@ -215,6 +293,7 @@ public class AudioPlayer {
                 public void onPeriodicNotification(AudioTrack track) {
                     Log.d(DEBUG_TAG, "PlaybackListener");
                     // TODO: update seekbar
+
                 }
             });
             audioTrackBuffer = new byte[ShortSoundTrack.BUFFER_SIZE * 2];
@@ -245,6 +324,9 @@ public class AudioPlayer {
                 fileInputStream = new FileInputStream( this.file );
                 audioInputStream = new DataInputStream( fileInputStream );
                 long bytesToSkip = (long)(trackLength * (position / 100.0));
+                if ( (int)bytesToSkip % 2 == 1 ) {
+                    bytesToSkip--;
+                }
                 currentTrackPosition = bytesToSkip;
                 audioInputStream.skip( bytesToSkip );
             } catch (FileNotFoundException e) {
@@ -333,6 +415,7 @@ public class AudioPlayer {
                         // Look at AudioTrack docs for more info.
                         currentTrackPosition+= bytesRead;
                         Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
+                        notifyAudioPlayerOfPosition();
                         audioTrack.write( audioTrackBuffer, 0, bytesRead );
                     }
                     if ( trackState == TrackState.PLAYING ) {
@@ -346,7 +429,13 @@ public class AudioPlayer {
                 }
             }
         }
+
+        private void notifyAudioPlayerOfPosition() {
+            int currentPos = getCurrentTrackPosition();
+            mAudioPlayerListener.notifyModelControlOfTrackPosition(this,currentPos);
+        }
     }
+
 
     public interface PlaybackCompleteListener {
         public void playbackComplete();
