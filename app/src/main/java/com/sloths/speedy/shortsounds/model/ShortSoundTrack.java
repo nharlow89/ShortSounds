@@ -282,4 +282,35 @@ public class ShortSoundTrack {
     public String getSQLSolo() { if (isSolo) return "t"; return "f";}
     public boolean isSolo() { return isSolo; }
     public void toggleSolo() { isSolo = !isSolo; }
+
+    public void setEffectToggle(Effect.Type effect, boolean enable) {
+        if (effect.equals(Effect.Type.EQ)) {
+            // EQ
+            if (enable) {
+                mEqEffect.enable();
+            } else {
+                mEqEffect.disable();
+            }
+        } else {
+            // REVERB
+            if (enable) {
+                mReverbEffect.enable();
+            } else {
+                mReverbEffect.disable();
+            }
+        }
+        sqlHelper.updateShortSoundTrack( this );
+    }
+
+    public boolean isEffectChecked(Effect.Type effect) {
+        if (effect.equals(Effect.Type.EQ)) {
+            return mEqEffect.getEnabled();
+        } else if (effect.equals(Effect.Type.REVERB)) {
+            //REVERB
+            return mReverbEffect.getEnabled();
+        } else {
+            // All other effects
+            return false;
+        }
+    }
 }

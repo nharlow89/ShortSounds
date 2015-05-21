@@ -24,11 +24,13 @@ public class EqEffect extends Effect {
 
     // Constructor used when loading a track from a recorded file
     public EqEffect() {
+        // Sets up default equalizer until set by track player
+        this.effect = new Equalizer( 0, 0 );
         PointF lo = new PointF(DEFAULT_X1, DEFAULT_Y);
         PointF hi = new PointF(DEFAULT_X2, DEFAULT_Y);
         this.eqPoints = new PointF[]{lo, hi};
-        // Todo: Change according to toggle
-        isActive = true;
+        effect.setEnabled( false );
+        isActive = false;
         repInvariant();
     }
 
@@ -40,6 +42,10 @@ public class EqEffect extends Effect {
             // Stored in DB as "ON/OFF:float,float,float,float"
             String[] params = effectVals.split(":");
             isActive = params[0].equals(ON);
+            this.effect.setEnabled( isActive );
+            Log.d(TAG, "Loaded eq from DB: " +effectVals);
+            Log.d(TAG, "Is active? " + isActive);
+            this.effect.setEnabled( isActive );
             String[] pointVals = params[1].split(",");
             eqPoints = new PointF[2];
             eqPoints[0] = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
@@ -54,11 +60,11 @@ public class EqEffect extends Effect {
      * @param audioSessionId
      */
     public void setupEqEffect( int audioSessionId ) {
-        effect = new Equalizer( 0, audioSessionId );
+        Log.d("REVERB", "Setting up eq to track #" +audioSessionId);
+        this.effect = new Equalizer( 0, audioSessionId );
         setEffectProperties();
-        Log.d("EQEffect", "Setting eq effect to active");
-        // TODO: Change to based upon toggle
-        effect.setEnabled( true );
+        this.effect.setEnabled( isActive );
+        Log.d("EQEffect", "Enabled? " + effect.getEnabled());
     }
 
     /**
@@ -67,7 +73,7 @@ public class EqEffect extends Effect {
     private void setEffectProperties() {
         Log.d("EQEFFECT", "Setting eq params");
         short bandLevels[] = convertParamsToSettings();
-        Equalizer eq = (Equalizer) effect;
+        Equalizer eq = (Equalizer) this.effect;
         for (int i = 0; i < eq.getNumberOfBands(); i++) {
             Log.d("EFFECTS", "set band["+i+"] to level[-1500], previous level["+eq.getBandLevel((short)i)+"]");
             eq.setBandLevel( (short)i, bandLevels[i] );
@@ -95,7 +101,7 @@ public class EqEffect extends Effect {
             return "NULL";
         }
         String retVal = new String();
-        if ( getEnabled() ) {
+        if ( this.effect.getEnabled() ) {
             retVal += "ON";
         } else {
             retVal += "OFF";
@@ -105,6 +111,7 @@ public class EqEffect extends Effect {
         retVal += eqPoints[0].y + ",";
         retVal += eqPoints[1].x + ",";
         retVal += eqPoints[1].y;
+        Log.d(TAG, "EQ string is: " + retVal);
         return retVal;
     }
 
@@ -112,16 +119,18 @@ public class EqEffect extends Effect {
      * Enable the effect.
      */
     public void enable() {
-        Log.d("EFFECTS", "Enabled EQ effect");
-        effect.setEnabled(true);
+        Log.d("EQ", "Enabled EQ effect");
+        this.effect.setEnabled(true);
+        isActive = true;
     }
 
     /**
      * Disable the effect.
      */
     public void disable() {
-        Log.d("EFFECTS", "Disabled EQ effect");
-        effect.setEnabled(false);
+        Log.d("EQ", "Disabled EQ effect");
+        this.effect.setEnabled(false);
+        isActive = false;
     }
 
     public String getTitleString() {

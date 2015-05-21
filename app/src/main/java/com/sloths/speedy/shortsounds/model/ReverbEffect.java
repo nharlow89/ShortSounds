@@ -27,21 +27,23 @@ public class ReverbEffect extends Effect {
 
     // Constructor used when loading a track from a recorded file
     public ReverbEffect() {
+        // Sets up default reverb until track player sets it
+        this.effect = new EnvironmentalReverb(0, 0);
         this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
-        // Todo: Change according to toggle
-        isActive = true;
+        isActive = false;
+        effect.setEnabled( false );
         repInvariant();
     }
 
     // Constructor used when loading an effect from the database
     public ReverbEffect(String effectVals) {
         this();  // Setup from other constructor.
-        boolean active = false;
         if ( !effectVals.equals( "NULL" ) ) {
             // Parse string from DB to get point vals & on/off
             // Stored in DB as "ON/OFF:float,float,float,float"
             String[] params = effectVals.split(":");
-            active = params[0].equals(ON);
+            isActive = params[0].equals(ON);
+            effect.setEnabled( isActive );
             String[] pointVals = params[1].split(",");
             pointVal = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
         }
@@ -50,6 +52,7 @@ public class ReverbEffect extends Effect {
 
 
     public void setupReverbEffect(int audioSessionId) {
+        Log.d("REVERB", "Setting up reverb to track #" +audioSessionId);
         try {
             effect = new EnvironmentalReverb(0, audioSessionId);
         } catch (Exception e) {
@@ -57,9 +60,7 @@ public class ReverbEffect extends Effect {
             Log.e(TAG, e.toString());
         }
         setEffectProperties();
-        Log.d("ReverbEffect", "Setting reverb effect to active");
-        // TODO: Change to based upon toggle
-        effect.setEnabled( true );
+        effect.setEnabled( isActive );
         Log.d("ReverbEfect", "Enabled? " + effect.getEnabled());
     }
 
@@ -95,7 +96,7 @@ public class ReverbEffect extends Effect {
             return "NULL";
         }
         String retVal = new String();
-        if ( getEnabled() ) {
+        if ( effect.getEnabled() ) {
             retVal += "ON";
         } else {
             retVal += "OFF";
@@ -111,14 +112,18 @@ public class ReverbEffect extends Effect {
      * Enables the effect
      */
     public void enable() {
+        Log.d("Reverb", "Enabled Reverb effect");
         effect.setEnabled(true);
+        isActive = true;
     }
 
     /**
      * Disables the effect
      */
     public void disable() {
+        Log.d("Reverb", "Disabled Reverb effect");
         effect.setEnabled(false);
+        isActive = false;
     }
 
     /**

@@ -23,6 +23,7 @@ import java.util.Map;
  */
 public class AudioPlayer {
     public static final String DEBUG_TAG = "SHORT_SOUNDS";
+    private static final String TAG = "AudioPlayer";
     public Float MAX_VOLUME = 1.0f;
     public Float MIN_VOLUME = 0.0f;
 
@@ -40,6 +41,7 @@ public class AudioPlayer {
         trackPlayers = new HashMap<>();
         tracks = new ArrayList<>();
         for ( ShortSoundTrack track : ss.getTracks() ) {
+            Log.d(TAG, "Audio Player Constructor adding new track");
             trackPlayers.put( track, new TrackPlayer(track) );
             tracks.add(track);
         }
@@ -198,6 +200,7 @@ public class AudioPlayer {
          * and creating a reference to the actual audio file.
          */
         public void setupTrack() {
+            Log.d("AUDIO PLAYER", "Setting up audio track");
             ShortSoundTrack.BUFFER_SIZE = AudioTrack.getMinBufferSize(
                     ShortSoundTrack.SAMPLE_RATE,
                     ShortSoundTrack.CHANNEL_CONFIG,
@@ -368,5 +371,9 @@ public class AudioPlayer {
 
     public interface PlaybackCompleteListener {
         public void playbackComplete();
+    }
+
+    public ShortSoundTrack getTrack(int pos) {
+        return tracks.get( pos );
     }
 }

@@ -74,6 +74,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // with that element
         viewHolder.setTitleView(position);
         dynamicallySetCardColor(viewHolder, position);
+        viewHolder.setToggles(position);
     }
 
     /**
@@ -157,6 +158,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private int mPrimaryColor;
         private int mSecondaryColor;
         int soloOff;
+        // Switches
+        private Switch[] switches;
+        private Effect.Type[] effectsTypes;
 
         /**
          * Constructor for a ViewHolder
@@ -181,16 +185,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Switch reverbToggle = ((Switch) v.findViewById(R.id.reverb_switch));
             Switch distToggle = ((Switch) v.findViewById(R.id.dist_switch));
             Switch bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
-
+            switches = new Switch[]{eqToggle, reverbToggle, bitToggle, distToggle};
+            effectsTypes = new Effect.Type[]{Effect.Type.EQ,
+                                            Effect.Type.REVERB,
+                                            Effect.Type.BITCRUSH,
+                                            Effect.Type.DISTORTION};
             // perform setup
             setPlayClickHandler();
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
-            setUpToggle(new Switch[]{eqToggle, reverbToggle, bitToggle, distToggle},
-                        new Effect.Type[]{Effect.Type.EQ,
-                            Effect.Type.REVERB,
-                            Effect.Type.BITCRUSH,
-                            Effect.Type.DISTORTION}
-            );
+            setUpToggle();
         }
 
         /**
@@ -243,21 +246,32 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
 
         // TODO implement effect toggle
-        private void setUpToggle(Switch[] sws, final Effect.Type[] effects) {
-            for (int i = 0; i < sws.length; i++) {
+        private void setUpToggle() {
+            for (int i = 0; i < switches.length; i++) {
                 final int i_ = i;
-                sws[i].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                switches[i].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
                             // effect on
-                            modelControl.turnOnEffect(effects[i_], getPosition());
+                            modelControl.turnOnEffect(effectsTypes[i_], getPosition());
                         } else {
                             //effect off
-                            modelControl.muteEffect(effects[i_], getPosition());
+                            modelControl.muteEffect(effectsTypes[i_], getPosition());
                         }
                     }
                 });
+            }
+        }
+
+        /**
+         * Sets up the initial toggle values, pulled from the backend model
+         * @param track
+         */
+        public void setToggles(int track) {
+            for (int i = 0; i < switches.length; i++) {
+                boolean checked = ((MainActivity) mContext).getEffectChecked(effectsTypes[i], getPosition());
+                switches[i].setChecked( checked );
             }
         }
 

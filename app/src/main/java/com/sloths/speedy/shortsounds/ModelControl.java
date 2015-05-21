@@ -1,5 +1,6 @@
 package com.sloths.speedy.shortsounds;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
@@ -7,6 +8,7 @@ import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
+import com.sloths.speedy.shortsounds.view.MainActivity;
 
 import java.io.File;
 
@@ -87,12 +89,15 @@ public class ModelControl implements PlaybackListener {
 
     @Override
     public void muteEffect(Effect.Type effect, int track) {
-        Log.i(TAG, "mute effect on track " + track);
+        mAudioPlayer.getTrack( track ).setEffectToggle(effect, false);
+        Log.i(TAG, "mute " + effect.toString() +" on track " + track);
     }
 
     @Override
     public void turnOnEffect(Effect.Type effect, int track) {
+        mAudioPlayer.getTrack( track ).setEffectToggle(effect, true);
         Log.i(TAG, "turn on effect on track " + track);
+
     }
 
     public void setmAudioPlayer(AudioPlayer mAudioPlayer) {

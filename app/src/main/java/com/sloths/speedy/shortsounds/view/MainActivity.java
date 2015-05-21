@@ -39,6 +39,7 @@ import com.sloths.speedy.shortsounds.controller.EffectController;
 import com.sloths.speedy.shortsounds.controller.ReverbEffectController;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
+import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.EqEffect;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
@@ -432,8 +433,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
     /**
      * Helper method for the the DrawerItemClickListener. When a drawer item is clicked
-     * its position is passed in as a parameter which determines the short sound to load
-     * into a recyclerViewFragment, which is then inflated into the UI.
+     * its position is passed in as a parameter which determines the short sound to load.
      * @param position int the position of the drawer item clicked
      */
     private void selectShortSoundFromDrawer(int position) {
@@ -453,6 +453,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             // load the mix into a view and replace it in the animator
             TrackView tv = (TrackView) findViewById(R.id.track_list);
             View add = getLayoutInflater().inflate(R.layout.track_list_xml, tv, false);
+            // Update toggles to be displayed correctly
+
+
             animator.addView(add, viewMap.get(TRACKS) + 1);
             animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
             animator.removeViewAt(viewMap.get(TRACKS));
@@ -882,5 +885,23 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         textView.setTextSize(20);
         textView.setGravity(Gravity.CENTER);
         toast.show();
+    }
+
+    /**
+     * Returns current short sound
+     * @return
+     */
+    public ShortSound getMActiveShortSound() {
+        return mActiveShortSound;
+    }
+
+    /**
+     *
+     * @param effect
+     * @param position
+     * @return
+     */
+    public boolean getEffectChecked(Effect.Type effect, int position) {
+        return mActiveShortSound.getTracks().get(position).isEffectChecked(effect);
     }
 }
