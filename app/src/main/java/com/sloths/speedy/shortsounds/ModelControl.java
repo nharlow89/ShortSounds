@@ -2,6 +2,7 @@ package com.sloths.speedy.shortsounds;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.SeekBar;
 
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
@@ -20,12 +21,10 @@ public class ModelControl implements PlaybackListener {
     private AudioRecorder mAudioRecorder;
     private int seekBarPosition;
     private static ModelControl instance = null;
-//    private MainActivity main;
-
+    private SeekBar mGlobalSeekBar;
 
     private ModelControl() {
         seekBarPosition = 0;
-//        main = (MainActivity) context;
     }
 
     public static ModelControl instance() {
@@ -66,7 +65,7 @@ public class ModelControl implements PlaybackListener {
             // Case 1. There is no active ShortSound, create one and continue.
             // Create the new ShortSound and add it the list.
             mActiveShortSound = new ShortSound();
-            mAudioPlayer = new AudioPlayer( mActiveShortSound );
+            mAudioPlayer = new AudioPlayer( mActiveShortSound, this );
         } else {
             mAudioPlayer.stopAll();
         }
@@ -94,12 +93,22 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void updateCurrentPosition(int position) {
         this.seekBarPosition = position;
+        mAudioPlayer.stopAll();
         boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
         if ( isOkToPlayAllWithNewPosition ) {
-            // play all of the tracks at the new position
+            // TODO: This scenario is super buggy
             //mAudioPlayer.stopAll();
             //mAudioPlayer.playAll(this.seekBarPosition);
         }
+    }
+
+    public void notifySeekBarOfChangeInPos(int position) {
+        this.seekBarPosition = position;
+        mGlobalSeekBar.setProgress(position);
+    }
+
+    public void setGlobalSeekBar(SeekBar sb) {
+        mGlobalSeekBar = sb;
     }
 
     @Override
@@ -135,4 +144,7 @@ public class ModelControl implements PlaybackListener {
     }
 
 
+    /*public MainActivity.MySeekBarListener setupSeekBarListener() {
+        return mAudioPlayer;
+    }*/
 }

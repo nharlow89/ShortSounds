@@ -152,7 +152,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void enableFunctionalityOfGlobalSeekBar() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mGlobalSeekBar.setVisibility(View.VISIBLE);
-        mGlobalSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -169,11 +169,15 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 // The current progress level. This will be in the range 0..max
                 // where max was set by setMax(int). (The default value for max is 100.)
                 // TODO Auto-generated method stub
-                modelControl.updateCurrentPosition(progress);
 
-
+                if(fromUser) {
+                    Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
+                    modelControl.updateCurrentPosition(progress);
+                }
             }
-        });
+        };
+        mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
+        modelControl.setGlobalSeekBar(mGlobalSeekBar);
     }
 
                 /**
@@ -312,7 +316,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
-
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
@@ -428,7 +431,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void selectShortSoundFromDrawer(int position) {
         mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
-        modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
+        modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound,modelControl));  // Setup the new AudioPlayer for this SS.
         setGlobalPlayButtonClickHandler();
         enableFunctionalityOfGlobalSeekBar();
         if (this.position != position) {

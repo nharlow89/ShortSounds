@@ -3,6 +3,9 @@ package com.sloths.speedy.shortsounds.model;
 import android.media.AudioTrack;
 import android.util.Log;
 
+import com.sloths.speedy.shortsounds.ModelControl;
+import com.sloths.speedy.shortsounds.view.MainActivity;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,12 +29,21 @@ public class AudioPlayer {
     private PlayerState playerState;
     private Map<ShortSoundTrack, TrackPlayer> trackPlayers;
     private ShortSound mCurrentShortSound;
+    private ShortSoundTrack mLongestTrack;
+    private TrackPlayer mLongestTrackPlayer;
+    private ModelControl mModelControl;
 
-    public AudioPlayer( ShortSound ss ) {
+    public AudioPlayer( ShortSound ss, ModelControl mc ) {
         trackPlayers = new HashMap<>();
+        mModelControl = mc;
         mCurrentShortSound = ss;
+        mLongestTrack = ss.getLongestTrack();
         for ( ShortSoundTrack track : ss.getTracks() ) {
-            trackPlayers.put(track, new TrackPlayer(track));
+            TrackPlayer tp = new TrackPlayer(track, this);
+            trackPlayers.put(track, tp);
+            if (track == mLongestTrack) {
+                mLongestTrackPlayer = tp;
+            }
         }
         playerState = PlayerState.STOPPED_ALL;
     }
@@ -41,17 +54,12 @@ public class AudioPlayer {
      */
     public void playAll( int position ) {
         Log.d(DEBUG_TAG, "Play all tracks starting at ["+position+"%]");
-
         if (mCurrentShortSound.getLongestTrack() == null) {
             return;
         }
         long longestTrackMaxByteOffset = mCurrentShortSound.getLongestTrack().getLengthInBytes();
-
         long longestBytePosition = (longestTrackMaxByteOffset * position) / 100 ;
-        if (longestBytePosition % 2 == 1) longestBytePosition--;
-
-
-
+        //if (longestBytePosition % 2 == 1) longestBytePosition--;
         Log.d(DEBUG_TAG, "longestTrackMaxByteOffset ["+longestTrackMaxByteOffset+"]");
         Log.d(DEBUG_TAG, "longestBytePosition ["+longestBytePosition+"]");
 
@@ -74,6 +82,16 @@ public class AudioPlayer {
             }
         }
         playerState = PlayerState.PLAYING_ALL;
+    }
+
+    public void notifyModelControlOfTrackPosition(TrackPlayer notifier, int position) {
+        if (notifier == mLongestTrackPlayer) {
+            notifyProgressChanged(position);
+        }
+    }
+
+    public void notifyProgressChanged(int position) {
+        mModelControl.notifySeekBarOfChangeInPos(position);
     }
 
     /**
@@ -112,7 +130,7 @@ public class AudioPlayer {
     public void playTrack( ShortSoundTrack track, int position ) {
         pauseAll();
         TrackPlayer targetPlayer = trackPlayers.get( track );
-        targetPlayer.play( position );
+        targetPlayer.play(position);
     }
 
     /**
@@ -148,7 +166,12 @@ public class AudioPlayer {
      * @param track
      */
     public void addTrack( ShortSoundTrack track ) {
-        trackPlayers.put(track, new TrackPlayer(track));
+        TrackPlayer tp = new TrackPlayer(track, this);
+        trackPlayers.put(track, tp);
+        if(track.getLengthInBytes() >= mLongestTrack.getLengthInBytes()) {
+            mLongestTrack = track;
+            mLongestTrackPlayer = tp;
+        }
     }
 
     /**
@@ -157,6 +180,9 @@ public class AudioPlayer {
      */
     public void removeTrack( ShortSoundTrack track ) {
         trackPlayers.remove(track);
+        if(mLongestTrack == track) {
+            // TODO: find new longest track
+        }
     }
 
     /**
@@ -190,9 +216,11 @@ public class AudioPlayer {
         private InputStream audioInputStream;
         private Thread audioThread;
         private long currentTrackPosition;
+        private AudioPlayer mAudioPlayerListener;
 
-        public TrackPlayer( ShortSoundTrack track ) {
+        public TrackPlayer( ShortSoundTrack track, AudioPlayer parent) {
             this.track = track;
+            this.mAudioPlayerListener = parent;
             setupTrack();
         }
 
@@ -220,6 +248,7 @@ public class AudioPlayer {
                 public void onPeriodicNotification(AudioTrack track) {
                     Log.d(DEBUG_TAG, "PlaybackListener");
                     // TODO: update seekbar
+
                 }
             });
             audioTrackBuffer = new byte[ShortSoundTrack.BUFFER_SIZE * 2];
@@ -340,7 +369,8 @@ public class AudioPlayer {
                         // NOTE: this is blocking, so the next frame will not be loaded until ready.
                         // Look at AudioTrack docs for more info.
                         currentTrackPosition+= bytesRead;
-                        //Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
+                        Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
+                        notifyAudioPlayerOfPosition();
                         audioTrack.write( audioTrackBuffer, 0, bytesRead );
                     }
                     if ( trackState == TrackState.PLAYING ) {
@@ -354,7 +384,13 @@ public class AudioPlayer {
                 }
             }
         }
+
+        private void notifyAudioPlayerOfPosition() {
+            int currentPos = getCurrentTrackPosition();
+            mAudioPlayerListener.notifyModelControlOfTrackPosition(this,currentPos);
+        }
     }
+
 
     public interface PlaybackCompleteListener {
         public void playbackComplete();
