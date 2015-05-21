@@ -93,7 +93,9 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void updateCurrentPosition(int position) {
         this.seekBarPosition = position;
-        mAudioPlayer.stopAll();
+        if ( !mAudioRecorder.isRecording() ) {
+            mAudioPlayer.stopAll();
+        }
         boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
         if ( isOkToPlayAllWithNewPosition ) {
             // TODO: This scenario is super buggy
