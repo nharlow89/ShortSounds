@@ -32,7 +32,7 @@ import android.widget.Toast;
 import android.widget.ViewAnimator;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
-import com.sloths.speedy.shortsounds.ModelControl;
+import com.sloths.speedy.shortsounds.controller.ModelControl;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
@@ -218,6 +218,14 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return list;
     }
 
+    /**
+     * Retrieve the currently selected ShortSound track names.
+     * @return volume level 0.0 <= level <= 1.0
+     */
+    public float getShortSoundVolume(int track) {
+        return mActiveShortSound.getTracks().get(track).getVolume();
+    }
+
 //    /**
 //     * Retrieve the current AudioPlayer.
 //     * @return the current AudioPlayer.
@@ -340,55 +348,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return super.onPrepareOptionsMenu(menu);
     }
 
-    /**
-     * Toggles the play and pause buttons
-     * @return boolean true of toggled, false else
-     */
-//    @Override
-//    public boolean onPlayToggle() {
-//        if ( !modelControl.onPlayToggle() )
-//            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
-//        else
-//            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
-//        return true;
-//    }
+    public void saveShortSoundTrack(int track) {
+        mActiveShortSound.getTracks().get(track).saveShortSoundTrack();
+    }
 
-//    /**
-//     * handles events when recording starts
-//     */
-//    @Override
-//    public void onRecordStart() {
-//        mGlobalPlayButton.setEnabled(false);
-//    }
-
-//    /**
-//     * handles events when recording stops
-//     * @param sound The ShortSound stopped
-//     * @return null
-//     */
-//    @Override
-//    public ShortSound onRecordStop( ShortSound sound ) {
-//        mGlobalPlayButton.setEnabled(true);
-//        return null;  // TODO fix later, seems hacky
-//    }
-//
-//    // TODO
-//    @Override
-//    public void soloOn() {
-//
-//    }
-//
-//    // TODO
-//    @Override
-//    public void soloOff() {
-//
-//    }
-//
-//    // TODO
-//    @Override
-//    public void updateCurrentPosition(int position) {
-//
-//    }
 
     /**
      * The click listener for ListView in the navigation drawer

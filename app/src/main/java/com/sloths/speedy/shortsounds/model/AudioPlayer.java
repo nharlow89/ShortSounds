@@ -26,7 +26,6 @@ public class AudioPlayer {
     public Float MIN_VOLUME = 0.0f;
 
 
-
     public static enum PlayerState { PLAYING_ALL, STOPPED_ALL, PAUSED_ALL };
     private static enum TrackState { PLAYING, PAUSED, STOPPED };
     private PlayerState playerState;
@@ -113,6 +112,22 @@ public class AudioPlayer {
             else
                 tp.audioTrack.setVolume(sst.getVolume());
         }
+    }
+
+    /**
+     * changes the volume of a short sound on the given track.
+     * @param track position
+     * @param volume level
+     */
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void volumeChanged(int track, float volume) {
+        ShortSoundTrack sst = tracks.get(track);
+        sst.setTrackVolume(volume);
+        if (!sst.isSolo())
+            trackPlayers.get(sst).audioTrack.setVolume(sst.getVolume());
+        else
+            trackPlayers.get(sst).audioTrack.setVolume(0.0f);
     }
 
     /**

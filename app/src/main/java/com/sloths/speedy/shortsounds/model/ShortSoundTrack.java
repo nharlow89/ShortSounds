@@ -271,4 +271,8 @@ public class ShortSoundTrack {
     public String getSQLSolo() { if (isSolo) return "t"; return "f";}
     public boolean isSolo() { return isSolo; }
     public void toggleSolo() { isSolo = !isSolo; }
+
+    public void saveShortSoundTrack() {
+        sqlHelper.updateShortSoundTrack(this);
+    }
 }

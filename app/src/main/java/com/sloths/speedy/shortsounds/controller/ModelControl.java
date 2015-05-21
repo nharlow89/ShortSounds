@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.controller;
 
 import android.util.Log;
 
@@ -95,6 +95,11 @@ public class ModelControl implements PlaybackListener {
         Log.i(TAG, "turn on effect on track " + track);
     }
 
+    @Override
+    public void saveShortSoundTrack(int track) {
+
+    }
+
     public void setmAudioPlayer(AudioPlayer mAudioPlayer) {
         this.mAudioPlayer = mAudioPlayer;
     }
@@ -107,13 +112,13 @@ public class ModelControl implements PlaybackListener {
         return mAudioRecorder.isRecording();
     }
 
-    //TODO check for track solo
     public boolean isTrackSolo(int track) {
         return mAudioPlayer.isTrackSolo(track);
     }
 
-    //TODO implement solo track
     public void soloTrack(int track) {
         mAudioPlayer.soloTrack(track);
     }
+
+    public void volumeChanged(int track, float volume) { mAudioPlayer.volumeChanged(track, volume); }
 }
