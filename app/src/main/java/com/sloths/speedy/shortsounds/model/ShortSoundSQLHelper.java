@@ -48,6 +48,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     public static final String KEY_TRACK_FILENAME_MODIFIED = "filename_modified";
     public static final String EQ_EFFECT_PARAMS = "eq_effects";
     public static final String REVERB_EFFECT_PARAMS = "reverb_effects";
+    public static final String TRACK_LENGTH = "track_length";
 
 
     // Table Create Query
@@ -67,13 +68,13 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                     KEY_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
                     KEY_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
                     EQ_EFFECT_PARAMS + " TEXT DEFAULT 'NULL'," +
+                    TRACK_LENGTH + " INTEGER, " +
                     REVERB_EFFECT_PARAMS + " TEXT DEFAULT 'NULL');";
 
     private ShortSoundSQLHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         db = getWritableDatabase();
     }
-
 
     public static ShortSoundSQLHelper getInstance() {
         if ( instance == null ) {
@@ -226,6 +227,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
         values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
         values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFileName() );
+        values.put( TRACK_LENGTH, track.getLengthInBytes() );
         return db.insert( TRACK_TABLE_NAME, null, values );  // Returns the new entry id
     }
 
