@@ -69,21 +69,31 @@ public class ReverbEffect extends Effect {
         Log.d("ReverbEffect", "setting reverb effect properties");
         System.out.println();
         Log.d("","");
-        EnvironmentalReverb.Settings eReverb = convertParamsToSettings();
-        // TODO: remove after conversion function is implemented
-        eReverb.decayHFRatio = (short) 1000;
-        eReverb.decayTime = 10000;
-        eReverb.density = (short) 1000;
-        eReverb.diffusion = (short) 1000;
-        eReverb.reverbLevel = (short) 1000;
-        eReverb.reflectionsDelay = 100;
-        // TODO: remove to here
+        EnvironmentalReverb.Settings revSettings = convertParamsToSettings();
         EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
-        reverb.setProperties(eReverb);
+        reverb.setProperties(revSettings);
     }
 
     private EnvironmentalReverb.Settings convertParamsToSettings() {
-        return new EnvironmentalReverb.Settings(); // TODO
+        EnvironmentalReverb.Settings revSettings = new EnvironmentalReverb.Settings();
+        // Constant settings
+        revSettings.reverbLevel = (short) 2000;
+        revSettings.density = (short) 500;
+        revSettings.diffusion = (short) 0;
+        revSettings.roomLevel = (short) 0; // master volume of reverb
+        revSettings.roomHFLevel = (short) 0; // controls a low-pass filter that will reduce the level of the high-frequency
+//        revSettings.decayHFRatio == ??
+
+        // Dynamic x settings
+        revSettings.reverbDelay =  (int) (pointVal.x * (float)100); // how long for reverb to kick in (ms) [0, 100]
+        revSettings.reflectionsDelay = (int) (pointVal.x * (float)300); // size of room (ms) int [0, 300]
+        revSettings.decayTime = (int) (pointVal.x * (float)20000); // time for reverb to die out (ms) int [100, 20000]
+        // Dynamic y settings
+        float yVal = 1.0f - pointVal.y;
+        revSettings.reflectionsLevel = (short) (yVal * (float) 1000);// volume of early reflections short [-9000, 1000]
+        Log.d("Reverb", "rev x settings are set as " + revSettings.reverbDelay +","+revSettings.reflectionsDelay+","+revSettings.decayTime);
+        Log.d("Reverb", "rev y settings are set as " + revSettings.reflectionsLevel);
+        return revSettings;
     }
 
     /**
