@@ -42,7 +42,7 @@ public class ShortSoundTrack {
     private final long parentId;
     private EqEffect mEqEffect;
     private ReverbEffect mReverbEffect;
-    private long mLengthInBytes;
+    private long mTrackLength;
 
     public enum EFFECT { EQ, REVERB, DISTORTION, BITCRUSH }
 
@@ -61,7 +61,7 @@ public class ShortSoundTrack {
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
         this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
-        this.mLengthInBytes = audioFile.length();
+        this.mTrackLength = audioFile.length();
         initFiles( audioFile );
         repInvariant();
     }
@@ -78,13 +78,15 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
         if ( !map.containsKey( sqlHelper.EQ_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.EQ_EFFECT_PARAMS + " field.");
         if ( !map.containsKey( sqlHelper.REVERB_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.REVERB_EFFECT_PARAMS + " field.");
+        if ( !map.containsKey( sqlHelper.TRACK_LENGTH) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.TRACK_LENGTH + " field.");
 
         this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
-        this.fileName = map.get( sqlHelper.KEY_TRACK_FILENAME_MODIFIED );
+        this.fileName = map.get(sqlHelper.KEY_TRACK_FILENAME_MODIFIED);
         this.title = map.get( sqlHelper.KEY_TITLE );
         this.parentId = Long.parseLong( map.get( sqlHelper.KEY_SHORT_SOUND_ID ) );
         this.mEqEffect = new EqEffect( map.get( sqlHelper.EQ_EFFECT_PARAMS ) );
         this.mReverbEffect = new ReverbEffect( map.get( sqlHelper.REVERB_EFFECT_PARAMS ) );
+        this.mTrackLength = Long.parseLong( map.get (sqlHelper.TRACK_LENGTH) );
         repInvariant();
     }
 
@@ -225,7 +227,7 @@ public class ShortSoundTrack {
      * Returns the length of this track in Bytes
      * @return long the length in bytes
      */
-    public long getLengthInBytes() { return this.mLengthInBytes; }
+    public long getLengthInBytes() { return this.mTrackLength; }
 
     /**
      * Get this tracks id.
