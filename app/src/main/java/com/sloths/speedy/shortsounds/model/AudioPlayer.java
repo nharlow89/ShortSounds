@@ -168,9 +168,11 @@ public class AudioPlayer {
     public void addTrack( ShortSoundTrack track ) {
         TrackPlayer tp = new TrackPlayer(track, this);
         trackPlayers.put(track, tp);
-        if(track.getLengthInBytes() >= mLongestTrack.getLengthInBytes()) {
+        if(mLongestTrack != null && track.getLengthInBytes() >= mLongestTrack.getLengthInBytes()) {
             mLongestTrack = track;
             mLongestTrackPlayer = tp;
+        } else if (mLongestTrack == null) {
+            mLongestTrack = track;
         }
     }
 

@@ -452,7 +452,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
             invalidateOptionsMenu();
 
-            // TODO: Set a listener to update the SeekBar based on play position.
+            mGlobalSeekBar.setProgress(0);
+            modelControl.updateCurrentPosition(0);
         } else {
             // selected mix is already loaded so close the drawer
             mDrawerLayout.closeDrawer(mDrawerList);
@@ -720,7 +721,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         // hides seek bar and play button
         setUpGlobalSeekBar();
         setUpGlobalPlayButton();
-        // TODO: made record a sound text view visible
+        enableFunctionalityOfGlobalSeekBar();
+        mGlobalSeekBar.setProgress(0);
+        modelControl.updateCurrentPosition(0);
+        mGlobalSeekBar.setVisibility(View.INVISIBLE);
     }
 
     /**
