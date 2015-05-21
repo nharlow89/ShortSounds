@@ -45,6 +45,7 @@ public class AudioPlayer {
         long longestTrackMaxByteOffset = mCurrentShortSound.getLongestTrack().getLengthInBytes();
 
         long longestBytePosition = (longestTrackMaxByteOffset * position) / 100 ;
+        if (longestBytePosition % 2 == 1) longestBytePosition--;
 
         Log.d(DEBUG_TAG, "longestTrackMaxByteOffset ["+longestTrackMaxByteOffset+"]");
         Log.d(DEBUG_TAG, "longestBytePosition ["+longestBytePosition+"]");
@@ -244,6 +245,9 @@ public class AudioPlayer {
                 fileInputStream = new FileInputStream( this.file );
                 audioInputStream = new DataInputStream( fileInputStream );
                 long bytesToSkip = (long)(trackLength * (position / 100.0));
+                if ( (int)bytesToSkip % 2 == 1 ) {
+                    bytesToSkip--;
+                }
                 currentTrackPosition = bytesToSkip;
                 audioInputStream.skip( bytesToSkip );
             } catch (FileNotFoundException e) {
@@ -331,7 +335,7 @@ public class AudioPlayer {
                         // NOTE: this is blocking, so the next frame will not be loaded until ready.
                         // Look at AudioTrack docs for more info.
                         currentTrackPosition+= bytesRead;
-                        Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
+                        //Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
                         audioTrack.write( audioTrackBuffer, 0, bytesRead );
                     }
                     if ( trackState == TrackState.PLAYING ) {

@@ -99,7 +99,7 @@ public class ModelControl implements PlaybackListener {
             // stop all of the tracks
             //mAudioPlayer.stopAll();
             // play all of the tracks at the new position
-            mAudioPlayer.playAll(this.seekBarPosition);
+            //mAudioPlayer.playAll(this.seekBarPosition);
         }
     }
 
