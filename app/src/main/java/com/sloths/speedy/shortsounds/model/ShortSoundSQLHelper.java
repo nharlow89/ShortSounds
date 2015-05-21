@@ -243,6 +243,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
         values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
         values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFileName() );
+        values.put( TRACK_LENGTH, track.getLengthInBytes() );
         db.update( TRACK_TABLE_NAME, values, "id=" + track.getId(), null );  // Returns the new entry id
     }
 

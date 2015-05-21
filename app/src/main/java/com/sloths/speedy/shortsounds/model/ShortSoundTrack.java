@@ -60,9 +60,9 @@ public class ShortSoundTrack {
         this.mReverbEffect = new ReverbEffect();
         this.id = this.sqlHelper.insertShortSoundTrack( this, shortSoundId );  // Save to the db
         this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
-        this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
-        this.mTrackLength = audioFile.length();
+          // Had to update with filenames =(
         initFiles( audioFile );
+        this.sqlHelper.updateShortSoundTrack( this );
         repInvariant();
     }
 
@@ -87,6 +87,7 @@ public class ShortSoundTrack {
         this.mEqEffect = new EqEffect( map.get( sqlHelper.EQ_EFFECT_PARAMS ) );
         this.mReverbEffect = new ReverbEffect( map.get( sqlHelper.REVERB_EFFECT_PARAMS ) );
         this.mTrackLength = Long.parseLong( map.get (sqlHelper.TRACK_LENGTH) );
+        if  (this.mTrackLength == 0) throw new AssertionError("Length can't be 0");
         repInvariant();
     }
 
@@ -165,6 +166,7 @@ public class ShortSoundTrack {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        mTrackLength = audioFile.length();
         repInvariant();
     }
 
@@ -246,6 +248,7 @@ public class ShortSoundTrack {
         if ( this.mEqEffect == null || !(this.mEqEffect instanceof EqEffect) ) throw new AssertionError("Missing EqEffect");
         if ( this.mReverbEffect == null || !(this.mReverbEffect instanceof ReverbEffect) ) throw new AssertionError("Missing ReverbEffect");
         if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
+
         // Check that the files are on disk
 //        File file = new File( this.fileName);
 //        if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
