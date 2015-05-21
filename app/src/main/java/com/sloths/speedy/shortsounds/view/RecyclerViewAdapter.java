@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.util.ArrayList;
@@ -155,12 +156,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private View vView;
         private int mPrimaryColor;
         private int mSecondaryColor;
-        boolean trackIsSolo;
         int soloOff;
-        private Switch eqToggle;
-        private Switch reverbToggle;
-        private Switch distToggle;
-        private Switch bitToggle;
 
         /**
          * Constructor for a ViewHolder
@@ -173,8 +169,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             vTitle = (TextView) v.findViewById(R.id.track_title);
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             vTitle.setOnClickListener(new TrackListener());
-            mSoloButton = (Button) v.findViewById(R.id.trackSolo);//TODO name change
-            trackIsSolo = false;// hacky.  will change to model value later
+            mSoloButton = (Button) v.findViewById(R.id.trackSolo);
             soloOff = mContext.getResources().getColor(R.color.button_material_light);
 
             // init buttons
@@ -191,10 +186,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             setPlayClickHandler();
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
             setUpToggle(new Switch[]{eqToggle, reverbToggle, bitToggle, distToggle},
-                        new ShortSoundTrack.EFFECT[]{ShortSoundTrack.EFFECT.EQ,
-                            ShortSoundTrack.EFFECT.REVERB,
-                            ShortSoundTrack.EFFECT.BITCRUSH,
-                            ShortSoundTrack.EFFECT.DISTORTION}
+                        new Effect.Type[]{Effect.Type.EQ,
+                            Effect.Type.REVERB,
+                            Effect.Type.BITCRUSH,
+                            Effect.Type.DISTORTION}
             );
         }
 
@@ -212,13 +207,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private void setPlayClickHandler() {
             mSoloButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    if (!trackIsSolo)
+                    if (!modelControl.isTrackSolo(getPosition()))
                         mSoloButton.setBackgroundColor(mSecondaryColor);
                     else
                         mSoloButton.setBackgroundColor(soloOff);
-
-                    trackIsSolo = !trackIsSolo;
-                    // TODO solo button set volume
+                    modelControl.soloTrack(getPosition());
                 }
             });
         }
@@ -248,59 +241,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
 
-        // This is kind of frustratingly complicated, but there's no readily apparent way for me
-        // to attach an Effect object to a Switch.  If you see a better way feel free to change
-        // this.  -Casey
-//        private void setUpToggles() {
-//            Log.d("effects", "setUpToggle called");
-//            reverbToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    Log.d("effects", "reverb switch clicked");
-//                    if (isChecked) {
-//                        mShortSoundTrack.turnOnEffect(ShortSoundTrack.EFFECT.REVERB);
-//                    } else {
-//                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.REVERB);
-//                    }
-//                }
-//            });
-//            eqToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    Log.d("effects", "eq switch clicked");
-//                    if (isChecked) {
-//                        mShortSoundTrack.turnOnEffect(ShortSoundTrack.EFFECT.EQ);
-//                    } else {
-//                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.EQ);
-//                    }
-//                }
-//            });
-//            distToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    Log.d("effects", "distortion switch clicked");
-//                    if (isChecked) {
-//                        mShortSoundTrack.turnOnEffect(ShortSoundTrack.EFFECT.DISTORTION);
-//                    } else {
-//                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.DISTORTION);
-//                    }
-//                }
-//            });
-//            bitToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    Log.d("effects", "bitcrush switch clicked");
-//                    if (isChecked) {
-//                        mShortSoundTrack.turnOnEffect(ShortSoundTrack.EFFECT.BITCRUSH);
-//                    } else {
-//                        mShortSoundTrack.removeEffect(ShortSoundTrack.EFFECT.BITCRUSH);
-//                    }
-//                }
-//            });
-//        }
 
         // TODO implement effect toggle
-        private void setUpToggle(Switch[] sws, final ShortSoundTrack.EFFECT[] effects) {
+        private void setUpToggle(Switch[] sws, final Effect.Type[] effects) {
             for (int i = 0; i < sws.length; i++) {
                 final int i_ = i;
                 sws[i].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -325,9 +268,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 if (!modelControl.isRecording()) {
-                    Log.i("Adapter", "vtrackchild == visible " + (vTrackChild.getVisibility() == View.VISIBLE));
-                    Log.i("Adapter", "vtrackchild.visible " + vTrackChild.getVisibility());
-                    Log.i("Adapter", "");
                     if (vTrackChild.getVisibility() == View.GONE) {
                         // Expand a track
                         collapseAllOtherTracks();
@@ -413,16 +353,4 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
     }
-
-
-
-//    // The button clicking implementation is actually implemented in the RecyclerViewFragment
-//    // It holds the logic for populating an effect popup
-//    public interface ChooseEffectListener {
-//        void onButtonClicked(int track, String name);
-//    }
-//
-//    public View getViewAtPos(int i) {
-//        return mViews.get(i).getViewHoldersView();
-//    }
 }

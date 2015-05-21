@@ -1,7 +1,9 @@
 package com.sloths.speedy.shortsounds.model;
 
+import android.annotation.TargetApi;
 import android.media.AudioTrack;
 import android.media.audiofx.AudioEffect;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -10,7 +12,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,17 +23,25 @@ import java.util.Map;
  */
 public class AudioPlayer {
     public static final String DEBUG_TAG = "SHORT_SOUNDS";
+    public Float MAX_VOLUME = 1.0f;
+    public Float MIN_VOLUME = 0.0f;
+
+
 
     public static enum PlayerState { PLAYING_ALL, STOPPED_ALL, PAUSED_ALL };
     private static enum TrackState { PLAYING, PAUSED, STOPPED };
-
     private PlayerState playerState;
+
     private Map<ShortSoundTrack, TrackPlayer> trackPlayers;
+    private List<ShortSoundTrack> tracks;
+
 
     public AudioPlayer( ShortSound ss ) {
         trackPlayers = new HashMap<>();
+        tracks = new ArrayList<>();
         for ( ShortSoundTrack track : ss.getTracks() ) {
-            trackPlayers.put( track, new TrackPlayer( track ) );
+            trackPlayers.put( track, new TrackPlayer(track) );
+            tracks.add(track);
         }
         playerState = PlayerState.STOPPED_ALL;
     }
@@ -77,6 +89,34 @@ public class AudioPlayer {
     }
 
     /**
+     *
+     * @param track position
+     * @return true is solo enabled false otherwise
+     */
+    public boolean isTrackSolo(int track) {
+        return tracks.get(track).isSolo();
+    }
+
+
+    /**
+     * Solo's the track at the given position.  Solo by definition sets all track volumes to
+     * zero for which solo is not enabled.
+     * @param track position
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void soloTrack(int track) {
+        tracks.get(track).toggleSolo();
+        for (int i = 0; i < tracks.size(); i++) {
+            ShortSoundTrack sst = tracks.get(i);
+            TrackPlayer tp = trackPlayers.get(sst);
+            if (!sst.isSolo())
+                tp.audioTrack.setVolume(0.0f);
+            else
+                tp.audioTrack.setVolume(sst.getVolume());
+        }
+    }
+
+    /**
      * Play a single track within this AudioPlayer.
      * @param track
      */
@@ -120,6 +160,7 @@ public class AudioPlayer {
      */
     public void addTrack( ShortSoundTrack track ) {
         trackPlayers.put(track, new TrackPlayer(track));
+        tracks.add(track);
     }
 
     /**

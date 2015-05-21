@@ -1,13 +1,12 @@
 package com.sloths.speedy.shortsounds;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
+import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
-import com.sloths.speedy.shortsounds.view.MainActivity;
 
 import java.io.File;
 
@@ -82,27 +81,17 @@ public class ModelControl implements PlaybackListener {
     }
 
     @Override
-    public void soloOn(int track) {
-        Log.i(TAG, "solo track " + track + "on");
-    }
-
-    @Override
-    public void soloOff(int track) {
-        Log.i(TAG, "solo track " + track + " on");
-    }
-
-    @Override
     public void updateCurrentPosition(int position) {
         this.seekBarPosition = position;
     }
 
     @Override
-    public void muteEffect(ShortSoundTrack.EFFECT effect, int track) {
+    public void muteEffect(Effect.Type effect, int track) {
         Log.i(TAG, "mute effect on track " + track);
     }
 
     @Override
-    public void turnOnEffect(ShortSoundTrack.EFFECT effect, int track) {
+    public void turnOnEffect(Effect.Type effect, int track) {
         Log.i(TAG, "turn on effect on track " + track);
     }
 
@@ -120,13 +109,11 @@ public class ModelControl implements PlaybackListener {
 
     //TODO check for track solo
     public boolean isTrackSolo(int track) {
-        return false;
+        return mAudioPlayer.isTrackSolo(track);
     }
 
     //TODO implement solo track
     public void soloTrack(int track) {
-
+        mAudioPlayer.soloTrack(track);
     }
-
-
 }
