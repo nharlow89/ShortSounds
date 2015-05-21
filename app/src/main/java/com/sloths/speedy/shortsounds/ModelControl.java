@@ -96,9 +96,8 @@ public class ModelControl implements PlaybackListener {
         this.seekBarPosition = position;
         boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
         if ( isOkToPlayAllWithNewPosition ) {
-            // stop all of the tracks
-            //mAudioPlayer.stopAll();
             // play all of the tracks at the new position
+            //mAudioPlayer.stopAll();
             //mAudioPlayer.playAll(this.seekBarPosition);
         }
     }

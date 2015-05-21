@@ -42,10 +42,15 @@ public class AudioPlayer {
     public void playAll( int position ) {
         Log.d(DEBUG_TAG, "Play all tracks starting at ["+position+"%]");
 
+        if (mCurrentShortSound.getLongestTrack() == null) {
+            return;
+        }
         long longestTrackMaxByteOffset = mCurrentShortSound.getLongestTrack().getLengthInBytes();
 
         long longestBytePosition = (longestTrackMaxByteOffset * position) / 100 ;
         if (longestBytePosition % 2 == 1) longestBytePosition--;
+
+
 
         Log.d(DEBUG_TAG, "longestTrackMaxByteOffset ["+longestTrackMaxByteOffset+"]");
         Log.d(DEBUG_TAG, "longestBytePosition ["+longestBytePosition+"]");
