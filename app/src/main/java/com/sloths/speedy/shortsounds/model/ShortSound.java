@@ -16,7 +16,6 @@ public class ShortSound {
     public static final String DEBUG_TAG = "SHORT_SOUNDS";
     private static final String DEFAULT_TITLE = "Untitled";
     private List<ShortSoundTrack> tracks;
-    private ShortSoundTrack mLongestTrack;
     private String title;
     private long id;
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
@@ -46,7 +45,6 @@ public class ShortSound {
         this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
         this.title = map.get(sqlHelper.KEY_TITLE);
         this.tracks = new ArrayList<ShortSoundTrack>();
-        mLongestTrack = null;
         repInvariant();
     }
 
@@ -74,10 +72,21 @@ public class ShortSound {
     }
 
     /**
-     * Returns the longest ShortSoundTrack in this ShortSound
-     * @return ShortSoundTrack the longest ShortSoundTrack in this ShortSound.
+     * Returns the longest ShortSoundTrack in this ShortSound, or null if ShortSound
+     * contains no ShortSoundTracks
+     * @return ShortSoundTrack the longest ShortSoundTrack in this ShortSound, or null
+     * if ShortSound contains no ShortSoundTracks
      */
-    public ShortSoundTrack getLongestTrack() { return this.mLongestTrack; };
+    public ShortSoundTrack getLongestTrack() {
+        if (tracks.size() < 1) return null;
+        ShortSoundTrack longestTrack = tracks.get(0);
+        for(ShortSoundTrack sst : tracks ) {
+            if(longestTrack.getLengthInBytes() < sst.getLengthInBytes()) {
+                longestTrack = sst;
+            }
+        }
+        return longestTrack;
+    }
 
     /**
      * Get the tracks for this ShortSound.
@@ -93,15 +102,6 @@ public class ShortSound {
      */
     public void addTrack( ShortSoundTrack track ) {
         this.tracks.add(track);  // Add track to list
-        if ( mLongestTrack == null ) {
-            mLongestTrack = track;
-        } else {
-            // calculate if track is longer
-            boolean isLongerThanLongest = mLongestTrack.getLengthInBytes() < track.getLengthInBytes();
-            if ( isLongerThanLongest ) {
-                mLongestTrack = track;
-            }
-        }
     }
 
     /**
@@ -110,19 +110,6 @@ public class ShortSound {
      */
     public void removeTrack( ShortSoundTrack track ) {
         this.tracks.remove(track);
-        boolean isLongestTrack = this.mLongestTrack == track;
-        boolean isLastTrack = tracks.size() == 0;
-        if ( isLastTrack ) {
-            this.mLongestTrack = null;
-        } else if ( isLongestTrack && !isLastTrack ) {
-            this.mLongestTrack = tracks.get(0);
-            for ( ShortSoundTrack sst : tracks ) {
-                boolean isLongerThanLongest = this.mLongestTrack.getLengthInBytes() < sst.getLengthInBytes();
-                if ( isLongerThanLongest ) {
-                    mLongestTrack = sst;
-                }
-            }
-        }
         track.delete();
         repInvariant();
     }
