@@ -91,7 +91,7 @@ public class AudioPlayerTest extends TestCase {
 
         //Test after playing has started
         player.playAll(0);
-        player.stopAll();
+        player.pauseAll();
         assertEquals("pauseAll Failure, player state incorrect.",
                 AudioPlayer.PlayerState.PAUSED_ALL, player.getPlayerState());
     }
