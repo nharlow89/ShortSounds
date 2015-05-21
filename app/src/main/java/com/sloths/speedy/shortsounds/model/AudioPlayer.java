@@ -51,6 +51,7 @@ public class AudioPlayer {
 
         for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
             entry.getValue().stop();
+
             if (position == 0) {
                 entry.getValue().play(position);
             } else {

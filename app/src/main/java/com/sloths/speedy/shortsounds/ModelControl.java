@@ -50,8 +50,7 @@ public class ModelControl implements PlaybackListener {
     public void onRecordStart() {
 //        main.onRecordStart();
         if (mAudioPlayer != null)
-            seekBarPosition = 0;
-            mAudioPlayer.playAll(seekBarPosition);  // Play from the beginning
+            mAudioPlayer.playAll(0);  // Play from the beginning
         // Setup the MediaRecorder
         mAudioRecorder.start();
     }
@@ -98,7 +97,7 @@ public class ModelControl implements PlaybackListener {
         boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
         if ( isOkToPlayAllWithNewPosition ) {
             // stop all of the tracks
-            mAudioPlayer.stopAll();
+            //mAudioPlayer.stopAll();
             // play all of the tracks at the new position
             mAudioPlayer.playAll(this.seekBarPosition);
         }
