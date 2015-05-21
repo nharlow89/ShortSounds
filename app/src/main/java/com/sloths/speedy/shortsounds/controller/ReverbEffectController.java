@@ -31,6 +31,7 @@ public class ReverbEffectController extends EffectController {
         this.effect = effect;
     }
 
+
     /**
      * Method for updating the parameter values held on the
      * reverb effect model. It will run a conversion function to
@@ -38,7 +39,6 @@ public class ReverbEffectController extends EffectController {
      * @param point
      */
     public void updateEffectValues(PointF point) {
-//        Log.d("REVERB-CONTROLLER", "Updating reverb effect model...");
         effect.setPointVal(point);
     }
 

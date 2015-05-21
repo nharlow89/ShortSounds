@@ -18,6 +18,7 @@ public class EqEffect extends Effect {
     public static final float DEFAULT_Y = 0;
     public static final float DEFAULT_X1 = 0.3f;
     public static final float DEFAULT_X2 = 0.7f;
+    private static final String TAG = "EQ-EFFECT";
     private PointF[] eqPoints;
     private boolean isActive;
 
@@ -26,6 +27,7 @@ public class EqEffect extends Effect {
         PointF lo = new PointF(DEFAULT_X1, DEFAULT_Y);
         PointF hi = new PointF(DEFAULT_X2, DEFAULT_Y);
         this.eqPoints = new PointF[]{lo, hi};
+        // Todo: Change according to toggle
         isActive = true;
         repInvariant();
     }
@@ -37,7 +39,6 @@ public class EqEffect extends Effect {
             // Parse string from DB to get point vals & on/off
             // Stored in DB as "ON/OFF:float,float,float,float"
             String[] params = effectVals.split(":");
-//            effect.setEnabled( params[0].equals(ON) );
             isActive = params[0].equals(ON);
             String[] pointVals = params[1].split(",");
             eqPoints = new PointF[2];
@@ -55,7 +56,9 @@ public class EqEffect extends Effect {
     public void setupEqEffect( int audioSessionId ) {
         effect = new Equalizer( 0, audioSessionId );
         setEffectProperties();
-        effect.setEnabled( isActive );
+        Log.d("EQEffect", "Setting eq effect to active");
+        // TODO: Change to based upon toggle
+        effect.setEnabled( true );
     }
 
     /**
@@ -76,7 +79,7 @@ public class EqEffect extends Effect {
      * @return an array containing the corresponding band levels
      */
     private short[] convertParamsToSettings() {
-        // TODO
+        // TODO Update this based upon point (conversion function)
         short bands[] = new short[5];
         bands[0] = (short)-1500;
         bands[1] = (short)-1500;
@@ -147,6 +150,7 @@ public class EqEffect extends Effect {
         this.eqPoints[1] = points[1];
 //        Log.d("EqEffect", eqPoints[0].x + ", " + eqPoints[0].y + "),(" + eqPoints[1].x + ", " + eqPoints[1].y + ")");
         setEffectProperties();
+
     }
 
     /**

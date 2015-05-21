@@ -238,6 +238,8 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         Log.d("DB_TEST", "ShortSoundSQLHelper:updateShortSoundTrack[file:"+track.getFileName()+"]");
         ContentValues values = new ContentValues();
         values.put( KEY_TITLE, track.getTitle() );
+        String eqString = track.getEQEffectString();
+        Log.d("SQLHELPER", " putting eq string in db: " + eqString);
         values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
         values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
         values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFileName() );

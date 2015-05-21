@@ -30,6 +30,7 @@ public class ShortSoundTrack {
     public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_MONO;
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     public static final int MODE = AudioTrack.MODE_STREAM;
+    private static final String TAG = "ShortSoundTrack";
     public static int BUFFER_SIZE = 44100; // Default
 
     public static final String DEFAULT_TITLE = "Untitled Track";
@@ -117,6 +118,9 @@ public class ShortSoundTrack {
     public PointF[] getEffectVals(String effect) {
         if (effect.equals(MainActivity.EQ)) {
             PointF[] points = mEqEffect.getPointVals();
+            if (points != null) {
+                Log.d("Track", "Track EQ effect values pulled: " + points[0].x +", "+points[0].y+") ("+points[1].x+", "+points[1].y+")");
+            }
             return points;
         } else {
             // Reverb point being returned
@@ -242,10 +246,12 @@ public class ShortSoundTrack {
     }
 
     public String getEQEffectString() {
+        Log.d(TAG, "Getting EQ String");
         return mEqEffect.encodeParameters();
     }
 
     public String getReverbEffectString() {
+        Log.d(TAG, "Getting reverb effect string");
         return mReverbEffect.encodeParameters();
     }
 
@@ -255,5 +261,10 @@ public class ShortSoundTrack {
 
     public ReverbEffect getmReverbEffect() {
         return mReverbEffect;
+    }
+
+    public void saveShortSoundTrack() {
+        Log.d(TAG, "Saving ShortSoundTrack to DB");
+        sqlHelper.updateShortSoundTrack(this);
     }
 }

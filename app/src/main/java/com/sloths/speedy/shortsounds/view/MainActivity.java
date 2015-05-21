@@ -417,6 +417,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         viewMap.put(DIST, 4);
 
         animator = (ViewAnimator) findViewById(R.id.view_animator);
+        animator.findViewById(R.id.eq_canvas);
+        animator.findViewById(R.id.reverb_canvas);
 //        slideLeft = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
 //        slideRight = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
 //        slideLeft.setDuration(SLIDE_DURATION);
@@ -605,7 +607,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             // Set current controller
             effectController = eqController;
             // Set button listeners on save & cancel on EQ
-            findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(effect));
+            findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(effect, track));
             findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(effect));
         } else if (effect.equals(REVERB)) {
             //REVERB
@@ -621,11 +623,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             // Set current controller
             effectController = reverbController;
             // Set button listeners on save & cancel on Reverb
-            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect));
+            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect, track));
             findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
         } else {
             // Set cancel and save for other effects
-            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect));
+            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect, track));
             findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
         }
     }
@@ -843,9 +845,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     public class SaveButtonListener implements View.OnClickListener {
         private String effect;
+        private int track;
 
-        public SaveButtonListener(String effect) {
+        public SaveButtonListener(String effect, int track) {
             this.effect = effect;
+            this.track = track;
         }
 
         /**
@@ -860,6 +864,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             // Switch view back
             animateToTrack();
             effectController = null;
+
+            Log.d("MAIN", "Saving current state of track");
+            ShortSoundTrack currTrack = mActiveShortSound.getTracks().get(track);
+            currTrack.saveShortSoundTrack();
         }
     }
 

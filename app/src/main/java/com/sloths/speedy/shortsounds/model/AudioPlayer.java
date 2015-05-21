@@ -190,10 +190,9 @@ public class AudioPlayer {
          */
         private void attachEffects () {
             // Reverb
-            Effect reverb = track.getmReverbEffect();
-            int reverbSuccess = audioTrack.attachAuxEffect( reverb.getEffectId() );
-            if ( reverbSuccess != AudioTrack.SUCCESS )
-                Log.e(DEBUG_TAG, "ERROR: unable to attach Reverb effect.");
+            ReverbEffect reverb = track.getmReverbEffect();
+            reverb.setupReverbEffect( audioTrack.getAudioSessionId() );
+            Log.d("AudioPlayer", "Attached reverb to track id : " + audioTrack.getAudioSessionId());
 
             // Equalizer
             EqEffect eq = track.getmEqEffect();
@@ -232,6 +231,9 @@ public class AudioPlayer {
          * Play the audio track associated with this ShortSound.
          */
         public void play( int position ) {
+            Log.d("AudioPlayer", "Playing track-" + audioTrack.getAudioSessionId());
+            Log.d("AudioPlayer", "EQ effect is enabled? " + track.getmEqEffect().getEnabled());
+            Log.d("AudioPlayer", "Reverb effect is enabled? " + track.getmReverbEffect().getEnabled());
             // If the track is Stopped then we need to reset the input stream so the AudioTrack starts
             // from the beginning again.
             if ( trackState == TrackState.STOPPED ) {
@@ -274,7 +276,7 @@ public class AudioPlayer {
                 Log.d(DEBUG_TAG, "Pause track [" + track.getId() + "]");
                 audioTrack.pause();
                 trackState = TrackState.PAUSED;
-                track.getmEqEffect().disable();  // TODO remove after eq debugging
+//                track.getmEqEffect().disable();  // TODO remove after eq debugging
             } else {
                 Log.e(DEBUG_TAG, "Tried to pause track ["+track.getId()+"] in invalid state ["+trackState+"]");
             }

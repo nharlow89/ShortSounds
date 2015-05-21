@@ -54,9 +54,6 @@ public class Fx_EQCanvas extends View {
         linePaint = new Paint();
         pointPaint =  new Paint();
 
-        Log.i(TAG, "width = " + getMeasuredWidth());
-        Log.i(TAG, "height = " + getMeasuredHeight());
-
         // Initialize touch locations for points
         currentGroup = PointInit.NONE;
     }
@@ -93,8 +90,6 @@ public class Fx_EQCanvas extends View {
         if (firstDraw) {
             // Draw the line between initial points
             setStyles();
-
-            resetPoints();
             setPath();
             firstDraw = false;
         }
@@ -102,12 +97,14 @@ public class Fx_EQCanvas extends View {
         // draw the line between points
         canvas.drawPath(linePath, linePaint);
         // draw the two points
-        if (lo.enabled)
+        if (lo.enabled) {
             pointPaint.setColor(Color.RED);
             canvas.drawPoint(lo.cp.x, lo.cp.y, pointPaint);
-        if (hi.enabled)
+        }
+        if (hi.enabled) {
             pointPaint.setColor(Color.BLUE);
             canvas.drawPoint(hi.cp.x, hi.cp.y, pointPaint);
+        }
     }
 
     // Private helper for drawing the line between all the points
@@ -184,18 +181,21 @@ public class Fx_EQCanvas extends View {
                     lo.set(x, y);
                     setPath();
                     invalidate();
+                    controlEffect();
                 } else if (currentGroup == PointInit.HI) {
                     hi.set(x, y);
                     setPath();
                     invalidate();
+                    controlEffect();
                 }
-                controlEffect();
                 break;
 
             // If user lifts up --> set new touch area & draw line & point
             case MotionEvent.ACTION_UP:
-                currentGroup = PointInit.NONE;
-                controlEffect();
+                if (currentGroup != PointInit.NONE) {
+                    currentGroup = PointInit.NONE;
+                    controlEffect();
+                }
                 break;
         }
         return true;
@@ -211,6 +211,50 @@ public class Fx_EQCanvas extends View {
             Log.d("EQCANVAS", "Updating eq controller to points: (" + getBandA().x +", "+getBandA().y+") ("+getBandB().x+", "+getBandB().y+")");
             controller.updateEffectValues(new PointF[]{getBandA(), getBandB()});
         }
+    }
+
+    public PointF getBandA() {
+        return getBand(lo.cp);
+    }
+
+    public PointF getBandB() {
+        return getBand(hi.cp);
+    }
+
+    private PointF getBand(EQPointF point) {
+        float midY = (float) getMeasuredHeight() / (float) 2;
+
+        // lo point to return as percentage
+        float loXPercent = point.x / (float) getMeasuredWidth();
+        float loYPercent = (midY - point.y) / midY;
+        return new PointF(loXPercent, loYPercent);
+    }
+
+    public void setValues(PointF[] points) {
+        if (points == null || points.length == 0 ||
+                (points[0].x == EqEffect.DEFAULT_X1 && points[1].x == EqEffect.DEFAULT_X2)) {
+            // Nothing pulled from model --> Set to default
+            resetPoints();
+            return;
+        }
+        if (lo == null || hi == null) {
+            // View being pulled for the first time -- Asign values from DB
+            left = new EQPointF(0, getMeasuredHeight() / 2);
+            right = new EQPointF(getMeasuredWidth(), getMeasuredHeight() / 2);
+            lo = new PointGroup(PointInit.LO);
+            hi = new PointGroup(PointInit.HI);
+        }
+        float width = getMeasuredWidth();
+        float height = getMeasuredHeight() / (float) 2;
+        lo.set(points[0].x * width, height - points[0].y * height);
+        hi.set(points[1].x * width, height - points[1].y * height);
+
+        setPath();
+        invalidate();
+    }
+
+    public void setController(EQEffectController controller) {
+        this.controller = controller;
     }
 
 
@@ -254,7 +298,7 @@ public class Fx_EQCanvas extends View {
             rp = new EQPointF(x + BANDWIDTH, y);
 
             rect = new RectF(cp.x - RECTSIZE, cp.y - RECTSIZE,
-                             cp.x + RECTSIZE, cp.y + RECTSIZE);
+                    cp.x + RECTSIZE, cp.y + RECTSIZE);
             enabled = true;
         }
 
@@ -272,45 +316,4 @@ public class Fx_EQCanvas extends View {
                     cp.x + RECTSIZE, cp.y + RECTSIZE);;
         }
     }
-    public PointF getBandA() {
-        return getBand(lo.cp);
-    }
-
-    public PointF getBandB() {
-        return getBand(hi.cp);
-    }
-
-    private PointF getBand(EQPointF point) {
-        float midY = (float) getMeasuredHeight() / (float) 2;
-
-        // lo point to return as percentage
-        float loXPercent = point.x / (float) getMeasuredWidth();
-        float loYPercent = (midY - point.y) / midY;
-        return new PointF(loXPercent, loYPercent);
-    }
-
-    public void setValues(PointF[] points) {
-        if (points == null || points.length == 0 ||
-                (points[0].x == EqEffect.DEFAULT_X1 && points[1].x == EqEffect.DEFAULT_X2)) {
-            // Nothing pulled from model --> Set to default
-            resetPoints();
-            return;
-        }
-        if (lo == null || hi == null) {
-            // View being pulled for the first time
-            resetPoints();
-        }
-
-        float width = getMeasuredWidth();
-        float height = getMeasuredHeight() / (float) 2;
-        lo.set(points[0].x * width, height - points[0].y * height);
-        hi.set(points[1].x * width, height - points[1].y * height);
-        setPath();
-        invalidate();
-    }
-
-    public void setController(EQEffectController controller) {
-        this.controller = controller;
-    }
-
 }
