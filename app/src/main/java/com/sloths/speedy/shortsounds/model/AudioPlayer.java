@@ -1,7 +1,9 @@
 package com.sloths.speedy.shortsounds.model;
 
+import android.annotation.TargetApi;
 import android.media.AudioTrack;
 import android.media.audiofx.AudioEffect;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -10,7 +12,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,17 +23,27 @@ import java.util.Map;
  */
 public class AudioPlayer {
     public static final String DEBUG_TAG = "SHORT_SOUNDS";
+    private static final String TAG = "AudioPlayer";
+    public Float MAX_VOLUME = 1.0f;
+    public Float MIN_VOLUME = 0.0f;
+
+
 
     public static enum PlayerState { PLAYING_ALL, STOPPED_ALL, PAUSED_ALL };
     private static enum TrackState { PLAYING, PAUSED, STOPPED };
-
     private PlayerState playerState;
+
     private Map<ShortSoundTrack, TrackPlayer> trackPlayers;
+    private List<ShortSoundTrack> tracks;
+
 
     public AudioPlayer( ShortSound ss ) {
         trackPlayers = new HashMap<>();
+        tracks = new ArrayList<>();
         for ( ShortSoundTrack track : ss.getTracks() ) {
-            trackPlayers.put( track, new TrackPlayer( track ) );
+            Log.d(TAG, "Audio Player Constructor adding new track");
+            trackPlayers.put( track, new TrackPlayer(track) );
+            tracks.add(track);
         }
         playerState = PlayerState.STOPPED_ALL;
     }
@@ -77,6 +91,34 @@ public class AudioPlayer {
     }
 
     /**
+     *
+     * @param track position
+     * @return true is solo enabled false otherwise
+     */
+    public boolean isTrackSolo(int track) {
+        return tracks.get(track).isSolo();
+    }
+
+
+    /**
+     * Solo's the track at the given position.  Solo by definition sets all track volumes to
+     * zero for which solo is not enabled.
+     * @param track position
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void soloTrack(int track) {
+        tracks.get(track).toggleSolo();
+        for (int i = 0; i < tracks.size(); i++) {
+            ShortSoundTrack sst = tracks.get(i);
+            TrackPlayer tp = trackPlayers.get(sst);
+            if (!sst.isSolo())
+                tp.audioTrack.setVolume(0.0f);
+            else
+                tp.audioTrack.setVolume(sst.getVolume());
+        }
+    }
+
+    /**
      * Play a single track within this AudioPlayer.
      * @param track
      */
@@ -120,6 +162,16 @@ public class AudioPlayer {
      */
     public void addTrack( ShortSoundTrack track ) {
         trackPlayers.put(track, new TrackPlayer(track));
+        tracks.add(track);
+    }
+
+    /**
+     * Getter for the state of the player
+     * Used for testing
+     * @return playerState as an Enum
+     */
+    public PlayerState getPlayerState() {
+        return playerState;
     }
 
     /**
@@ -148,6 +200,7 @@ public class AudioPlayer {
          * and creating a reference to the actual audio file.
          */
         public void setupTrack() {
+            Log.d("AUDIO PLAYER", "Setting up audio track");
             ShortSoundTrack.BUFFER_SIZE = AudioTrack.getMinBufferSize(
                     ShortSoundTrack.SAMPLE_RATE,
                     ShortSoundTrack.CHANNEL_CONFIG,
@@ -181,10 +234,9 @@ public class AudioPlayer {
          */
         private void attachEffects () {
             // Reverb
-            Effect reverb = track.getmReverbEffect();
-            int reverbSuccess = audioTrack.attachAuxEffect( reverb.getEffectId() );
-            if ( reverbSuccess != AudioTrack.SUCCESS )
-                Log.e(DEBUG_TAG, "ERROR: unable to attach Reverb effect.");
+            ReverbEffect reverb = track.getmReverbEffect();
+            reverb.setupReverbEffect( audioTrack.getAudioSessionId() );
+            Log.d("AudioPlayer", "Attached reverb to track id : " + audioTrack.getAudioSessionId());
 
             // Equalizer
             EqEffect eq = track.getmEqEffect();
@@ -223,6 +275,9 @@ public class AudioPlayer {
          * Play the audio track associated with this ShortSound.
          */
         public void play( int position ) {
+            Log.d("AudioPlayer", "Playing track-" + audioTrack.getAudioSessionId());
+            Log.d("AudioPlayer", "EQ effect is enabled? " + track.getmEqEffect().getEnabled());
+            Log.d("AudioPlayer", "Reverb effect is enabled? " + track.getmReverbEffect().getEnabled());
             // If the track is Stopped then we need to reset the input stream so the AudioTrack starts
             // from the beginning again.
             if ( trackState == TrackState.STOPPED ) {
@@ -265,7 +320,7 @@ public class AudioPlayer {
                 Log.d(DEBUG_TAG, "Pause track [" + track.getId() + "]");
                 audioTrack.pause();
                 trackState = TrackState.PAUSED;
-                track.getmEqEffect().disable();  // TODO remove after eq debugging
+//                track.getmEqEffect().disable();  // TODO remove after eq debugging
             } else {
                 Log.e(DEBUG_TAG, "Tried to pause track ["+track.getId()+"] in invalid state ["+trackState+"]");
             }
@@ -316,5 +371,9 @@ public class AudioPlayer {
 
     public interface PlaybackCompleteListener {
         public void playbackComplete();
+    }
+
+    public ShortSoundTrack getTrack(int pos) {
+        return tracks.get( pos );
     }
 }

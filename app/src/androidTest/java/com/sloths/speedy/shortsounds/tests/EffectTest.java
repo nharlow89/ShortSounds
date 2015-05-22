@@ -24,13 +24,4 @@ public class EffectTest extends TestCase {
         assertNotNull("Effect Constructor made a null object", e);
     }
 
-    public void testBitConstructor() {
-        Effect e = new EqEffect(); //change to bit crush effect constructor
-        assertTrue(false);
-    }
-
-    public void testDistortionConstructor() {
-        Effect e = new EqEffect(); //change to Distortion effect constructor
-        assertTrue(false);
-    }
 }
