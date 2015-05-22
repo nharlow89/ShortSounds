@@ -182,9 +182,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                     if ( !isChecked ) {
                         endRecording();
                         setPlayerVisibility(View.VISIBLE);
+                        mGlobalSeekBar.setEnabled(true);
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
+                        mGlobalSeekBar.setEnabled(false);
                     }
                 }
             });
