@@ -6,6 +6,7 @@ package com.sloths.speedy.shortsounds.model;
 public abstract class Effect {
 
     public enum Type { EQ, REVERB, DISTORTION, BITCRUSH }
+
     protected android.media.audiofx.AudioEffect effect;
 
     /**
@@ -27,7 +28,11 @@ public abstract class Effect {
     /**
      * Whether or not the effect is enabled.
      */
-    public boolean getEnabled() { return effect.getEnabled(); }
+    public boolean getEnabled() {
+        if (effect == null) {
+            return false;
+        }
+        return effect.getEnabled(); }
 
     public abstract String getTitleString();
 

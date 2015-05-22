@@ -75,6 +75,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         viewHolder.setTitleView(position);
         dynamicallySetCardColor(viewHolder, position);
         viewHolder.setUpVolume(viewHolder.vView, position);
+        viewHolder.setToggles(position);
     }
 
     /**
@@ -158,6 +159,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private int mPrimaryColor;
         private int mSecondaryColor;
         int soloOff;
+        // Switches
+        private Switch[] switches;
+        private Effect.Type[] effectsTypes;
 
         /**
          * Constructor for a ViewHolder
@@ -182,7 +186,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Switch reverbToggle = ((Switch) v.findViewById(R.id.reverb_switch));
             Switch distToggle = ((Switch) v.findViewById(R.id.dist_switch));
             Switch bitToggle = ((Switch) v.findViewById(R.id.bit_switch));
-
+            switches = new Switch[]{eqToggle, reverbToggle, bitToggle, distToggle};
+            effectsTypes = new Effect.Type[]{Effect.Type.EQ,
+                                            Effect.Type.REVERB,
+                                            Effect.Type.BITCRUSH,
+                                            Effect.Type.DISTORTION};
             // perform setup
             setPlayClickHandler();
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
@@ -192,7 +200,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                             Effect.Type.BITCRUSH,
                             Effect.Type.DISTORTION}
             );
-
         }
 
         private void setUpVolume(final View v, final int track) {
@@ -281,6 +288,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         }
                     }
                 });
+            }
+        }
+
+        /**
+         * Sets up the initial toggle values, pulled from the backend model
+         * @param track
+         */
+        public void setToggles(int track) {
+            for (int i = 0; i < switches.length; i++) {
+                boolean checked = ((MainActivity) mContext).getEffectChecked(effectsTypes[i], getPosition());
+                switches[i].setChecked( checked );
             }
         }
 
