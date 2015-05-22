@@ -117,6 +117,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void setUpControllerView() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mGlobalSeekBar.setMax(100);  // Set the max value (0-100)
+
         SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -138,13 +139,21 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 if(fromUser) {
                     Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
                     modelControl.updateCurrentPosition(progress);
+                } else {
+                    if(progress == 100) {
+                        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                        mGlobalSeekBar.setProgress(0);
+                        modelControl.updateCurrentPosition(0);
+                    }
                 }
             }
         };
+
+
         mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
         modelControl.setGlobalSeekBar(mGlobalSeekBar);
-        
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
+
         mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
@@ -183,9 +192,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                     if ( !isChecked ) {
                         endRecording();
                         setPlayerVisibility(View.VISIBLE);
+                        mGlobalSeekBar.setEnabled(true);
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
+                        mGlobalSeekBar.setEnabled(false);
                     }
                 }
             });
@@ -400,6 +411,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void selectShortSoundFromDrawer(int position) {
         modelControl.stopAllFromPlaying();
         resetSeekBarToZero();
+        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
         if (position != -1) {
             mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
             modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
@@ -435,6 +447,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             invalidateOptionsMenu();
 
             resetSeekBarToZero();
+            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
 
         }
         // selected mix is already loaded so close the drawer

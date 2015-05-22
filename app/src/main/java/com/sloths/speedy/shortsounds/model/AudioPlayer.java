@@ -80,6 +80,7 @@ public class AudioPlayer {
             entry.getValue().stop();
 
             if (position == 0) {
+                Log.d(DEBUG_TAG,"play position 0");
                 entry.getValue().play(position);
             } else {
                 ShortSoundTrack currentTrack = entry.getKey();
@@ -95,12 +96,6 @@ public class AudioPlayer {
             }
         }
         playerState = PlayerState.PLAYING_ALL;
-    }
-
-    private void notifyEndOfTrack(TrackPlayer notifier) {
-        if (notifier == mLongestTrackPlayer) {
-            mModelControl.endOfTrack();
-        }
     }
 
 
@@ -441,17 +436,11 @@ public class AudioPlayer {
                         // We reached the end of the track
                         Log.d(DEBUG_TAG, "Reached end of track["+track.getId()+"]");
                         stop();
-                        // TODO notify the audio player that we have finished playback on this track.
-                        notifyAudioPlayerEndOfTrack();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        }
-
-        private void notifyAudioPlayerEndOfTrack() {
-            mAudioPlayerListener.notifyEndOfTrack(this);
         }
 
         private void notifyAudioPlayerOfPosition() {

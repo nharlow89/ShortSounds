@@ -1,8 +1,13 @@
 package com.sloths.speedy.shortsounds.controller;
 
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 
+import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
@@ -26,6 +31,8 @@ public class ModelControl implements PlaybackListener {
     private int seekBarPosition;
     private static ModelControl instance = null;
     private SeekBar mGlobalSeekBar;
+    private ImageButton mGlobalPlayButton;
+    private Context mMainContext;
 
 
     /**
@@ -60,8 +67,10 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void onRecordStart() {
 //        main.onRecordStart();
-        if (mAudioPlayer != null)
-            mAudioPlayer.playAll( 0 );  // Play from the beginning
+        if (mAudioPlayer != null) {
+            Log.d("Debug", "onRecordStart() playALL!!!");
+            mAudioPlayer.playAll(0);  // Play from the beginning
+        }
         // Setup the MediaRecorder
         mAudioRecorder.start();
     }
@@ -99,12 +108,12 @@ public class ModelControl implements PlaybackListener {
             if (!mAudioRecorder.isRecording()) {
                 mAudioPlayer.stopAll();
             }
-            boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
-            if (isOkToPlayAllWithNewPosition) {
-                // TODO: This scenario is super buggy
-                //mAudioPlayer.stopAll();
-                //mAudioPlayer.playAll(this.seekBarPosition);
-            }
+//            boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
+//            if (isOkToPlayAllWithNewPosition) {
+//                // TODO: This scenario is super buggy
+//                mAudioPlayer.stopAll();
+//                mAudioPlayer.playAll(this.seekBarPosition);
+//            }
         }
     }
 
@@ -159,11 +168,4 @@ public class ModelControl implements PlaybackListener {
     }
 
     public void volumeChanged(int track, float volume) { mAudioPlayer.volumeChanged(track, volume); }
-
-    public void endOfTrack() {
-        seekBarPosition = 0;
-        mGlobalSeekBar.setProgress(0);
-        onPlayToggle();
-        // TODO: Update Play Button
-    }
 }
