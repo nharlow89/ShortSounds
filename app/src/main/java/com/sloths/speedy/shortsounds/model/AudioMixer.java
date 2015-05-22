@@ -83,6 +83,15 @@ public class AudioMixer {
         return mixedBuf;
     }
 
+    /**
+     * Method for testing purposes.
+     * Getter for shorsound
+     * @return ShortSound this.shortsound
+     */
+    public ShortSound getShortSound() {
+        return this.shortSound;
+    }
+
     private File writeWavHeader( File fileToConvert ) throws IOException {
         // Constants used in the .wav header
         long mySubChunk1Size = 16;  // 16bit PCM
