@@ -398,8 +398,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void selectShortSoundFromDrawer(int position) {
         modelControl.stopAllFromPlaying();
-        mGlobalSeekBar.setProgress(0);
-        modelControl.updateCurrentPosition(0);
+        resetSeekBarToZero();
         if (position != -1) {
             mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
             modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
@@ -434,12 +433,16 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
             invalidateOptionsMenu();
 
-            mGlobalSeekBar.setProgress(0);
-            modelControl.updateCurrentPosition(0);
+            resetSeekBarToZero();
 
         }
         // selected mix is already loaded so close the drawer
         mDrawerLayout.closeDrawer(mDrawerList);
+    }
+
+    private void resetSeekBarToZero() {
+        mGlobalSeekBar.setProgress(0);
+        modelControl.updateCurrentPosition(0);
     }
 
     /**
