@@ -33,7 +33,7 @@ import android.widget.Toast;
 import android.widget.ViewAnimator;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
-import com.sloths.speedy.shortsounds.controller.ModelControl;
+import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
@@ -56,7 +56,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     public static final String BIT = "Bit Crush";
     public static final String DIST = "Distortion";
     public static final String TRACKS = "tracks";
-    public static final String UNTITLED = "Untitled";
     public static final int SLIDE_DURATION = 400;
 
     private String[] mShortSoundsTitles;
@@ -116,9 +115,33 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void setUpControllerView() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mGlobalSeekBar.setMax(100);  // Set the max value (0-100)
+        SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 
-        mGlobalPlayButton = (ImageButton) findViewById(R.id.imageButtonPlay);
-        Log.e("DEBUG", mGlobalPlayButton.toString());
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // The current progress level. This will be in the range 0..max
+                // where max was set by setMax(int). (The default value for max is 100.)
+                // TODO Auto-generated method stub
+
+                if(fromUser) {
+                    Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
+                    modelControl.updateCurrentPosition(progress);
+                }
+            }
+        };
+        mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
+        modelControl.setGlobalSeekBar(mGlobalSeekBar);
+        
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
         mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
@@ -131,18 +154,17 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
             }
         });
-
         setPlayerVisibility(View.INVISIBLE);
     }
 
-
     /**
-     * Shows the global seek bar and play button
+     * Shows and hides the global seek bar and play button
      */
     private void setPlayerVisibility(int value) {
         mGlobalPlayButton.setVisibility(value);
         mGlobalSeekBar.setVisibility(value);
     }
+
 
     /**
      * This sets up the Record button and attaches the click handler which gives it the record
@@ -181,8 +203,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             });
         }
     }
-
-
+    
     /**
      * Retrieve the currently selected ShortSound track names.
      * @return
@@ -320,11 +341,19 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         return super.onPrepareOptionsMenu(menu);
     }
 
-    public void saveShortSoundTrack(int track) {
-        mActiveShortSound.getTracks().get(track).saveShortSoundTrack();
-    }
-
-
+    /**
+     * Toggles the play and pause buttons
+     * @return boolean true of toggled, false else
+     */
+//    @Override
+//    public boolean onPlayToggle() {
+//        if ( !modelControl.onPlayToggle() )
+//            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
+//        else
+//            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+//        return true;
+//    }
+    
     /**
      * The click listener for ListView in the navigation drawer
      */
@@ -394,9 +423,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             animator.addView(add, viewMap.get(TRACKS) + 1);
             animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
             animator.removeViewAt(viewMap.get(TRACKS));
+
             invalidateOptionsMenu();
 
-            // TODO: Set a listener to update the SeekBar based on play position.
+            mGlobalSeekBar.setProgress(0);
+            modelControl.updateCurrentPosition(0);
         }
         // selected mix is already loaded so close the drawer
         mDrawerLayout.closeDrawer(mDrawerList);
@@ -576,8 +607,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private Intent createShareIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         File absolutePath = new File(getFilesDir(), "ss1-track1.mp3");
-        Uri contentURI = FileProvider.getUriForFile(MainActivity.this,
-                "com.sloths.speedy.shortsounds.fileprovider", absolutePath);
+        Uri contentURI = FileProvider.getUriForFile(MainActivity.this, "com.sloths.speedy.shortsounds.fileprovider", absolutePath);
 
         if (contentURI != null) {
             shareIntent.putExtra(Intent.EXTRA_STREAM, contentURI);
@@ -696,16 +726,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             // Update the existing fragment manager to add new track to list
             TrackView tv = ((TrackView) findViewById(R.id.track_list));
             tv.notifyTrackAdded(mActiveShortSound.getTracks().size() - 1);
-//            RecyclerViewAdapter rva = (RecyclerViewAdapter)tv.getAdapter();
-//            rva.notifyDataSetChanged();
-//            rva.notifyItemChanged(mActiveShortSound.getTracks().size() - 1);
         }
 
-        // Activate GlobalPlayButton so that tracks are playable
-        // If there is only one track, this must've been an empty ShortSound before
-//        if (mActiveShortSound.getTracks().size() == 1) {
-//            setGlobalPlayButtonClickHandler();
-//        }
     }
 
     // TODO: Clean up resources & Save track state to DB

@@ -49,6 +49,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     public static final String REVERB_EFFECT_PARAMS = "reverb_effects";
     public static final String VOLUME_PARAMS = "volume";
     public static final String SOLO_PARAMS = "solo";
+    public static final String TRACK_LENGTH = "track_length";
 
 
     // Table Create Query
@@ -70,13 +71,13 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                     VOLUME_PARAMS + " REAL," +
                     SOLO_PARAMS + " TEXT," +
                     EQ_EFFECT_PARAMS + " TEXT DEFAULT 'NULL'," +
+                    TRACK_LENGTH + " INTEGER, " +
                     REVERB_EFFECT_PARAMS + " TEXT DEFAULT 'NULL');";
 
     private ShortSoundSQLHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         db = getWritableDatabase();
     }
-
 
     public static ShortSoundSQLHelper getInstance() {
         if ( instance == null ) {
@@ -231,6 +232,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
         values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
         values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFileName() );
+        values.put( TRACK_LENGTH, track.getLengthInBytes() );
         return db.insert( TRACK_TABLE_NAME, null, values );  // Returns the new entry id
     }
 
@@ -248,6 +250,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         values.put( EQ_EFFECT_PARAMS , track.getEQEffectString());
         values.put( REVERB_EFFECT_PARAMS, track.getReverbEffectString());
         values.put( KEY_TRACK_FILENAME_MODIFIED, track.getFileName() );
+        values.put( TRACK_LENGTH, track.getLengthInBytes() );
         db.update( TRACK_TABLE_NAME, values, "id=" + track.getId(), null );  // Returns the new entry id
     }
 

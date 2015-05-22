@@ -1,7 +1,7 @@
-package com.sloths.speedy.shortsounds.controller;
+package com.sloths.speedy.shortsounds;
 
 import android.util.Log;
-
+import android.widget.SeekBar;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
@@ -19,10 +19,12 @@ public class ModelControl implements PlaybackListener {
     private AudioRecorder mAudioRecorder;
     private int seekBarPosition;
     private static ModelControl instance = null;
+    private SeekBar mGlobalSeekBar;
 
 
     private ModelControl() {
         seekBarPosition = 0;
+//        main = (MainActivity) context;
     }
 
     public static ModelControl instance() {
@@ -45,6 +47,7 @@ public class ModelControl implements PlaybackListener {
 
     @Override
     public void onRecordStart() {
+//        main.onRecordStart();
         if (mAudioPlayer != null)
             mAudioPlayer.playAll( 0 );  // Play from the beginning
         // Setup the MediaRecorder
@@ -80,6 +83,24 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void updateCurrentPosition(int position) {
         this.seekBarPosition = position;
+        if ( !mAudioRecorder.isRecording() ) {
+            mAudioPlayer.stopAll();
+        }
+        boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
+        if ( isOkToPlayAllWithNewPosition ) {
+            // TODO: This scenario is super buggy
+            mAudioPlayer.stopAll();
+            mAudioPlayer.playAll(this.seekBarPosition);
+        }
+    }
+
+    public void notifySeekBarOfChangeInPos(int position) {
+        this.seekBarPosition = position;
+        mGlobalSeekBar.setProgress(position);
+    }
+
+    public void setGlobalSeekBar(SeekBar sb) {
+        mGlobalSeekBar = sb;
     }
 
     @Override
@@ -109,10 +130,12 @@ public class ModelControl implements PlaybackListener {
         return mAudioRecorder.isRecording();
     }
 
+    //TODO check for track solo
     public boolean isTrackSolo(int track) {
         return mAudioPlayer.isTrackSolo(track);
     }
 
+    //TODO implement solo track
     public void soloTrack(int track) {
         mAudioPlayer.soloTrack(track);
     }

@@ -45,7 +45,7 @@ public class ShortSoundTrack {
     private ReverbEffect mReverbEffect;
     private float volume;
     private boolean isSolo;
-
+    private long mTrackLength;
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -63,8 +63,9 @@ public class ShortSoundTrack {
         this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
         this.volume = 0.8f;
         this.isSolo = false;
-        this.sqlHelper.updateShortSoundTrack( this );  // Had to update with filenames =(
+          // Had to update with filenames =(
         initFiles( audioFile );
+        this.sqlHelper.updateShortSoundTrack( this );
         repInvariant();
     }
 
@@ -80,6 +81,7 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.KEY_SHORT_SOUND_ID ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.KEY_SHORT_SOUND_ID + " field.");
         if ( !map.containsKey( sqlHelper.EQ_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.EQ_EFFECT_PARAMS + " field.");
         if ( !map.containsKey( sqlHelper.REVERB_EFFECT_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.REVERB_EFFECT_PARAMS + " field.");
+        if ( !map.containsKey( sqlHelper.TRACK_LENGTH) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.TRACK_LENGTH + " field.");
         if ( !map.containsKey( sqlHelper.VOLUME_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.VOLUME_PARAMS + " field.");
         if ( !map.containsKey( sqlHelper.SOLO_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.SOLO_PARAMS + " field.");
 
@@ -90,6 +92,8 @@ public class ShortSoundTrack {
         this.mEqEffect = new EqEffect( map.get( sqlHelper.EQ_EFFECT_PARAMS ) );
         this.mReverbEffect = new ReverbEffect( map.get( sqlHelper.REVERB_EFFECT_PARAMS ) );
         this.volume = Float.parseFloat(map.get(sqlHelper.VOLUME_PARAMS));
+        this.mTrackLength = Long.parseLong(map.get(sqlHelper.TRACK_LENGTH));
+        if  (this.mTrackLength == 0) throw new AssertionError("Length can't be 0");
         this.isSolo = map.get(sqlHelper.SOLO_PARAMS).equals("t");
         repInvariant();
     }
@@ -169,6 +173,7 @@ public class ShortSoundTrack {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        mTrackLength = audioFile.length();
         repInvariant();
     }
 
@@ -228,6 +233,12 @@ public class ShortSoundTrack {
     public String getFileName() { return this.fileName; }
 
     /**
+     * Returns the length of this track in Bytes
+     * @return long the length in bytes
+     */
+    public long getLengthInBytes() { return this.mTrackLength; }
+
+    /**
      * Get this tracks id.
      * @return id
      */
@@ -244,6 +255,7 @@ public class ShortSoundTrack {
         if ( this.mEqEffect == null || !(this.mEqEffect instanceof EqEffect) ) throw new AssertionError("Missing EqEffect");
         if ( this.mReverbEffect == null || !(this.mReverbEffect instanceof ReverbEffect) ) throw new AssertionError("Missing ReverbEffect");
         if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
+
         // Check that the files are on disk
 //        File file = new File( this.fileName);
 //        if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
