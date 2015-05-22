@@ -54,6 +54,9 @@ public abstract class Effect {
      */
     public abstract String encodeParameters();
 
+    /**
+     * Release the effect.
+     */
     public void release() {
         if (this.effect != null) {
             this.effect.release();

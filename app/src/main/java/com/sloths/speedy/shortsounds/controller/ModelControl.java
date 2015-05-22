@@ -76,6 +76,7 @@ public class ModelControl implements PlaybackListener {
             // Case 1. There is no active ShortSound, create one and continue.
             // Create the new ShortSound and add it the list.
             mActiveShortSound = new ShortSound();
+            mAudioPlayer = new AudioPlayer(mActiveShortSound);
         } else {
             mAudioPlayer.stopAll();
         }

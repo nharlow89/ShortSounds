@@ -28,15 +28,16 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
-import android.widget.SeekBar;
-import android.widget.ShareActionProvider;
+
 import com.sloths.speedy.shortsounds.R;
-import com.sloths.speedy.shortsounds.controller.ModelControl;
 import com.sloths.speedy.shortsounds.controller.EQEffectController;
 import com.sloths.speedy.shortsounds.controller.EffectController;
+import com.sloths.speedy.shortsounds.controller.ModelControl;
 import com.sloths.speedy.shortsounds.controller.ReverbEffectController;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
@@ -45,6 +46,7 @@ import com.sloths.speedy.shortsounds.model.EqEffect;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -410,15 +412,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void selectShortSoundFromDrawer(int position) {
         modelControl.stopAllFromPlaying();
         resetSeekBarToZero();
-        if (position != -1) {
-            mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
-            modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
-            setPlayerVisibility(View.VISIBLE);
-        } else {
-//            modelControl.setmAudioPlayer(null);
-            setPlayerVisibility(View.INVISIBLE);
-        }
+        mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
+        // If the selected ShortSound was not the currently active one...
         if (this.position != position) {
+            modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
             currentView = TRACKS;
             if (position != -1) {
                 // Highlight item, update title, close drawer
@@ -430,22 +427,15 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             this.position = position;
 
                 // load the mix into a view and replace it in the animator
-            View add;
             if (mActiveShortSound != null && mActiveShortSound.getTracks().size() > 0) {
-                TrackView tv = (TrackView) findViewById(R.id.track_list);
-                add = getLayoutInflater().inflate(R.layout.track_list_xml, tv, false);
+                setPopulatedTrackView();
             } else {
-                RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.nested_track_view);
-                add = getLayoutInflater().inflate(R.layout.empty_tracks, relativeLayout, false);
+                setEmptyTrackView();
             }
-            animator.addView(add, viewMap.get(TRACKS) + 1);
-            animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
-            animator.removeViewAt(viewMap.get(TRACKS));
 
             invalidateOptionsMenu();
 
             resetSeekBarToZero();
-
         }
         // selected mix is already loaded so close the drawer
         mDrawerLayout.closeDrawer(mDrawerList);
@@ -708,7 +698,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void deleteShortSound() {
         if (mActiveShortSound != null) {
-//            this.position = -1;
+            this.position = -1;
             Log.d("CHECK", "" + sounds.size());
             sounds.remove(mActiveShortSound);
             Log.d("CHECK", "" + sounds.size());
@@ -722,15 +712,41 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * current tracks for this ShortSound
      */
     private void createNew() {
+        position = -1;
         mActiveShortSound = null;
+        modelControl.setmAudioPlayer(null);  // Clear the existing AudioPlayer
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, mShortSoundsTitles));
-        selectShortSoundFromDrawer(-1);
-//         hides seek bar and play button
-        setPlayerVisibility(View.INVISIBLE);
+        setEmptyTrackView();
         ActionBar ab = getActionBar();
         if (ab != null)
-            ab.setTitle(UNTITLED);
+            ab.setTitle("ShortSounds");
+    }
+
+    /**
+     * Set the view to the "Record a Sound" view
+     */
+    private void setEmptyTrackView() {
+        setPlayerVisibility(View.INVISIBLE);
+        RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.nested_track_view);
+        View add = getLayoutInflater().inflate(R.layout.empty_tracks, relativeLayout, false);
+        animator.addView(add, viewMap.get(TRACKS) + 1);
+        animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
+        animator.removeViewAt(viewMap.get(TRACKS));
+        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+    }
+
+    /**
+     * Set the view when we have a populated ShortSound
+     */
+    private void setPopulatedTrackView() {
+        setPlayerVisibility(View.VISIBLE);
+        TrackView tv = (TrackView) findViewById(R.id.track_list);
+        View add = getLayoutInflater().inflate(R.layout.track_list_xml, tv, false);
+        animator.addView(add, viewMap.get(TRACKS) + 1);
+        animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
+        animator.removeViewAt(viewMap.get(TRACKS));
+        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
     }
 
     /**
@@ -765,6 +781,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));//TODO
         ShortSound newShortSound = modelControl.onRecordStop( mActiveShortSound );
         if ( newShortSound != null ) {
+            Log.d("DEBUG", "Ended recording while no ShortSound existed");
             // Update the sidebar with the new ShortSound.
             sounds.add(newShortSound);
             mShortSoundsTitles = getShortSoundTitles(sounds);
@@ -773,6 +790,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             // Select the new ShortSound to be active.
             selectShortSoundFromDrawer(sounds.size() - 1);
         } else {
+            Log.d("DEBUG", "Ended recording on existing ShortSound");
             // Update the existing fragment manager to add new track to list
             TrackView tv = ((TrackView) findViewById(R.id.track_list));
             tv.notifyTrackAdded(mActiveShortSound.getTracks().size() - 1);

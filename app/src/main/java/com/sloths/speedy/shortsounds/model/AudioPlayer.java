@@ -41,8 +41,8 @@ public class AudioPlayer {
     private ModelControl mModelControl;
 
     public AudioPlayer( ShortSound ss ) {
+        Log.d(DEBUG_TAG, "Creating new AudioPlayer");
         trackPlayers = new HashMap<>();
-
         tracks = new ArrayList<>();
         for ( ShortSoundTrack track : ss.getTracks() ) {
             trackPlayers.put(track, new TrackPlayer(track, this));
@@ -339,6 +339,8 @@ public class AudioPlayer {
          */
         public void destroy() {
             Log.d(DEBUG_TAG, "Destroy TrackPlayer associated with Track["+track.getId()+"]");
+            // Cleanup any effect objects
+            track.releaseEffects();
             // Take care of the input stream.
             if ( audioInputStream != null ) {
                 try {
@@ -354,8 +356,6 @@ public class AudioPlayer {
             // Take care of the AudioTrack
             if ( audioTrack != null )
                 audioTrack.release();
-            // Cleanup any effect objects
-
         }
 
         /**
@@ -365,7 +365,6 @@ public class AudioPlayer {
             // Reverb
             ReverbEffect reverb = track.getmReverbEffect();
             reverb.setupReverbEffect( audioTrack.getAudioSessionId() );
-            Log.d("AudioPlayer", "Attached reverb to track id : " + audioTrack.getAudioSessionId());
 
             // Equalizer
             EqEffect eq = track.getmEqEffect();

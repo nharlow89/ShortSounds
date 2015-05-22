@@ -266,12 +266,10 @@ public class ShortSoundTrack {
     }
 
     public String getEQEffectString() {
-        Log.d(TAG, "Getting EQ String");
         return mEqEffect.encodeParameters();
     }
 
     public String getReverbEffectString() {
-        Log.d(TAG, "Getting reverb effect string");
         return mReverbEffect.encodeParameters();
     }
 
@@ -324,5 +322,11 @@ public class ShortSoundTrack {
             // All other effects
             return false;
         }
+    }
+
+    public void releaseEffects() {
+        Log.d(DEBUG_TAG, "Release effects associated with track["+this.id+"]");
+        mReverbEffect.release();
+        mEqEffect.release();
     }
 }
