@@ -397,6 +397,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * @param position int the position of the drawer item clicked
      */
     private void selectShortSoundFromDrawer(int position) {
+        modelControl.stopAllFromPlaying();
+        mGlobalSeekBar.setProgress(0);
+        modelControl.updateCurrentPosition(0);
         if (position != -1) {
             mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
             modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
@@ -433,6 +436,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
             mGlobalSeekBar.setProgress(0);
             modelControl.updateCurrentPosition(0);
+
         }
         // selected mix is already loaded so close the drawer
         mDrawerLayout.closeDrawer(mDrawerList);

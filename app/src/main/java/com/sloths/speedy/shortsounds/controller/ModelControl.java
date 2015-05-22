@@ -14,6 +14,11 @@ import java.io.File;
 /**
  * Created by nj on 5/15/15.
  */
+
+/**
+ * A ModelControl is a controller that ties the backend to the front end. A
+ * ModelControl is a SINGLETON.
+ */
 public class ModelControl implements PlaybackListener {
     public static final String TAG = "ModelControl";
     private AudioPlayer mAudioPlayer;
@@ -23,11 +28,17 @@ public class ModelControl implements PlaybackListener {
     private SeekBar mGlobalSeekBar;
 
 
+    /**
+     * Private Constructor for a ModelControl
+     */
     private ModelControl() {
         seekBarPosition = 0;
-//        main = (MainActivity) context;
     }
 
+    /**
+     * Provides a singleton instance of a ModelControl
+     * @return ModelControl singleton
+     */
     public static ModelControl instance() {
         if (instance == null)
             instance = new ModelControl();
@@ -91,10 +102,14 @@ public class ModelControl implements PlaybackListener {
             boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
             if (isOkToPlayAllWithNewPosition) {
                 // TODO: This scenario is super buggy
-                mAudioPlayer.stopAll();
-                mAudioPlayer.playAll(this.seekBarPosition);
+                //mAudioPlayer.stopAll();
+                //mAudioPlayer.playAll(this.seekBarPosition);
             }
         }
+    }
+
+    public void stopAllFromPlaying() {
+        if (mAudioPlayer != null) mAudioPlayer.stopAll();
     }
 
     public void notifySeekBarOfChangeInPos(int position) {
@@ -148,5 +163,7 @@ public class ModelControl implements PlaybackListener {
     public void endOfTrack() {
         seekBarPosition = 0;
         mGlobalSeekBar.setProgress(0);
+        onPlayToggle();
+        // TODO: Update Play Button
     }
 }
