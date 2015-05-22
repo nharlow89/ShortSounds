@@ -42,6 +42,7 @@ import com.sloths.speedy.shortsounds.model.ReverbEffect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -437,6 +438,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
         }
         // selected mix is already loaded so close the drawer
+        try {
+            mShareActionProvider.setShareIntent(createShareIntent());
+        } catch (IOException e) {
+            mShareActionProvider.setShareIntent(null);
+        }
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
@@ -608,7 +614,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         MenuItem shareItem = menu.findItem(R.id.action_share);
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
-        mShareActionProvider.setShareIntent(createShareIntent());
         return true;
     }
 
@@ -616,17 +621,20 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * Specifies the share intent
      * @return the share Intent
      */
-    private Intent createShareIntent() {
+    private Intent createShareIntent() throws IOException {
+        if (mActiveShortSound == null) {
+            return null;
+        }
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        File absolutePath = new File(getFilesDir(), "ss1-track1.mp3");
+        File absolutePath = mActiveShortSound.generateAudioFile();
+
         Uri contentURI = FileProvider.getUriForFile(MainActivity.this, "com.sloths.speedy.shortsounds.fileprovider", absolutePath);
 
         if (contentURI != null) {
             shareIntent.putExtra(Intent.EXTRA_STREAM, contentURI);
-            shareIntent.setType("audio/mpeg3");
+            shareIntent.setType("audio/wav");
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
-
         return shareIntent;
     }
 
@@ -733,11 +741,15 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                     R.layout.drawer_list_item, mShortSoundsTitles));
             // Select the new ShortSound to be active.
             selectShortSoundFromDrawer(sounds.size() - 1);
-
         } else {
             // Update the existing fragment manager to add new track to list
             TrackView tv = ((TrackView) findViewById(R.id.track_list));
             tv.notifyTrackAdded(mActiveShortSound.getTracks().size() - 1);
+            try {
+                mShareActionProvider.setShareIntent(createShareIntent());
+            } catch (IOException e) {
+                mShareActionProvider.setShareIntent(null);
+            }
         }
 
     }
