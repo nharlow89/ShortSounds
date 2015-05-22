@@ -1,8 +1,11 @@
 package com.sloths.speedy.shortsounds.controller;
 
 import android.util.Log;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 
+import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
@@ -26,6 +29,7 @@ public class ModelControl implements PlaybackListener {
     private int seekBarPosition;
     private static ModelControl instance = null;
     private SeekBar mGlobalSeekBar;
+    private ImageButton mGlobalPlayButton;
 
 
     /**
@@ -165,7 +169,10 @@ public class ModelControl implements PlaybackListener {
     public void endOfTrack() {
         seekBarPosition = 0;
         mGlobalSeekBar.setProgress(0);
-        onPlayToggle();
         // TODO: Update Play Button
+    }
+
+    public void setGlobalPlayButton(ImageButton mGlobalPlayButton) {
+        this.mGlobalPlayButton = mGlobalPlayButton;
     }
 }

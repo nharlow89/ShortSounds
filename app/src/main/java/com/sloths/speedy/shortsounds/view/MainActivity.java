@@ -144,6 +144,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         modelControl.setGlobalSeekBar(mGlobalSeekBar);
         
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
+        modelControl.setGlobalPlayButton(mGlobalPlayButton);
         mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
