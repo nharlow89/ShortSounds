@@ -1,9 +1,12 @@
 package com.sloths.speedy.shortsounds.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+
+import com.sloths.speedy.shortsounds.R;
 
 /**
  * A TrackView represents the views associated with individual tracks.
@@ -34,6 +37,6 @@ public class TrackView extends RecyclerView {
      */
     public void notifyTrackAdded( int index ) {
         mAdapter.notifyDataSetChanged();
-        mAdapter.notifyItemInserted( index );
+        mAdapter.notifyItemInserted(index);
     }
 }

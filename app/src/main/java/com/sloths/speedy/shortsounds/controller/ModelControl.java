@@ -19,12 +19,10 @@ public class ModelControl implements PlaybackListener {
     private AudioRecorder mAudioRecorder;
     private int seekBarPosition;
     private static ModelControl instance = null;
-//    private MainActivity main;
 
 
     private ModelControl() {
         seekBarPosition = 0;
-//        main = (MainActivity) context;
     }
 
     public static ModelControl instance() {
@@ -47,7 +45,6 @@ public class ModelControl implements PlaybackListener {
 
     @Override
     public void onRecordStart() {
-//        main.onRecordStart();
         if (mAudioPlayer != null)
             mAudioPlayer.playAll( 0 );  // Play from the beginning
         // Setup the MediaRecorder

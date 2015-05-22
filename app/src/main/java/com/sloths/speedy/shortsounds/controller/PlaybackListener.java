@@ -18,6 +18,5 @@ public interface PlaybackListener {
     void updateCurrentPosition(int position);
     void muteEffect(Effect.Type effect, int track);
     void turnOnEffect(Effect.Type effect, int track);
-
     void saveShortSoundTrack(int track);
 }

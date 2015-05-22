@@ -238,8 +238,8 @@ public class AudioPlayer {
             this.trackLength = file.length();
             // Let the effects know about the audio playback object
 //            track.getmEqEffect().setAudioSource( audioTrack.getAudioSessionId() );
-            track.getmReverbEffect().setAudioSource( audioTrack.getAudioSessionId() );
-            audioTrack.setAuxEffectSendLevel(1.0f);
+//            track.getmReverbEffect().setAudioSource( audioTrack.getAudioSessionId() );
+//            audioTrack.setAuxEffectSendLevel(1.0f);
             // Attach the audio effects (NOT required if passing audioTrack id to the effect constructor).
 //            int eqId = track.getmEqEffect().getEffectId();
 //            audioTrack.attachAuxEffect( eqId );
