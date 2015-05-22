@@ -116,6 +116,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void setUpControllerView() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mGlobalSeekBar.setMax(100);  // Set the max value (0-100)
+
         SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -137,14 +138,21 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 if(fromUser) {
                     Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
                     modelControl.updateCurrentPosition(progress);
+                } else {
+                    if(progress == 100) {
+                        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                        mGlobalSeekBar.setProgress(0);
+                        modelControl.updateCurrentPosition(0);
+                    }
                 }
             }
         };
+
+
         mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
         modelControl.setGlobalSeekBar(mGlobalSeekBar);
-        
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
-        modelControl.setGlobalPlayButton(mGlobalPlayButton);
+
         mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {

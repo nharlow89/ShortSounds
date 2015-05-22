@@ -1,5 +1,7 @@
 package com.sloths.speedy.shortsounds.controller;
 
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -30,6 +32,7 @@ public class ModelControl implements PlaybackListener {
     private static ModelControl instance = null;
     private SeekBar mGlobalSeekBar;
     private ImageButton mGlobalPlayButton;
+    private Context mMainContext;
 
 
     /**
@@ -165,14 +168,4 @@ public class ModelControl implements PlaybackListener {
     }
 
     public void volumeChanged(int track, float volume) { mAudioPlayer.volumeChanged(track, volume); }
-
-    public void endOfTrack() {
-        seekBarPosition = 0;
-        mGlobalSeekBar.setProgress(0);
-        // TODO: Update Play Button
-    }
-
-    public void setGlobalPlayButton(ImageButton mGlobalPlayButton) {
-        this.mGlobalPlayButton = mGlobalPlayButton;
-    }
 }
