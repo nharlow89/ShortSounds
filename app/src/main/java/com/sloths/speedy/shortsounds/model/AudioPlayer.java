@@ -5,8 +5,8 @@ import android.media.AudioTrack;
 import android.os.Build;
 import android.util.Log;
 
-import com.sloths.speedy.shortsounds.ModelControl;
-import com.sloths.speedy.shortsounds.view.MainActivity;
+
+import com.sloths.speedy.shortsounds.controller.ModelControl;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -40,7 +40,7 @@ public class AudioPlayer {
     private TrackPlayer mLongestTrackPlayer;
     private ModelControl mModelControl;
 
-    public AudioPlayer( ShortSound ss, ModelControl mc ) {
+    public AudioPlayer( ShortSound ss ) {
         trackPlayers = new HashMap<>();
 
         tracks = new ArrayList<>();
@@ -48,7 +48,7 @@ public class AudioPlayer {
             trackPlayers.put(track, new TrackPlayer(track, this));
             tracks.add(track);
         }
-        mModelControl = mc;
+        mModelControl = ModelControl.instance();
         mCurrentShortSound = ss;
         mLongestTrack = ss.getLongestTrack();
         for ( ShortSoundTrack sst : ss.getTracks() ) {
