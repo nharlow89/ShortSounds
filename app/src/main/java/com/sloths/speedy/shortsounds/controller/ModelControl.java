@@ -144,4 +144,9 @@ public class ModelControl implements PlaybackListener {
     }
 
     public void volumeChanged(int track, float volume) { mAudioPlayer.volumeChanged(track, volume); }
+
+    public void endOfTrack() {
+        seekBarPosition = 0;
+        mGlobalSeekBar.setProgress(0);
+    }
 }

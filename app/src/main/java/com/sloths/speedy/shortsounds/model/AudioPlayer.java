@@ -97,15 +97,19 @@ public class AudioPlayer {
         playerState = PlayerState.PLAYING_ALL;
     }
 
-    public void notifyModelControlOfTrackPosition(TrackPlayer notifier, int position) {
+    private void notifyEndOfTrack(TrackPlayer notifier) {
         if (notifier == mLongestTrackPlayer) {
-            notifyProgressChanged(position);
+            mModelControl.endOfTrack();
         }
     }
 
-    public void notifyProgressChanged(int position) {
-        mModelControl.notifySeekBarOfChangeInPos(position);
+
+    public void notifyModelControlOfTrackPosition(TrackPlayer notifier, int position) {
+        if (notifier == mLongestTrackPlayer) {
+            mModelControl.notifySeekBarOfChangeInPos(position);
+        }
     }
+
 
     /**
      * Stop playing all tracks in this AudioPlayer. When a track is stopped it's position
@@ -429,7 +433,7 @@ public class AudioPlayer {
                         // NOTE: this is blocking, so the next frame will not be loaded until ready.
                         // Look at AudioTrack docs for more info.
                         currentTrackPosition+= bytesRead;
-                        Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
+                        //Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
                         notifyAudioPlayerOfPosition();
                         audioTrack.write( audioTrackBuffer, 0, bytesRead );
                     }
@@ -438,6 +442,7 @@ public class AudioPlayer {
                         Log.d(DEBUG_TAG, "Reached end of track["+track.getId()+"]");
                         stop();
                         // TODO notify the audio player that we have finished playback on this track.
+                        notifyAudioPlayerEndOfTrack();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -445,12 +450,15 @@ public class AudioPlayer {
             }
         }
 
+        private void notifyAudioPlayerEndOfTrack() {
+            mAudioPlayerListener.notifyEndOfTrack(this);
+        }
+
         private void notifyAudioPlayerOfPosition() {
             int currentPos = getCurrentTrackPosition();
             mAudioPlayerListener.notifyModelControlOfTrackPosition(this,currentPos);
         }
     }
-
 
     public interface PlaybackCompleteListener {
         public void playbackComplete();
