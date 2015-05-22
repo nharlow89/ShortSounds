@@ -4,6 +4,7 @@ package com.sloths.speedy.shortsounds.model;
  * Created by caseympfischer on 4/28/15.
  */
 public abstract class Effect {
+
     protected android.media.audiofx.AudioEffect effect;
 
     /**
