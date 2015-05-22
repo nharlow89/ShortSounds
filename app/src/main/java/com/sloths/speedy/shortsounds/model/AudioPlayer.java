@@ -80,6 +80,7 @@ public class AudioPlayer {
             entry.getValue().stop();
 
             if (position == 0) {
+                Log.d(DEBUG_TAG,"play position 0");
                 entry.getValue().play(position);
             } else {
                 ShortSoundTrack currentTrack = entry.getKey();
