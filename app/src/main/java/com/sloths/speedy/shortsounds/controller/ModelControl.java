@@ -1,6 +1,5 @@
 package com.sloths.speedy.shortsounds.controller;
 
-import android.content.Context;
 import android.util.Log;
 import android.widget.SeekBar;
 
@@ -9,7 +8,6 @@ import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
-import com.sloths.speedy.shortsounds.view.MainActivity;
 
 import java.io.File;
 
@@ -78,7 +76,6 @@ public class ModelControl implements PlaybackListener {
             // Case 1. There is no active ShortSound, create one and continue.
             // Create the new ShortSound and add it the list.
             mActiveShortSound = new ShortSound();
-            mAudioPlayer = new AudioPlayer( mActiveShortSound );
         } else {
             mAudioPlayer.stopAll();
         }

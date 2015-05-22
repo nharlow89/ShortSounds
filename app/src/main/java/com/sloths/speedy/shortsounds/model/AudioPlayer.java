@@ -2,7 +2,6 @@ package com.sloths.speedy.shortsounds.model;
 
 import android.annotation.TargetApi;
 import android.media.AudioTrack;
-import android.media.audiofx.AudioEffect;
 import android.os.Build;
 import android.util.Log;
 
@@ -355,6 +354,8 @@ public class AudioPlayer {
             // Take care of the AudioTrack
             if ( audioTrack != null )
                 audioTrack.release();
+            // Cleanup any effect objects
+
         }
 
         /**

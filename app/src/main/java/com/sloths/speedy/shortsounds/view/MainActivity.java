@@ -415,7 +415,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
             setPlayerVisibility(View.VISIBLE);
         } else {
-            modelControl.setmAudioPlayer(null);
+//            modelControl.setmAudioPlayer(null);
             setPlayerVisibility(View.INVISIBLE);
         }
         if (this.position != position) {
