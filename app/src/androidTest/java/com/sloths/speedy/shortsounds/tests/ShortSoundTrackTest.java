@@ -267,6 +267,7 @@ public class ShortSoundTrackTest extends AndroidTestCase {
         testValues.put(ShortSoundSQLHelper.REVERB_EFFECT_PARAMS, TEST_EFFECT_PARAMETERS);
         testValues.put(ShortSoundSQLHelper.VOLUME_PARAMS, "0");
         testValues.put(ShortSoundSQLHelper.SOLO_PARAMS, "false");
+        testValues.put(ShortSoundSQLHelper.TRACK_LENGTH, "1");
 
         return testValues;
     }
