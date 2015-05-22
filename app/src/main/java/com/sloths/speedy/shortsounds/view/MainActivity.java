@@ -415,6 +415,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         mActiveShortSound = sounds.get(position);  // Set the currently active ShortSound.
         // If the selected ShortSound was not the currently active one...
         if (this.position != position) {
+            Log.d("SHORT_SOUNDS", "Selected ShortSound ["+mActiveShortSound.getId()+"] from the sidebar.");
             modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
             currentView = TRACKS;
             if (position != -1) {
