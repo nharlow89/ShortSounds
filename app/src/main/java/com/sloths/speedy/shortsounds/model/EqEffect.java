@@ -65,7 +65,7 @@ public class EqEffect extends Effect {
         Log.d("REVERB", "Setting up eq to track #" +audioSessionId);
         this.effect = new Equalizer( 0, audioSessionId );
         setEffectProperties();
-        this.effect.setEnabled( isActive );
+        this.effect.setEnabled(isActive);
         Log.d("EQEffect", "Enabled? " + effect.getEnabled());
     }
 
@@ -74,50 +74,46 @@ public class EqEffect extends Effect {
      */
     private void setEffectProperties() {
         Log.d("EQEFFECT", "Setting eq params");
-        short bandLevels[] = convertParamsToSettings();
         Equalizer eq = (Equalizer) this.effect;
-        for (int i = 0; i < eq.getNumberOfBands(); i++) {
-            Log.d("EFFECTS", "set band["+i+"] to level[-1500], previous level["+eq.getBandLevel((short)i)+"]");
-            int[] range = eq.getBandFreqRange((short) i);
-            eq.setBandLevel( (short)i, bandLevels[i] );
+        short[] levelRange = eq.getBandLevelRange();
+
+        // these are right triangles approximating the area under the EQ curve
+        GraphShape g1 = new GraphShape(Math.max((float) (eqPoints[0].x - 0.125), 0f), 0,
+                eqPoints[0].x, eqPoints[0].y);
+        GraphShape g2 = new GraphShape(eqPoints[0].x, eqPoints[0].y,
+                Math.min((float) (eqPoints[0].x + 0.125), 1f), 0);
+        GraphShape g3 = new GraphShape(Math.max((float) (eqPoints[1].x - 0.125), 0f), 0,
+                eqPoints[1].x, eqPoints[1].y);
+        GraphShape g4 = new GraphShape(eqPoints[1].x, eqPoints[1].y,
+                Math.min((float) (eqPoints[1].x + 0.125), 1f), 0);
+        for (short i = 0; i < eq.getNumberOfBands(); i++) {
+            float[] range = {((float) i) / eq.getNumberOfBands(), ((float) (i + 1)) / eq.getNumberOfBands()};
+            float bandVal = 0;
+            bandVal += g1.getArea(range[0], range[1]);
+            bandVal += g2.getArea(range[0], range[1]);
+            bandVal += g3.getArea(range[0], range[1]);
+            bandVal += g4.getArea(range[0], range[1]);
+
+            bandVal -= g1.getIntersectArea(g3, range[0], range[1]);
+            bandVal -= g1.getIntersectArea(g4, range[0], range[1]);
+            bandVal -= g2.getIntersectArea(g3, range[0], range[1]);
+            bandVal -= g2.getIntersectArea(g4, range[0], range[1]);
+            // now scale these 0-1 values to the millibel level range of the Equalizer
+            if (levelRange[0] < 0 && levelRange[1] > 0) {
+                if (bandVal > 0) {
+                    bandVal *= levelRange[1];
+                } else {
+                    bandVal *= levelRange[0];
+                }
+            } else {
+                float mid = (levelRange[0] + levelRange[1]) / 2;
+                float width = (levelRange[1] - levelRange[0]) / 2;
+                bandVal = (bandVal * width) + mid;
+            }
+
+            eq.setBandLevel(i, (short) bandVal);
+            Log.d("PARAMSETTING", "band " + i + " set to level " + (short) bandVal * eq.getNumberOfBands());
         }
-    }
-
-    /**
-     * Convert the EqEffect parameters into band levels that are understood by the effects engine.
-     * @return an array containing the corresponding band levels
-     */
-    private short[] convertParamsToSettings() {
-        // TODO Update this based upon point (conversion function)
-        short bands[] = new short[5];
-        bands[0] = (short)-1500;
-        bands[1] = (short)-1500;
-        bands[2] = (short)-1500;
-        bands[3] = (short)-1500;
-        bands[4] = (short)-1500;
-
-        // these are the x values of all eq points (including non-visible guide points),
-        // in order of ascending x
-        float[] allPointsXVals = {
-                Math.max((float) (eqPoints[0].x - 0.125), 0f),
-                eqPoints[0].x,
-                Math.min((float) (eqPoints[0].x + 0.125), 1f),
-                Math.max((float) (eqPoints[1].x - 0.125), 0f),
-                eqPoints[1].x,
-                Math.min((float) (eqPoints[1].x + 0.125), 1f)
-        };
-        Arrays.sort(allPointsXVals);
-
-        // TODO: hook this part up to the GraphShape business
-        for (short i = 0; i < bands.length; i++) {
-            // We're modeling the EQ settings as triangles whose peaks/troughs are
-            // the eqPoints.  For each band, we calculate the area under that triangle
-            // and set the band level (height) such that the band's area equals the area
-            // under that curve.
-            //int[] bounds = eq.getBandFreqRange(i);
-            //short triangle1Width = Math.max(0, )
-        }
-        return bands;
     }
 
     // used for calculating band levels.
