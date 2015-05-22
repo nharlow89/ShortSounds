@@ -5,6 +5,7 @@ package com.sloths.speedy.shortsounds.model;
  */
 public abstract class Effect {
 
+    public enum Type { EQ, REVERB, DISTORTION, BITCRUSH }
     protected android.media.audiofx.AudioEffect effect;
 
     /**

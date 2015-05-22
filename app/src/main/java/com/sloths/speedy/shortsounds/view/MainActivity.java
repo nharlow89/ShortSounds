@@ -733,13 +733,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                     R.layout.drawer_list_item, mShortSoundsTitles));
             // Select the new ShortSound to be active.
             selectShortSoundFromDrawer(sounds.size() - 1);
-
         } else {
             // Update the existing fragment manager to add new track to list
             TrackView tv = ((TrackView) findViewById(R.id.track_list));
             tv.notifyTrackAdded(mActiveShortSound.getTracks().size() - 1);
         }
-
     }
 
     // TODO: Clean up resources & Save track state to DB

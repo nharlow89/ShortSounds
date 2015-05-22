@@ -2,10 +2,8 @@ package com.sloths.speedy.shortsounds.model;
 
 import android.annotation.TargetApi;
 import android.media.AudioTrack;
-import android.media.audiofx.AudioEffect;
 import android.os.Build;
 import android.util.Log;
-
 
 import com.sloths.speedy.shortsounds.controller.ModelControl;
 
@@ -60,6 +58,17 @@ public class AudioPlayer {
             }
         }
         playerState = PlayerState.STOPPED_ALL;
+    }
+
+    /**
+     * Teardown and cleanup any resources that were in use by this AudioPlayer.
+     */
+    public void destroy() {
+        Log.d(DEBUG_TAG, "Destroying AudioPlayer.");
+        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
+            TrackPlayer trackPlayer = entry.getValue();
+            trackPlayer.destroy();
+        }
     }
 
     /**
@@ -281,7 +290,6 @@ public class AudioPlayer {
         private InputStream audioInputStream;
         private Thread audioThread;
         private long currentTrackPosition;
-        private AudioEffect mEffect;  // TODO: remove when done debugging
         private AudioPlayer mAudioPlayerListener;
 
         public TrackPlayer( ShortSoundTrack track, AudioPlayer parent) {
@@ -322,6 +330,28 @@ public class AudioPlayer {
             this.file = new File( ShortSoundTrack.STORAGE_PATH, track.getFileName() );
             this.trackLength = file.length();
             attachEffects();
+        }
+
+        /**
+         * Cleanup any resources tied to this TrackPlayer.
+         */
+        public void destroy() {
+            Log.d(DEBUG_TAG, "Destroy TrackPlayer associated with Track["+track.getId()+"]");
+            // Take care of the input stream.
+            if ( audioInputStream != null ) {
+                try {
+                    audioInputStream.close();
+                } catch (IOException e) {
+                    Log.d(DEBUG_TAG, "Failed closing an existing AudioInputStream.");
+                    e.printStackTrace();
+                }
+            }
+            // Take care of the thread
+            if ( audioThread != null )
+                audioThread.interrupt();
+            // Take care of the AudioTrack
+            if ( audioTrack != null )
+                audioTrack.release();
         }
 
         /**

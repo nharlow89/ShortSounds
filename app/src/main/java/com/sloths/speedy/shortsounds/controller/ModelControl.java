@@ -68,7 +68,6 @@ public class ModelControl implements PlaybackListener {
 
     @Override
     public ShortSound onRecordStop( ShortSound mActiveShortSound ) {
-//        main.onRecordStop( null );
         File recordedFile = mAudioRecorder.end();
         Log.d("DEBUG", "endRecording() recordedFile: " + recordedFile.getAbsolutePath());
 
@@ -136,7 +135,15 @@ public class ModelControl implements PlaybackListener {
 
     }
 
+    /**
+     * Set the AudioPlayer that this controller will interact with.
+     * @param mAudioPlayer
+     */
     public void setmAudioPlayer(AudioPlayer mAudioPlayer) {
+        // Whenever setting the AudioPlayer, we should check if there is already an existing one.
+        // If so, clean up any resources related to that AudioPlayer.
+        if ( this.mAudioPlayer != null )
+            this.cleanUpTheDirty();
         this.mAudioPlayer = mAudioPlayer;
     }
 
@@ -165,5 +172,14 @@ public class ModelControl implements PlaybackListener {
         mGlobalSeekBar.setProgress(0);
         onPlayToggle();
         // TODO: Update Play Button
+    }
+
+    /**
+     * This method does what it says, it goes through and cleans up any resources that were
+     * in use by the previously active shortsound. This includes AudioTracks, AudioRecorders,
+     * and Effect objects.
+     */
+    private void cleanUpTheDirty() {
+        mAudioPlayer.destroy();
     }
 }

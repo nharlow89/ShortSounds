@@ -63,7 +63,7 @@ public class ShortSoundTrack {
         this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
         this.volume = 0.8f;
         this.isSolo = false;
-          // Had to update with filenames =(
+          // Had to update with filename =(
         initFiles( audioFile );
         this.sqlHelper.updateShortSoundTrack( this );
         repInvariant();
