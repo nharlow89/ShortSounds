@@ -1,7 +1,8 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.controller;
 
 import android.util.Log;
 import android.widget.SeekBar;
+
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
@@ -83,14 +84,16 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void updateCurrentPosition(int position) {
         this.seekBarPosition = position;
-        if ( !mAudioRecorder.isRecording() ) {
-            mAudioPlayer.stopAll();
-        }
-        boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
-        if ( isOkToPlayAllWithNewPosition ) {
-            // TODO: This scenario is super buggy
-            mAudioPlayer.stopAll();
-            mAudioPlayer.playAll(this.seekBarPosition);
+        if (mAudioPlayer != null) {
+            if (!mAudioRecorder.isRecording()) {
+                mAudioPlayer.stopAll();
+            }
+            boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
+            if (isOkToPlayAllWithNewPosition) {
+                // TODO: This scenario is super buggy
+                mAudioPlayer.stopAll();
+                mAudioPlayer.playAll(this.seekBarPosition);
+            }
         }
     }
 

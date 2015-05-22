@@ -33,8 +33,8 @@ import android.widget.Toast;
 import android.widget.ViewAnimator;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
-import com.sloths.speedy.shortsounds.ModelControl;
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.controller.ModelControl;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.EqEffect;
@@ -57,6 +57,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     public static final String DIST = "Distortion";
     public static final String TRACKS = "tracks";
     public static final int SLIDE_DURATION = 400;
+    public static final String UNTITLED = "Untitled";
 
     private String[] mShortSoundsTitles;
     private DrawerLayout mDrawerLayout;
@@ -339,6 +340,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         menu.findItem(R.id.action_share).setVisible(!drawerOpen && shortSoundSelected);
         menu.findItem(R.id.action_new).setVisible(!drawerOpen && shortSoundSelected);
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    public void saveShortSoundTrack(int track) {
+        modelControl.saveShortSoundTrack(track);
     }
 
     /**
