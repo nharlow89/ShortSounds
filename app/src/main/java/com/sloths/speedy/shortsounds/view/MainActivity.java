@@ -8,6 +8,8 @@ import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
@@ -47,6 +49,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * The MainActivity for the application. Contains setup for the framework of the UI.
@@ -77,6 +81,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private SeekBar mGlobalSeekBar;
     private int position;
     private ModelControl modelControl;
+    private Timer mRecordTimer;
+    private boolean mTimerIsRunning;
+    private int mElapsedTime;
 
     /**
      * Sets up MainActivity
@@ -88,6 +95,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         Log.d("DB_TEST", "MainActivity:onCreate()");
         sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
+        mTimerIsRunning = false;
+        mElapsedTime = 0;
         mShortSoundsTitles = getShortSoundTitles(sounds);
         modelControl = ModelControl.instance();
         final AudioRecorder mAudioRecorder = new AudioRecorder( getCacheDir() );
@@ -193,10 +202,12 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                         endRecording();
                         setPlayerVisibility(View.VISIBLE);
                         mGlobalSeekBar.setEnabled(true);
+                        stopTimer();
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
                         mGlobalSeekBar.setEnabled(false);
+                        startTimer();
                     }
                 }
             });
@@ -208,9 +219,11 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                     if (modelControl.isRecording()) {
                         endRecording();
                         setPlayerVisibility(View.VISIBLE);
+                        mGlobalSeekBar.setEnabled(true);
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
+                        mGlobalSeekBar.setEnabled(false);;
                     }
                 }
             });
@@ -611,6 +624,50 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     public void setTitle(CharSequence title) {
         mTitle = title;
         getActionBar().setTitle(mTitle);
+    }
+
+    /**
+     * Start a timer that times the how long a track is recording for
+     */
+    private void startTimer() {
+        mRecordTimer = new Timer();
+        mTimerIsRunning = true;
+        TextView timerTextView = (TextView)findViewById(R.id.timerView);
+        timerTextView.setVisibility(View.VISIBLE);
+        mRecordTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                mElapsedTime += 1; //increase every sec
+                mTimeHandler.obtainMessage(1).sendToTarget();
+
+            }
+        }, 0, 1000);
+    }
+
+    /**
+     * Used by startTimer(). Updates the textview associated with the record timer.
+     */
+    private Handler mTimeHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            TextView timerTextView = (TextView)findViewById(R.id.timerView);
+            int minutes = mElapsedTime / 60;
+            int seconds = mElapsedTime - (60 * minutes);
+            String z = "";
+            if (seconds < 10) z = "0";
+            String time = "0" + minutes + ":" + z + seconds;
+            timerTextView.setText(time);
+        }
+    };
+
+    /**
+     * stops the timer associated with track recording.
+     */
+    private void stopTimer() {
+        mRecordTimer.cancel();
+        TextView timerTextView = (TextView)findViewById(R.id.timerView);
+        timerTextView.setVisibility(View.INVISIBLE);
+        timerTextView.setText("00:00");
+        mElapsedTime = 0;
+        mTimerIsRunning = false;
     }
 
     /**
