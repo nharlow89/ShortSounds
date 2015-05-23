@@ -76,6 +76,23 @@ public class ShortSound {
     }
 
     /**
+     * Returns the longest ShortSoundTrack in this ShortSound, or null if ShortSound
+     * contains no ShortSoundTracks
+     * @return ShortSoundTrack the longest ShortSoundTrack in this ShortSound, or null
+     * if ShortSound contains no ShortSoundTracks
+     */
+    public ShortSoundTrack getLongestTrack() {
+        if (tracks.size() < 1) return null;
+        ShortSoundTrack longestTrack = tracks.get(0);
+        for(ShortSoundTrack sst : tracks ) {
+            if(longestTrack.getLengthInBytes() < sst.getLengthInBytes()) {
+                longestTrack = sst;
+            }
+        }
+        return longestTrack;
+    }
+
+    /**
      * Get the tracks for this ShortSound.
      * @return A list of the ShortSoundTracks associated with this ShortSound.
      */
@@ -88,7 +105,7 @@ public class ShortSound {
      * @postcondition track will be the last element in the list of tracks.
      */
     public void addTrack( ShortSoundTrack track ) {
-        this.tracks.add( track );  // Add track to list
+        this.tracks.add(track);  // Add track to list
     }
 
     /**

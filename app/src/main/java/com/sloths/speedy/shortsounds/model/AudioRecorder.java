@@ -78,7 +78,7 @@ public class AudioRecorder {
         while (isRecording()) {
             // gets the voice output from microphone to byte format
             int bytesRead = mTrackRecorder.read(frameBuffer, 0, BUFFER_ELEMENTS_TO_REC);
-            System.out.println("Short writing to file" + frameBuffer.toString());
+//            System.out.println("Short writing to file" + frameBuffer.toString());
             try {
                 // Put de gains
                 /*

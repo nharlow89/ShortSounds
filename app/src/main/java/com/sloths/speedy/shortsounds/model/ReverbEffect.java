@@ -28,10 +28,10 @@ public class ReverbEffect extends Effect {
     // Constructor used when loading a track from a recorded file
     public ReverbEffect() {
         // Sets up default reverb until track player sets it
-        this.effect = new EnvironmentalReverb(0, 0);
+//        this.effect = new EnvironmentalReverb(0, 0);
         this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
         isActive = false;
-        effect.setEnabled( false );
+//        effect.setEnabled( false );
         repInvariant();
     }
 
@@ -43,7 +43,7 @@ public class ReverbEffect extends Effect {
             // Stored in DB as "ON/OFF:float,float,float,float"
             String[] params = effectVals.split(":");
             isActive = params[0].equals(ON);
-            effect.setEnabled( isActive );
+//            effect.setEnabled( isActive );
             String[] pointVals = params[1].split(",");
             pointVal = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
         }
@@ -52,23 +52,20 @@ public class ReverbEffect extends Effect {
 
 
     public void setupReverbEffect(int audioSessionId) {
-        Log.d("REVERB", "Setting up reverb to track #" +audioSessionId);
+        Log.d(TAG, "Attaching reverb to track id [" + audioSessionId + "]");
         try {
             effect = new EnvironmentalReverb(0, audioSessionId);
+            setEffectProperties();
+            effect.setEnabled( isActive );
+            Log.d(TAG, "Enabled [" + effect.getEnabled() + "]");
         } catch (Exception e) {
             Log.e(TAG, "MAJOR PROBLEM LOADING REVERB LIBRARY");
             Log.e(TAG, e.toString());
         }
-        setEffectProperties();
-        effect.setEnabled( isActive );
-        Log.d("ReverbEfect", "Enabled? " + effect.getEnabled());
     }
 
     private void setEffectProperties() {
-        System.out.println();
-        Log.d("ReverbEffect", "setting reverb effect properties");
-        System.out.println();
-        Log.d("","");
+        Log.d(TAG, "Setting reverb effect properties");
         EnvironmentalReverb.Settings revSettings = convertParamsToSettings();
         EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
         reverb.setProperties(revSettings);
@@ -82,7 +79,7 @@ public class ReverbEffect extends Effect {
         revSettings.diffusion = (short) 0;
         revSettings.roomLevel = (short) 0; // master volume of reverb
         revSettings.roomHFLevel = (short) 0; // controls a low-pass filter that will reduce the level of the high-frequency
-//        revSettings.decayHFRatio == ??
+        revSettings.decayHFRatio =  1000; // The valid range is [100, 2000]. A ratio of 1000 indicates that all frequencies decay at the same rate.
 
         // Dynamic x settings
         revSettings.reverbDelay =  (int) (pointVal.x * (float)100); // how long for reverb to kick in (ms) [0, 100]
@@ -106,7 +103,7 @@ public class ReverbEffect extends Effect {
             return "NULL";
         }
         String retVal = new String();
-        if ( effect.getEnabled() ) {
+        if ( effect != null && effect.getEnabled() ) {
             retVal += "ON";
         } else {
             retVal += "OFF";

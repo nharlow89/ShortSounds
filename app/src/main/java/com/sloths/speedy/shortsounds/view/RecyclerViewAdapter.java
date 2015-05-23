@@ -6,7 +6,6 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +14,13 @@ import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.sloths.speedy.shortsounds.ModelControl;
+import com.sloths.speedy.shortsounds.controller.ModelControl;
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.Effect;
-import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +33,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private Context mContext;
     private ModelControl modelControl;
     private List<ViewHolder> mViews;
+    public static final int MAX_VOLUME = 100;
 
 
     /**
@@ -74,6 +74,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // with that element
         viewHolder.setTitleView(position);
         dynamicallySetCardColor(viewHolder, position);
+        viewHolder.setUpVolume(viewHolder.vView, position);
         viewHolder.setToggles(position);
     }
 
@@ -193,7 +194,34 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             // perform setup
             setPlayClickHandler();
             setUpButtons(new Button[]{eqButton, reverbButton, bitButton, distButton});
-            setUpToggle();
+            setUpToggle(new Switch[]{eqToggle, reverbToggle, bitToggle, distToggle},
+                    new Effect.Type[]{Effect.Type.EQ,
+                            Effect.Type.REVERB,
+                            Effect.Type.BITCRUSH,
+                            Effect.Type.DISTORTION}
+            );
+        }
+
+        private void setUpVolume(final View v, final int track) {
+            SeekBar volumeSlider = (SeekBar) v.findViewById(R.id.volumeSlider);
+            volumeSlider.setMax(MAX_VOLUME);
+            float lvl = 0.8f;
+            if (getPosition() >= 0)
+                lvl = ((MainActivity) mContext).getShortSoundVolume(getPosition());
+            volumeSlider.setProgress((int)(MAX_VOLUME * lvl));
+            volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (fromUser)
+                        modelControl.volumeChanged(getPosition(), 1.0f * progress / MAX_VOLUME);
+                }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {}
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    ((MainActivity)mContext).saveShortSoundTrack(track);
+                }
+            });
         }
 
         /**
@@ -244,20 +272,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
 
-
         // TODO implement effect toggle
-        private void setUpToggle() {
-            for (int i = 0; i < switches.length; i++) {
+        private void setUpToggle(Switch[] sws, final Effect.Type[] effects) {
+            for (int i = 0; i < sws.length; i++) {
                 final int i_ = i;
-                switches[i].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                sws[i].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
                             // effect on
-                            modelControl.turnOnEffect(effectsTypes[i_], getPosition());
+                            modelControl.turnOnEffect(effects[i_], getPosition());
                         } else {
                             //effect off
-                            modelControl.muteEffect(effectsTypes[i_], getPosition());
+                            modelControl.muteEffect(effects[i_], getPosition());
                         }
                     }
                 });
@@ -289,9 +316,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     } else {
                         // Close the current open track
                         collapseTrackChildView(vTrackChild);
-
                     }
-
                 }
             }
             /**

@@ -4,8 +4,6 @@ import android.graphics.PointF;
 import android.media.audiofx.Equalizer;
 import android.util.Log;
 
-import java.util.Arrays;
-
 /**
  * Equalizer Effect. This class provides a wrapper around the existing Android Equalizer
  * effect class.
@@ -44,10 +42,10 @@ public class EqEffect extends Effect {
             // Stored in DB as "ON/OFF:float,float,float,float"
             String[] params = effectVals.split(":");
             isActive = params[0].equals(ON);
-            this.effect.setEnabled( isActive );
-            Log.d(TAG, "Loaded eq from DB: " +effectVals);
-            Log.d(TAG, "Is active? " + isActive);
-            this.effect.setEnabled( isActive );
+//            this.effect.setEnabled( isActive );
+//            Log.d(TAG, "Loaded eq from DB: " +effectVals);
+//            Log.d(TAG, "Is active? " + isActive);
+//            this.effect.setEnabled( isActive );
             String[] pointVals = params[1].split(",");
             eqPoints = new PointF[2];
             eqPoints[0] = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
@@ -62,11 +60,16 @@ public class EqEffect extends Effect {
      * @param audioSessionId
      */
     public void setupEqEffect( int audioSessionId ) {
-        Log.d("REVERB", "Setting up eq to track #" +audioSessionId);
-        this.effect = new Equalizer( 0, audioSessionId );
-        setEffectProperties();
-        this.effect.setEnabled(isActive);
-        Log.d("EQEffect", "Enabled? " + effect.getEnabled());
+        Log.d( TAG, "Attaching EQ to track id [" + audioSessionId + "]" );
+        try {
+            this.effect = new Equalizer(0, audioSessionId);
+            setEffectProperties();
+            this.effect.setEnabled( isActive );
+            Log.d(TAG, "Enabled [" + effect.getEnabled() + "]");
+        } catch( Exception e ) {
+            Log.e(TAG, "Error creating the Equalizer");
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -219,7 +222,7 @@ public class EqEffect extends Effect {
             return "NULL";
         }
         String retVal = new String();
-        if ( this.effect.getEnabled() ) {
+        if ( this.effect != null && this.effect.getEnabled() ) {
             retVal += "ON";
         } else {
             retVal += "OFF";
@@ -237,18 +240,26 @@ public class EqEffect extends Effect {
      * Enable the effect.
      */
     public void enable() {
-        Log.d("EQ", "Enabled EQ effect");
-        this.effect.setEnabled(true);
-        isActive = true;
+        if ( this.effect == null ) {
+            Log.e(TAG, "Error trying to enable EQ effect that is null");
+        } else {
+            Log.d(TAG, "Enabled EQ effect");
+            this.effect.setEnabled(true);
+            isActive = true;
+        }
     }
 
     /**
      * Disable the effect.
      */
     public void disable() {
-        Log.d("EQ", "Disabled EQ effect");
-        this.effect.setEnabled(false);
-        isActive = false;
+        if ( this.effect == null ) {
+            Log.e(TAG, "Error trying to disable EQ effect that is null");
+        } else {
+            Log.d(TAG, "Disabled EQ effect");
+            this.effect.setEnabled(false);
+            isActive = false;
+        }
     }
 
     public String getTitleString() {

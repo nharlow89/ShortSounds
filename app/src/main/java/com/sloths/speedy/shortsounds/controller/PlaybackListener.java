@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds;
+package com.sloths.speedy.shortsounds.controller;
 
 import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
@@ -14,7 +14,9 @@ public interface PlaybackListener {
     ShortSound onRecordStop( ShortSound sound );
     void soloTrack(int track);
     boolean isTrackSolo(int track);
+    void volumeChanged(int track, float volume);
     void updateCurrentPosition(int position);
     void muteEffect(Effect.Type effect, int track);
     void turnOnEffect(Effect.Type effect, int track);
+    void saveShortSoundTrack(int track);
 }
