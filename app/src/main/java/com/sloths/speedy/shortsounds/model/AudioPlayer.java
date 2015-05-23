@@ -45,19 +45,17 @@ public class AudioPlayer {
         trackPlayers = new HashMap<>();
         tracks = new ArrayList<>();
         for ( ShortSoundTrack track : ss.getTracks() ) {
-            trackPlayers.put(track, new TrackPlayer(track, this));
+            TrackPlayer tp = new TrackPlayer(track, this);
+            trackPlayers.put(track, tp);
             tracks.add(track);
+            if (track == mLongestTrack) {
+                mLongestTrackPlayer = tp;
+            }
         }
         mModelControl = ModelControl.instance();
         mCurrentShortSound = ss;
         mLongestTrack = ss.getLongestTrack();
-        for ( ShortSoundTrack sst : ss.getTracks() ) {
-            TrackPlayer tp = new TrackPlayer(sst, this);
-            trackPlayers.put(sst, tp);
-            if (sst == mLongestTrack) {
-                mLongestTrackPlayer = tp;
-            }
-        }
+
         playerState = PlayerState.STOPPED_ALL;
     }
 
