@@ -104,18 +104,18 @@ public class EqEffect extends Effect {
             // now scale these 0-1 values to the millibel level range of the Equalizer
             if (levelRange[0] < 0 && levelRange[1] > 0) {
                 if (bandVal > 0) {
-                    bandVal *= levelRange[1];
+                    bandVal *= Math.abs(levelRange[1]);
                 } else {
-                    bandVal *= levelRange[0];
+                    bandVal *= Math.abs(levelRange[0]);
                 }
             } else {
                 float mid = (levelRange[0] + levelRange[1]) / 2;
                 float width = (levelRange[1] - levelRange[0]) / 2;
                 bandVal = (bandVal * width) + mid;
             }
-
-            eq.setBandLevel(i, (short) bandVal);
-            Log.d("PARAMSETTING", "band " + i + " set to level " + (short) bandVal * eq.getNumberOfBands());
+            eq.setBandLevel(i, (short) (bandVal * eq.getNumberOfBands()));
+            Log.d("PARAMSETTING", "bandVal " + i + " = " + bandVal);
+            Log.d("PARAMSETTING", "band " + i + " set to level " + eq.getBandLevel(i));
         }
     }
 
