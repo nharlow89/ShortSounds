@@ -30,7 +30,7 @@ public class AudioMixerTest extends TestCase {
 
     /*
      * Tests the generateAudioFile method from AudioMixer
-     * to make sure it generates a file properly.
+     * to make sure it generates a non null file properly.
      */
     public void testGenerateAudioFile() {
         ShortSound ss = new ShortSound();
