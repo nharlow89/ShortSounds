@@ -740,10 +740,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
     /**
      * Deletes the current ShortSound from the library.
-     * If there are other ShortSounds in the library, opens the first
-     * ShortSound.
-     * If there are no ShortSounds in the library, creates and opens a new
-     * ShortSound
+     * And returns the user to a blank start recording screen.
      */
     private void deleteShortSound() {
         if (mActiveShortSound != null) {
@@ -752,6 +749,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             sounds.remove(mActiveShortSound);
             Log.d("CHECK", "" + sounds.size());
             mActiveShortSound.delete();
+            mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
             createNew();
         }
     }
