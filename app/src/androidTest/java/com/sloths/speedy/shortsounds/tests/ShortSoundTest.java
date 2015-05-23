@@ -2,10 +2,12 @@ package com.sloths.speedy.shortsounds.tests;
 
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundSQLHelper;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import junit.framework.TestCase;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by jbusc_000 on 5/15/2015.
@@ -27,6 +29,9 @@ public class ShortSoundTest extends TestCase {
         ShortSound ss = new ShortSound();
         assertNotNull(ss);
         assertEquals(0, ss.getTracks().size());
+
+        // So that the fact that ss is inserted into the database doesn't affect the other tests.
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
     }
 
     /**
@@ -83,6 +88,128 @@ public class ShortSoundTest extends TestCase {
         assertNotNull(ss);
         assertEquals(TEST_TITLE, ss.getTitle());
         assertEquals(0, ss.getTracks().size());
+    }
+
+    /**
+     * Tests that constructing with a map with all fields and an extra one results in the same
+     * result as the test with a map of both fields.
+     */
+    public void testConstructorWithMapWithExtraValues() {
+        HashMap<String, String> testMap = makeTestMap();
+        testMap.put("Random key", "Random value");
+        ShortSound ss = new ShortSound(testMap);
+
+        assertNotNull(ss);
+        assertEquals(TEST_TITLE, ss.getTitle());
+        assertEquals(0, ss.getTracks().size());
+    }
+
+    /*
+     * getAll
+     */
+
+    /**
+     * Tests that getAll returns an empty List when no ShortSounds have been constructed.
+     */
+    public void testGetAllWithNoShortSounds() {
+        List<ShortSound> shortSounds = ShortSound.getAll();
+
+        assertNotNull(shortSounds);
+        assertEquals(0, shortSounds.size());
+    }
+
+    /**
+     * Tests that getAll returns a List with the proper number of ShortSounds when 1 ShortSound
+     * has been constructed and that it is the same as the constructed ShortSound.
+     */
+    public void testGetAllWithOneShortSound() {
+        ShortSound ss = new ShortSound();
+        List<ShortSound> shortSounds = ShortSound.getAll();
+
+        assertNotNull(shortSounds);
+        assertEquals(1, shortSounds.size());
+
+        ShortSound retreivedSS = shortSounds.get(0);
+        assertEquals(ss.getTitle(), retreivedSS.getTitle());
+        assertEquals(ss.getTracks().size(), retreivedSS.getTracks().size());
+        assertEquals(ss.getId(), retreivedSS.getId());
+
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
+    }
+
+    /*
+     * getById
+     */
+
+    /**
+     * Tests that calling getById with an ID that doesn't exist returns null.
+     */
+    public void testGetByIdWithNoMatchingId() {
+        assertNull(ShortSound.getById(-1));
+    }
+
+    /**
+     * Tests that calling getById with an ID that exists returns the correct ShortSound.
+     */
+    public void testGetByIdWithMatchingId() {
+        ShortSound ss = new ShortSound();
+        ShortSound retreivedSS = ShortSound.getById(ss.getId());
+
+        assertNotNull(retreivedSS);
+        assertEquals(ss.getTitle(), retreivedSS.getTitle());
+        assertEquals(ss.getTracks().size(), retreivedSS.getTracks().size());
+        assertEquals(ss.getId(), retreivedSS.getId());
+
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
+    }
+
+    /*
+     * getLongestTrack
+     */
+
+    /**
+     * Tests that the returned track is null if there are no tracks
+     */
+    public void testLongestTrackWhenThereAreNoTracksIsNull() {
+        ShortSound ss = new ShortSound();
+        assertNull(ss.getLongestTrack());
+
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
+    }
+
+    /**
+     * Tests that when the ShortSound has only one track that getLongestTrack returns the one track.
+     */
+    public void testLongestTrackWithOneTrackReturnsTheOneTrack() {
+        ShortSound ss = new ShortSound();
+        HashMap<String, String> shortSoundTrackTestMap = ShortSoundTrackTest.makeTestValues();
+        ShortSoundTrack sst = new ShortSoundTrack(shortSoundTrackTestMap);
+        ss.addTrack(sst);
+
+        ShortSoundTrack retreivedTrack = ss.getLongestTrack();
+        assertNotNull(retreivedTrack);
+        assertTrue(sst == retreivedTrack);
+
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
+    }
+
+    /**
+     * Tests that when the ShortSound has two tracks, getLongestTrack picks the longer of the two.
+     */
+    public void testLongestTrackBetweenTwoTracksIsTheCorrectOne() {
+        ShortSound ss = new ShortSound();
+        HashMap<String, String> shortSoundTrackTestMap = ShortSoundTrackTest.makeTestValues();
+        ShortSoundTrack shortTrack = new ShortSoundTrack(shortSoundTrackTestMap);
+        shortSoundTrackTestMap.put(ShortSoundSQLHelper.TRACK_LENGTH, "10");
+        ShortSoundTrack longTrack = new ShortSoundTrack(shortSoundTrackTestMap);
+        ss.addTrack(shortTrack);
+        ss.addTrack(longTrack);
+        ShortSoundTrack returnedTrack = ss.getLongestTrack();
+
+        assertNotNull(returnedTrack);
+        assertTrue(longTrack == returnedTrack);
+
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
     }
 
     /**
