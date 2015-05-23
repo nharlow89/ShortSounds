@@ -6,6 +6,7 @@ import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import junit.framework.TestCase;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -210,6 +211,125 @@ public class ShortSoundTest extends TestCase {
         assertTrue(longTrack == returnedTrack);
 
         ShortSoundSQLHelper.getInstance().removeShortSound(ss);
+    }
+
+    /*
+     * getTracks
+     */
+
+    /**
+     * Tests that getTracks returns an empty List when the ShortSound has no tracks.
+     */
+    public void testGetTracksWithNoTracks() {
+        ShortSound ss = new ShortSound();
+        List<ShortSoundTrack> ssTracks = ss.getTracks();
+
+        assertNotNull(ssTracks);
+        assertEquals(0, ssTracks.size());
+
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
+    }
+
+    /**
+     * Tests that getTracks returns a List with one track when the ShortSound has one track.
+     * Also makes sure that the track returned in the List refers to the same track as the one
+     * in the ShortSound.
+     */
+    public void testGetTracksWithOneTrack() {
+        ShortSound ss = new ShortSound();
+        ShortSoundTrack sst = new ShortSoundTrack(new File(""), 1);
+        ss.addTrack(sst);
+        List<ShortSoundTrack> ssTracks = ss.getTracks();
+
+        assertNotNull(ssTracks);
+        assertEquals(1, ssTracks.size());
+        assertTrue(sst == ssTracks.get(0));
+
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
+    }
+
+    /*
+     * addTrack
+     */
+
+    /**
+     * Tests that adding a track to a track list with one track appends the bew track to the end.
+     */
+    public void testAddTrackToListWithOneTrack() {
+        ShortSound ss = new ShortSound();
+        ShortSoundTrack firstTrack = new ShortSoundTrack(new File(""), 1);
+        ss.addTrack(firstTrack);
+        ShortSoundTrack secondTrack = new ShortSoundTrack(new File(""), 1);
+        ss.addTrack(secondTrack);
+        List<ShortSoundTrack> ssTracks = ss.getTracks();
+
+        assertNotNull(ssTracks);
+        assertEquals(2, ssTracks.size());
+        assertTrue(firstTrack == ssTracks.get(0));
+        assertTrue(secondTrack == ssTracks.get(1));
+
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
+    }
+
+    /*
+     * removeTrack
+     */
+
+    /**
+     * Tests that removing a ShortSoundTrack that is not in the ShortSound causes no change to the
+     * ShortSound.
+     */
+    public void testRemoveTrackWhenTrackIsNotInShortSound() {
+        HashMap<String, String> testMap = makeTestMap();
+        ShortSound ss = new ShortSound(testMap);
+        ShortSoundTrack shortSoundTrack = new ShortSoundTrack(new File(""), 1);
+        ShortSoundTrack trackToTryToRemove = new ShortSoundTrack(new File(""), 1);
+        ss.addTrack(shortSoundTrack);
+
+        ss.removeTrack(trackToTryToRemove);
+        List<ShortSoundTrack> shortSoundTracks = ss.getTracks();
+
+        assertNotNull(shortSoundTracks);
+        assertEquals(1, shortSoundTracks.size());
+        assertTrue(shortSoundTrack == shortSoundTracks.get(0));
+    }
+
+    /**
+     * Tests that removing a ShortSoundTrack that is in the ShortSound removes it from the
+     * ShortSound.
+     */
+    public void testRemoveTrackWhenTrackIsInShortSoundAndThereIsOnlyOneTrack() {
+        ShortSound ss = new ShortSound();
+        ShortSoundTrack shortSoundTrack = new ShortSoundTrack(new File(""), 0);
+        ss.addTrack(shortSoundTrack);
+
+        ss.removeTrack(shortSoundTrack);
+        List<ShortSoundTrack> shortSoundTracks = ss.getTracks();
+
+        assertNotNull(shortSoundTracks);
+        assertEquals(0, shortSoundTracks.size());
+
+        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
+    }
+
+    /**
+     * Tests that removing a ShortSoundTrack that is in a ShortSound with multiple tracks
+     * only removes the ShortSoundTrack passed in.
+     */
+    public void testRemoveTrackWhenTrackIsInShortSoundAndThereAreMultipleTracks() {
+        HashMap<String, String> testMap = makeTestMap();
+        ShortSound ss = new ShortSound(testMap);
+        ShortSoundTrack shortSoundTrack = new ShortSoundTrack(new File(""), 1);
+        ShortSoundTrack trackToTryToRemove = new ShortSoundTrack(new File(""), 1);
+        ss.addTrack(shortSoundTrack);
+        ss.addTrack(trackToTryToRemove);
+
+        ss.removeTrack(trackToTryToRemove);
+        List<ShortSoundTrack> shortSoundTracks = ss.getTracks();
+
+        assertNotNull(shortSoundTracks);
+        assertEquals(1, shortSoundTracks.size());
+        assertTrue(shortSoundTrack == shortSoundTracks.get(0));
     }
 
     /**
