@@ -289,7 +289,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 xViews[i].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (((MainActivity)mContext).getEffectChecked(effectTypes[i_], getPosition())) {
+                        if (!xViews[i_].isOn()) {//((MainActivity)mContext).getEffectChecked(effectTypes[i_], getPosition())) {
                             xViews[i_].cross();
                             modelControl.muteEffect(effectTypes[i_], getPosition());
                         } else {
