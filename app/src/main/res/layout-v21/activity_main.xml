@@ -58,6 +58,17 @@
                 android:layout_gravity="left|center_vertical"
                 style="@android:style/Widget.Material.ActionButton" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="00:00"
+                android:id="@+id/timerView"
+                android:layout_gravity="right|bottom"
+                android:visibility="invisible"
+                android:paddingRight="22dp"
+                android:paddingBottom="5dp" />
+
             <SeekBar
                 android:layout_width="219dp"
                 android:layout_height="wrap_content"

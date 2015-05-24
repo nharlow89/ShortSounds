@@ -4,8 +4,9 @@ package com.sloths.speedy.shortsounds.model;
  * Created by caseympfischer on 4/28/15.
  */
 public abstract class Effect {
+
     public enum Type { EQ, REVERB, DISTORTION, BITCRUSH }
-    protected boolean active;
+
     protected android.media.audiofx.AudioEffect effect;
 
     /**
@@ -24,7 +25,14 @@ public abstract class Effect {
         return effect.getId();
     }
 
-    public abstract void setAudioSource( int audioSessionId );
+    /**
+     * Whether or not the effect is enabled.
+     */
+    public boolean getEnabled() {
+        if (effect == null) {
+            return false;
+        }
+        return effect.getEnabled(); }
 
     public abstract String getTitleString();
 
@@ -46,8 +54,9 @@ public abstract class Effect {
      */
     public abstract String encodeParameters();
 
-    public abstract void prepare();
-
+    /**
+     * Release the effect.
+     */
     public void release() {
         if (this.effect != null) {
             this.effect.release();

@@ -5,7 +5,6 @@ import android.media.AudioTrack;
 import android.os.Build;
 import android.util.Log;
 
-
 import com.sloths.speedy.shortsounds.controller.ModelControl;
 
 import java.io.DataInputStream;
@@ -25,6 +24,7 @@ import java.util.Map;
  */
 public class AudioPlayer {
     public static final String DEBUG_TAG = "SHORT_SOUNDS";
+    private static final String TAG = "AudioPlayer";
     public Float MAX_VOLUME = 1.0f;
     public Float MIN_VOLUME = 0.0f;
 
@@ -41,24 +41,33 @@ public class AudioPlayer {
     private ModelControl mModelControl;
 
     public AudioPlayer( ShortSound ss ) {
+        Log.d(DEBUG_TAG, "Creating new AudioPlayer");
         trackPlayers = new HashMap<>();
-
         tracks = new ArrayList<>();
         for ( ShortSoundTrack track : ss.getTracks() ) {
-            trackPlayers.put(track, new TrackPlayer(track, this));
+            TrackPlayer tp = new TrackPlayer(track, this);
+            trackPlayers.put(track, tp);
             tracks.add(track);
+            if (track == mLongestTrack) {
+                mLongestTrackPlayer = tp;
+            }
         }
         mModelControl = ModelControl.instance();
         mCurrentShortSound = ss;
         mLongestTrack = ss.getLongestTrack();
-        for ( ShortSoundTrack sst : ss.getTracks() ) {
-            TrackPlayer tp = new TrackPlayer(sst, this);
-            trackPlayers.put(sst, tp);
-            if (sst == mLongestTrack) {
-                mLongestTrackPlayer = tp;
-            }
-        }
+
         playerState = PlayerState.STOPPED_ALL;
+    }
+
+    /**
+     * Teardown and cleanup any resources that were in use by this AudioPlayer.
+     */
+    public void destroy() {
+        Log.d(DEBUG_TAG, "Destroying AudioPlayer.");
+        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
+            TrackPlayer trackPlayer = entry.getValue();
+            trackPlayer.destroy();
+        }
     }
 
     /**
@@ -80,6 +89,7 @@ public class AudioPlayer {
             entry.getValue().stop();
 
             if (position == 0) {
+                Log.d(DEBUG_TAG,"play position 0");
                 entry.getValue().play(position);
             } else {
                 ShortSoundTrack currentTrack = entry.getKey();
@@ -95,12 +105,6 @@ public class AudioPlayer {
             }
         }
         playerState = PlayerState.PLAYING_ALL;
-    }
-
-    private void notifyEndOfTrack(TrackPlayer notifier) {
-        if (notifier == mLongestTrackPlayer) {
-            mModelControl.endOfTrack();
-        }
     }
 
 
@@ -293,6 +297,7 @@ public class AudioPlayer {
          * and creating a reference to the actual audio file.
          */
         public void setupTrack() {
+            Log.d("AUDIO PLAYER", "Setting up audio track");
             ShortSoundTrack.BUFFER_SIZE = AudioTrack.getMinBufferSize(
                     ShortSoundTrack.SAMPLE_RATE,
                     ShortSoundTrack.CHANNEL_CONFIG,
@@ -319,15 +324,50 @@ public class AudioPlayer {
             trackState = TrackState.STOPPED;
             this.file = new File( ShortSoundTrack.STORAGE_PATH, track.getFileName() );
             this.trackLength = file.length();
-            // Let the effects know about the audio playback object
-//            track.getmEqEffect().setAudioSource( audioTrack.getAudioSessionId() );
-//            track.getmReverbEffect().setAudioSource( audioTrack.getAudioSessionId() );
-//            audioTrack.setAuxEffectSendLevel(1.0f);
-            // Attach the audio effects (NOT required if passing audioTrack id to the effect constructor).
-//            int eqId = track.getmEqEffect().getEffectId();
-//            audioTrack.attachAuxEffect( eqId );
-//            int reverbId = track.getmReverbEffect().getEffectId();
-//            audioTrack.attachAuxEffect( reverbId );
+            attachEffects();
+        }
+
+        /**
+         * Cleanup any resources tied to this TrackPlayer.
+         */
+        public void destroy() {
+            Log.d(DEBUG_TAG, "Destroy TrackPlayer associated with Track["+track.getId()+"]");
+            // Cleanup any effect objects
+            track.releaseEffects();
+            // Take care of the input stream.
+            if ( audioInputStream != null ) {
+                try {
+                    audioInputStream.close();
+                } catch (IOException e) {
+                    Log.d(DEBUG_TAG, "Failed closing an existing AudioInputStream.");
+                    e.printStackTrace();
+                }
+            }
+            // Take care of the thread
+            if ( audioThread != null )
+                audioThread.interrupt();
+            // Take care of the AudioTrack
+            if ( audioTrack != null )
+                audioTrack.release();
+        }
+
+        /**
+         * Private helper to attach all the effects associated with this track.
+         */
+        private void attachEffects () {
+            // Reverb
+            ReverbEffect reverb = track.getmReverbEffect();
+            reverb.setupReverbEffect( audioTrack.getAudioSessionId() );
+
+            // Equalizer
+            EqEffect eq = track.getmEqEffect();
+            eq.setupEqEffect( audioTrack.getAudioSessionId() );
+
+            // Important: set the volume of the effect.
+            float maxVolume = AudioTrack.getMaxVolume();
+            int result = audioTrack.setAuxEffectSendLevel(maxVolume);
+            if ( result != AudioTrack.SUCCESS )
+                Log.e(DEBUG_TAG, "ERROR: unable to set the effect volume");
         }
 
         private void setInputStream( int position ) {
@@ -359,6 +399,9 @@ public class AudioPlayer {
          * Play the audio track associated with this ShortSound.
          */
         public void play( int position ) {
+            Log.d("AudioPlayer", "Playing track-" + audioTrack.getAudioSessionId());
+            Log.d("AudioPlayer", "EQ effect is enabled? " + track.getmEqEffect().getEnabled());
+            Log.d("AudioPlayer", "Reverb effect is enabled? " + track.getmReverbEffect().getEnabled());
             // If the track is Stopped then we need to reset the input stream so the AudioTrack starts
             // from the beginning again.
             if ( trackState == TrackState.STOPPED ) {
@@ -401,6 +444,7 @@ public class AudioPlayer {
                 Log.d(DEBUG_TAG, "Pause track [" + track.getId() + "]");
                 audioTrack.pause();
                 trackState = TrackState.PAUSED;
+//                track.getmEqEffect().disable();  // TODO remove after eq debugging
             } else {
                 Log.e(DEBUG_TAG, "Tried to pause track ["+track.getId()+"] in invalid state ["+trackState+"]");
             }
@@ -433,7 +477,6 @@ public class AudioPlayer {
                         // NOTE: this is blocking, so the next frame will not be loaded until ready.
                         // Look at AudioTrack docs for more info.
                         currentTrackPosition+= bytesRead;
-                        //Log.d(DEBUG_TAG, "Writing ["+bytesRead+"] bytes to audioTrack ["+track.getId()+"]. PlaybackPosition["+ getCurrentTrackPosition() +"%]");
                         notifyAudioPlayerOfPosition();
                         audioTrack.write( audioTrackBuffer, 0, bytesRead );
                     }
@@ -441,17 +484,11 @@ public class AudioPlayer {
                         // We reached the end of the track
                         Log.d(DEBUG_TAG, "Reached end of track["+track.getId()+"]");
                         stop();
-                        // TODO notify the audio player that we have finished playback on this track.
-                        notifyAudioPlayerEndOfTrack();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        }
-
-        private void notifyAudioPlayerEndOfTrack() {
-            mAudioPlayerListener.notifyEndOfTrack(this);
         }
 
         private void notifyAudioPlayerOfPosition() {
@@ -462,5 +499,9 @@ public class AudioPlayer {
 
     public interface PlaybackCompleteListener {
         public void playbackComplete();
+    }
+
+    public ShortSoundTrack getTrack(int pos) {
+        return tracks.get( pos );
     }
 }

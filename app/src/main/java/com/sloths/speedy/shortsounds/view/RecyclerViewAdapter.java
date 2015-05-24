@@ -87,6 +87,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         viewHolder.setTitleView(position);
         dynamicallySetCardColor(viewHolder, position);
         viewHolder.setUpVolume(viewHolder.vView, position);
+        viewHolder.setInitToggleState(position);
     }
 
     /**
@@ -169,6 +170,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private int mPrimaryColor;
         private int mSecondaryColor;
         int soloOff;
+        // Switches
+        private CrossView[] xViews;
+        private Effect.Type[] effectTypes;
 
         /**
          * Constructor for a ViewHolder
@@ -183,18 +187,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             vTitle.setOnClickListener(new TrackListener());
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             vTrackChild.setVisibility(View.GONE);
+            xViews = new CrossView[]{((CrossView) v.findViewById(R.id.eq_switch)),
+                        ((CrossView) v.findViewById(R.id.reverb_switch))};
+            effectTypes = new Effect.Type[]{Effect.Type.EQ, Effect.Type.REVERB};
 
             // set up solo button
             setUpSolo();
 
             // init buttons
             setUpButtons(new Button[]{((Button) v.findViewById(R.id.eq_button)),
-                                      ((Button) v.findViewById(R.id.reverb_button))});
+                    ((Button) v.findViewById(R.id.reverb_button))});
             // perform setup
-            setUpToggle(new CrossView[]{((CrossView) v.findViewById(R.id.eq_switch)),
-                                     ((CrossView) v.findViewById(R.id.reverb_switch))},
-                        new Effect.Type[]{Effect.Type.EQ, Effect.Type.REVERB}
-            );
+            setUpToggle();
         }
 
 
@@ -206,18 +210,21 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             float lvl = 0.8f;
             if (getPosition() >= 0)
                 lvl = ((MainActivity) mContext).getShortSoundVolume(getPosition());
-            volumeSlider.setProgress((int)(MAX_VOLUME * lvl));
+            volumeSlider.setProgress((int) (MAX_VOLUME * lvl));
             volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (fromUser)
                         modelControl.volumeChanged(getPosition(), 1.0f * progress / MAX_VOLUME);
                 }
+
                 @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {}
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    ((MainActivity)mContext).saveShortSoundTrack(track);
+                    ((MainActivity) mContext).saveShortSoundTrack(track);
                 }
             });
         }
@@ -276,30 +283,33 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
         // TODO implement effect toggle
-        private void setUpToggle(final CrossView[] crossViews, final Effect.Type[] effects) {
-
-            for (int i = 0; i < crossViews.length; i++) {
-//                sws[i].getLayoutParams().width = screenWidth / 2;
-//                sws[i].getLayoutParams().height = screenHeight / 6;
+        private void setUpToggle() {
+            for (int i = 0; i < xViews.length; i++) {
                 final int i_ = i;
-                crossViews[i].setOnClickListener(new View.OnClickListener() {
+                xViews[i].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        crossViews[i_].toggle();
+                        if (((MainActivity)mContext).getEffectChecked(effectTypes[i_], getPosition())) {
+                            xViews[i_].cross();
+                            modelControl.muteEffect(effectTypes[i_], getPosition());
+                        } else {
+                            xViews[i_].plus();
+                            modelControl.turnOnEffect(effectTypes[i_], getPosition());
+                        }
                     }
                 });
-//                        .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                    @Override
-//                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                        if (isChecked) {
-//                            // effect on
-//                            modelControl.turnOnEffect(effects[i_], getPosition());
-//                        } else {
-//                            //effect off
-//                            modelControl.muteEffect(effects[i_], getPosition());
-//                        }
-//                    }
-//                });
+            }
+        }
+
+        /**
+         * Sets up the initial toggle values, pulled from the backend model
+         * @param track
+         */
+        public void setInitToggleState(int track) {
+            MainActivity main = (MainActivity) mContext;
+            for (int i = 0; i < xViews.length; i++) {
+                boolean checked = main.getEffectChecked(effectTypes[i], getPosition());
+                xViews[i].setInitialState(checked);
             }
         }
 

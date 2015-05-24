@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -94,7 +95,6 @@ public class Fx_ReverbCanvas extends View {
         if (firstDraw) {
             // Draw the line between initial points
             setStyles();
-            setUpGraph();
             firstDraw = false;
         }
 
@@ -172,17 +172,17 @@ public class Fx_ReverbCanvas extends View {
                     setLine();
                     echoG.setEchos();
                     invalidate();
+                    controlEffect();
                 }
-                controlEffect();
                 break;
             // If user lifts up --> set new touch area & draw line & point
             case MotionEvent.ACTION_UP:
                 if (currentTouch == TOUCH_POINT) {
                     point.set(x, y);
-                        invalidate();
-                        currentTouch = NONE;
+                    invalidate();
+                    currentTouch = NONE;
+                    controlEffect();
                 }
-                controlEffect();
                 break;
         }
         return true;
@@ -195,6 +195,7 @@ public class Fx_ReverbCanvas extends View {
      */
     private void controlEffect() {
         if (controller != null) {
+//            Log.d("REVERBCANVAS", "Updating rev controller to point: ("+getValue().x+", "+getValue().y+")");
             controller.updateEffectValues(getValue());
         }
     }
@@ -207,7 +208,79 @@ public class Fx_ReverbCanvas extends View {
         invalidate();
     }
 
+    /**
+     * Sets the controller the for the backend
+     * @param controller
+     */
+    public void setController(ReverbEffectController controller) {
+        this.controller = controller;
+    }
 
+    /**
+     * Gets the value of the point that controls the UI
+     * @return
+     */
+    public PointF getValue() {
+        float percentX = point.x / (float) getMeasuredWidth();
+        float percentY = point.y / (float) getMeasuredHeight();
+        return new PointF(percentX, percentY);
+    }
+
+    /**
+     * Sets the value for the point that controls the UI
+     * @param values
+     */
+    public void setValue(PointF[] values) {
+        // Data coming from database
+        if (point == null) {
+            // View being setup for the first time
+            setUpGraph();
+        }
+        float x = values[0].x * getMeasuredWidth();
+        float y = values[0].y * getMeasuredHeight();
+        point.set(x, y);
+        setLine();
+        echoG.setEchos();
+        invalidate();
+    }
+
+    /**
+     * This control point encapsulates the point being used to
+     * control the UI.
+     */
+    class ControlPoint {
+        private final float RECTSIZE;
+        private float x;
+        private float y;
+
+        ControlPoint() {
+            RECTSIZE = getMeasuredWidth() / 16f;
+            // Initialize x & y at default locations
+            // These will be set by effect values w/ backend connected
+            x = getMeasuredWidth() / 2;
+            y = getMeasuredHeight() / 2;
+
+            // Initialize touch locations for points
+            pointTouch = new RectF(x - RECTSIZE, y - RECTSIZE,
+                    x + RECTSIZE, y + RECTSIZE);
+        }
+
+        /**
+         * Sets new values for the point
+         * @param x
+         * @param y
+         */
+        void set(float x, float y) {
+            if (x > XMIN + 4 * MARGIN && x < XMAX - 4 * MARGIN)
+                this.x = x;
+            if (y  < YMIN - 4 * MARGIN && y  > YMAX + 4 * MARGIN)
+                this.y = y;
+
+            // Initialize touch locations for points
+            pointTouch.set(this.x - RECTSIZE, this.y - RECTSIZE,
+                    this.x + RECTSIZE, this.y + RECTSIZE);
+        }
+    }
     /**
      * A class used for the echo lines.  These lines represent the length
      * between echos on a reverb and the amount of echo.
@@ -226,7 +299,6 @@ public class Fx_ReverbCanvas extends View {
             arr = new Path[ECHO_SIZE];
             for (int i = 0; i < ECHO_SIZE; i++) {
                 arr[i] = new Path();
-//                echos[i] = new PointF();
             }
 
             final int H = YMIN - YMAX;
@@ -237,7 +309,6 @@ public class Fx_ReverbCanvas extends View {
             int y;
             for (int i = 0; i < ECHO_SIZE; i++) {
                 y = (int) (YMAX + (heightScalar * H) + (H / 6 - r.nextInt(H / 3)));
-//                Log.i(TAG, "xInc = " + xInc + ", x = " + x + ", y = " + y);
                 heightScalar += (1.0 / ECHO_SIZE);
                 echos[i] = new PointF(x, y);
                 x += 1.5 * W / ECHO_SIZE - r.nextInt(W / ECHO_SIZE);
@@ -283,85 +354,4 @@ public class Fx_ReverbCanvas extends View {
             }
         }
     }
-
-    /**
-     * This control point encapsulates the point being used to
-     * control the UI.
-     */
-    class ControlPoint {
-        private final float RECTSIZE;
-        private float x;
-        private float y;
-
-        ControlPoint() {
-            RECTSIZE = getMeasuredWidth() / 16f;
-            // Initialize x & y at default locations
-            // These will be set by effect values w/ backend connected
-            x = getMeasuredWidth() / 2;
-            y = getMeasuredHeight() / 2;
-
-            // Initialize touch locations for points
-            pointTouch = new RectF(x - RECTSIZE, y - RECTSIZE,
-                                   x + RECTSIZE, y + RECTSIZE);
-        }
-
-        /**
-         * Sets new values for the point
-         * @param x
-         * @param y
-         */
-        void set(float x, float y) {
-            if (x > XMIN + 4 * MARGIN && x < XMAX - 4 * MARGIN)
-                this.x = x;
-            if (y  < YMIN - 4 * MARGIN && y  > YMAX + 4 * MARGIN)
-                this.y = y;
-
-            // Initialize touch locations for points
-            pointTouch.set(this.x - RECTSIZE, this.y - RECTSIZE,
-                    this.x + RECTSIZE, this.y + RECTSIZE);
-        }
-    }
-
-    /**
-     * Sets the controller the for the backend
-     * @param controller
-     */
-    public void setController(ReverbEffectController controller) {
-        this.controller = controller;
-    }
-
-    /**
-     * Gets the value of the point that controls the UI
-     * @return
-     */
-    public PointF getValue() {
-        float percentX = point.x / (float) getMeasuredWidth();
-        float percentY = point.y / (float) getMeasuredHeight();
-        return new PointF(percentX, percentY);
-    }
-
-    /**
-     * Sets the value for the point that controls the UI
-     * @param value
-     */
-    public void setValue(PointF value) {
-        if (value == null || value.length() == 0) {
-            // No values are pulled from model --> Set to default
-            point = new ControlPoint();
-            echoG = new EchoGraphics();
-        } else {
-            // Data coming from database
-            if (point == null) {
-                // View being setup for the first time
-                setUpGraph();
-            }
-            float x = value.x * getMeasuredWidth();
-            float y = value.y * getMeasuredHeight();
-            point.set(x, y);
-        }
-        setLine();
-        echoG.setEchos();
-        invalidate();
-    }
-
 }

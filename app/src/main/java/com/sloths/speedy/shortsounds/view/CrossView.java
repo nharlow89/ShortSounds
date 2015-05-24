@@ -117,7 +117,6 @@ public class CrossView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         determineColor();
-        Log.i("CrossView", "mPrecent = " + mPercent);
         setPointFromPercent(mArcTop, mArcLengthTop, mPercent, mFromXY);
         setPointFromPercent(mArcBottom, mArcLengthBottom, mPercent, mToXY);
 
@@ -193,12 +192,20 @@ public class CrossView extends View {
     }
 
     public void setColor(int argb) {
-        mColor = getContext().getResources().getColor(android.R.color.black);
-//        mColor = argb;
+//        mColor = getContext().getResources().getColor(android.R.color.black);
+        mColor = argb;
         if (mPaint == null) {
             mPaint = new Paint();
         }
         mPaint.setColor(argb);
+        invalidate();
+    }
+
+    public void setInitialState(boolean isChecked) {
+        if (isChecked)
+            mState = FLAG_STATE_PLUS;
+        else
+            mState = FLAG_STATE_CROSS;
         invalidate();
     }
 

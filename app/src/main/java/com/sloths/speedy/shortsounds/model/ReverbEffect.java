@@ -18,54 +18,80 @@ public class ReverbEffect extends Effect {
     private static final String ON = "ON";
     private static final float DEFAULT_X = 0.5f;
     private static final float DEFAULT_Y = 0.5f;
+    private static final String TAG = "REVERB-EFFECT";
 
     private PointF pointVal;
+    private boolean isActive;
+
 
 
     // Constructor used when loading a track from a recorded file
     public ReverbEffect() {
-        Log.d("effects", "ReverbEffect initialized from scratch");
-        this.active = false;
+        // Sets up default reverb until track player sets it
+//        this.effect = new EnvironmentalReverb(0, 0);
         this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
-        //initAudioEffect();
+        isActive = false;
+//        effect.setEnabled( false );
         repInvariant();
     }
 
     // Constructor used when loading an effect from the database
     public ReverbEffect(String effectVals) {
-        if ( effectVals.equals( "NULL" ) ) {
-            // Default values
-            this.active = false;
-            this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
-        } else {
+        this();  // Setup from other constructor.
+        if ( !effectVals.equals( "NULL" ) ) {
             // Parse string from DB to get point vals & on/off
             // Stored in DB as "ON/OFF:float,float,float,float"
             String[] params = effectVals.split(":");
-            if (params[0].equals(ON)) {
-                this.active = true;
-            } else {
-                this.active = false;
-            }
+            isActive = params[0].equals(ON);
+//            effect.setEnabled( isActive );
             String[] pointVals = params[1].split(",");
             pointVal = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
         }
         repInvariant();
     }
 
-    /**
-     * Set the audio source that this effect is related to. This is required for the effect to show
-     * up on a given audio playback source.
-     * @param audioSessionId
-     */
-    public void setAudioSource( int audioSessionId ) {
-        Log.d("DEBUG", "Creating EnvironmentalReverb(0, "+audioSessionId+")");
-        effect = new EnvironmentalReverb( 1, audioSessionId );
-        effect.setEnabled( this.active );
-        EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
-        reverb.setReverbLevel((short)1000);
-        reverb.setDecayTime(3000);
+
+    public void setupReverbEffect(int audioSessionId) {
+        Log.d(TAG, "Attaching reverb to track id [" + audioSessionId + "]");
+        try {
+            effect = new EnvironmentalReverb(0, audioSessionId);
+            setEffectProperties();
+            effect.setEnabled( isActive );
+            Log.d(TAG, "Enabled [" + effect.getEnabled() + "]");
+        } catch (Exception e) {
+            Log.e(TAG, "MAJOR PROBLEM LOADING REVERB LIBRARY");
+            Log.e(TAG, e.toString());
+        }
     }
 
+    private void setEffectProperties() {
+        Log.d(TAG, "Setting reverb effect properties");
+        EnvironmentalReverb.Settings revSettings = convertParamsToSettings();
+        EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
+        reverb.setProperties(revSettings);
+    }
+
+    private EnvironmentalReverb.Settings convertParamsToSettings() {
+        EnvironmentalReverb.Settings revSettings = new EnvironmentalReverb.Settings();
+        // Constant settings
+        revSettings.reverbLevel = (short) 2000;
+        revSettings.density = (short) 500;
+        revSettings.diffusion = (short) 0;
+        revSettings.roomLevel = (short) 0; // master volume of reverb
+        revSettings.roomHFLevel = (short) 0; // controls a low-pass filter that will reduce the level of the high-frequency
+        revSettings.decayHFRatio =  1000; // The valid range is [100, 2000]. A ratio of 1000 indicates that all frequencies decay at the same rate.
+
+        // Dynamic x settings
+        revSettings.reverbDelay =  (int) (pointVal.x * (float)100); // how long for reverb to kick in (ms) [0, 100]
+        revSettings.reflectionsDelay = (int) (pointVal.x * (float)300); // size of room (ms) int [0, 300]
+        revSettings.decayTime = (int) (pointVal.x * (float)20000); // time for reverb to die out (ms) int [100, 20000]
+        // Dynamic y settings
+        float yVal = 1.0f - pointVal.y;
+        revSettings.reflectionsLevel = (short) (yVal * (float) 1000);// volume of early reflections short [-9000, 1000]
+        Log.d("Reverb", "rev x settings are set as " + revSettings.reverbDelay +","+revSettings.reflectionsDelay+","+revSettings.decayTime);
+        Log.d("Reverb", "rev y settings are set as " + revSettings.reflectionsLevel);
+        return revSettings;
+    }
 
     /**
      * This encodes the paramaters according to "ON/OFF:x,y" or "NULL"
@@ -77,7 +103,7 @@ public class ReverbEffect extends Effect {
             return "NULL";
         }
         String retVal = new String();
-        if (active) {
+        if ( effect != null && effect.getEnabled() ) {
             retVal += "ON";
         } else {
             retVal += "OFF";
@@ -85,43 +111,26 @@ public class ReverbEffect extends Effect {
         retVal += ":";
         retVal += pointVal.x + ",";
         retVal += pointVal.y;
+        Log.d(TAG, "Reverb string is: " + retVal);
         return retVal;
-    }
-
-    // TODO: grab converted values from point
-//    private void initAudioEffect() {
-//        this.effect = new EnvironmentalReverb(0, player.getAudioSessionId());
-//        ((EnvironmentalReverb)effect).setDecayTime(DEFAULT_DECAY);
-//        ((EnvironmentalReverb)effect).setReflectionsLevel((short) DEFAULT_REFLECTION_LEVEL);
-//        ((EnvironmentalReverb)effect).setReflectionsDelay((short) DEFAULT_REFLECTION_DELAY);
-//        ((EnvironmentalReverb)effect).setDensity((short)DEFAULT_DENSITY);
-//    }
-
-    /***
-     * Prepares the effect
-     */
-    @Override
-    public void prepare() {
-        if (effect == null) {
-//            initAudioEffect();
-        }
     }
 
     /**
      * Enables the effect
      */
     public void enable() {
-//        initAudioEffect();
+        Log.d("Reverb", "Enabled Reverb effect");
         effect.setEnabled(true);
+        isActive = true;
     }
 
     /**
      * Disables the effect
      */
     public void disable() {
+        Log.d("Reverb", "Disabled Reverb effect");
         effect.setEnabled(false);
-        effect.release();
-        effect = null;
+        isActive = false;
     }
 
     /**
@@ -148,9 +157,18 @@ public class ReverbEffect extends Effect {
      * @param point
      */
     public void setPointVal(PointF point) {
-        Log.d("ReverbEffect", "Setting reverb effect values");
         this.pointVal = point;
+        setEffectProperties();  // Update the effect params.
     }
+
+    /**
+     * For setting point back to default value if cancel/back is pressed
+     */
+    public void resetPointVal() {
+        this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
+        setEffectProperties();
+    }
+
 
     /**
      * A representation invariant of a reverb effect that essentially

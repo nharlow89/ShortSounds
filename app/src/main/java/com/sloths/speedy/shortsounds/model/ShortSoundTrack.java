@@ -30,6 +30,7 @@ public class ShortSoundTrack {
     public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_MONO;
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     public static final int MODE = AudioTrack.MODE_STREAM;
+    private static final String TAG = "ShortSoundTrack";
     public static int BUFFER_SIZE = 44100; // Default
     public static float DEFAULT_VOLUME = 0.8f;
 
@@ -63,7 +64,7 @@ public class ShortSoundTrack {
         this.fileName = "ss" + shortSoundId + "-track" + id + "-modified";
         this.volume = 0.8f;
         this.isSolo = false;
-          // Had to update with filenames =(
+          // Had to update with filename =(
         initFiles( audioFile );
         this.sqlHelper.updateShortSoundTrack( this );
         repInvariant();
@@ -129,6 +130,9 @@ public class ShortSoundTrack {
     public PointF[] getEffectVals(String effect) {
         if (effect.equals(MainActivity.EQ)) {
             PointF[] points = mEqEffect.getPointVals();
+            if (points != null) {
+                Log.d("Track", "Track EQ effect values pulled: " + points[0].x +", "+points[0].y+") ("+points[1].x+", "+points[1].y+")");
+            }
             return points;
         } else {
             // Reverb point being returned
@@ -280,11 +284,49 @@ public class ShortSoundTrack {
         if (volume >= 0.0f && volume <= 1.0f)
             this.volume = volume;
     }
+
+    public void saveShortSoundTrack() {
+        Log.d(TAG, "Saving ShortSoundTrack to DB");
+        sqlHelper.updateShortSoundTrack(this);
+    }
     public String getSQLSolo() { if (isSolo) return "t"; return "f";}
     public boolean isSolo() { return isSolo; }
     public void toggleSolo() { isSolo = !isSolo; }
 
-    public void saveShortSoundTrack() {
-        sqlHelper.updateShortSoundTrack(this);
+    public void setEffectToggle(Effect.Type effect, boolean enable) {
+        if (effect.equals(Effect.Type.EQ)) {
+            // EQ
+            if (enable) {
+                mEqEffect.enable();
+            } else {
+                mEqEffect.disable();
+            }
+        } else {
+            // REVERB
+            if (enable) {
+                mReverbEffect.enable();
+            } else {
+                mReverbEffect.disable();
+            }
+        }
+        sqlHelper.updateShortSoundTrack( this );
+    }
+
+    public boolean isEffectChecked(Effect.Type effect) {
+        if (effect.equals(Effect.Type.EQ)) {
+            return mEqEffect.getEnabled();
+        } else if (effect.equals(Effect.Type.REVERB)) {
+            //REVERB
+            return mReverbEffect.getEnabled();
+        } else {
+            // All other effects
+            return false;
+        }
+    }
+
+    public void releaseEffects() {
+        Log.d(DEBUG_TAG, "Release effects associated with track["+this.id+"]");
+        mReverbEffect.release();
+        mEqEffect.release();
     }
 }

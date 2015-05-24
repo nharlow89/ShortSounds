@@ -1,8 +1,13 @@
 package com.sloths.speedy.shortsounds.controller;
 
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 
+import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
@@ -26,6 +31,8 @@ public class ModelControl implements PlaybackListener {
     private int seekBarPosition;
     private static ModelControl instance = null;
     private SeekBar mGlobalSeekBar;
+    private ImageButton mGlobalPlayButton;
+    private Context mMainContext;
 
 
     /**
@@ -60,15 +67,16 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void onRecordStart() {
 //        main.onRecordStart();
-        if (mAudioPlayer != null)
-            mAudioPlayer.playAll( 0 );  // Play from the beginning
+        if (mAudioPlayer != null) {
+            Log.d("Debug", "onRecordStart() playALL!!!");
+            mAudioPlayer.playAll(0);  // Play from the beginning
+        }
         // Setup the MediaRecorder
         mAudioRecorder.start();
     }
 
     @Override
     public ShortSound onRecordStop( ShortSound mActiveShortSound ) {
-//        main.onRecordStop( null );
         File recordedFile = mAudioRecorder.end();
         Log.d("DEBUG", "endRecording() recordedFile: " + recordedFile.getAbsolutePath());
 
@@ -77,7 +85,7 @@ public class ModelControl implements PlaybackListener {
             // Case 1. There is no active ShortSound, create one and continue.
             // Create the new ShortSound and add it the list.
             mActiveShortSound = new ShortSound();
-            mAudioPlayer = new AudioPlayer( mActiveShortSound );
+            mAudioPlayer = new AudioPlayer(mActiveShortSound);
         } else {
             mAudioPlayer.stopAll();
         }
@@ -99,12 +107,12 @@ public class ModelControl implements PlaybackListener {
             if (!mAudioRecorder.isRecording()) {
                 mAudioPlayer.stopAll();
             }
-            boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
-            if (isOkToPlayAllWithNewPosition) {
-                // TODO: This scenario is super buggy
-                //mAudioPlayer.stopAll();
-                //mAudioPlayer.playAll(this.seekBarPosition);
-            }
+//            boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
+//            if (isOkToPlayAllWithNewPosition) {
+//                // TODO: This scenario is super buggy
+//                mAudioPlayer.stopAll();
+//                mAudioPlayer.playAll(this.seekBarPosition);
+//            }
         }
     }
 
@@ -123,12 +131,15 @@ public class ModelControl implements PlaybackListener {
 
     @Override
     public void muteEffect(Effect.Type effect, int track) {
-        Log.i(TAG, "mute effect on track " + track);
+        mAudioPlayer.getTrack( track ).setEffectToggle(effect, false);
+        Log.i(TAG, "mute " + effect.toString() +" on track " + track);
     }
 
     @Override
     public void turnOnEffect(Effect.Type effect, int track) {
+        mAudioPlayer.getTrack( track ).setEffectToggle(effect, true);
         Log.i(TAG, "turn on effect on track " + track);
+
     }
 
     @Override
@@ -136,7 +147,15 @@ public class ModelControl implements PlaybackListener {
 
     }
 
+    /**
+     * Set the AudioPlayer that this controller will interact with.
+     * @param mAudioPlayer
+     */
     public void setmAudioPlayer(AudioPlayer mAudioPlayer) {
+        // Whenever setting the AudioPlayer, we should check if there is already an existing one.
+        // If so, clean up any resources related to that AudioPlayer.
+        if ( this.mAudioPlayer != null )
+            this.cleanUpTheDirty();
         this.mAudioPlayer = mAudioPlayer;
     }
 
@@ -166,5 +185,14 @@ public class ModelControl implements PlaybackListener {
 //        mGlobalSeekBar.setProgress(0);
 //        onPlayToggle();
         // TODO: Update Play Button
+    }
+
+    /**
+     * This method does what it says, it goes through and cleans up any resources that were
+     * in use by the previously active shortsound. This includes AudioTracks, AudioRecorders,
+     * and Effect objects.
+     */
+    private void cleanUpTheDirty() {
+        mAudioPlayer.destroy();
     }
 }
