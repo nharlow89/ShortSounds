@@ -17,4 +17,5 @@
     <color name="yellow_200">#FFF59D</color>
     <color name="indigo_500">#3F51B5</color>
     <color name="indigo_200">#9FA8DA</color>
+    <color name="cross_view_stroke_color">@android:color/black</color>
 </resources>
