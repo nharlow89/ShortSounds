@@ -256,7 +256,7 @@ public class ShortSoundTrackTest extends AndroidTestCase {
      *
      * @return HashMap representing sample data stored by the database for ShortSoundTracks.
      */
-    private HashMap<String, String> makeTestValues() {
+    public static HashMap<String, String> makeTestValues() {
         HashMap<String, String> testValues = new HashMap<String, String>();
 
         testValues.put(ShortSoundSQLHelper.KEY_ID, "1");
