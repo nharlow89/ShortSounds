@@ -18,6 +18,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -117,6 +118,13 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void setUpControllerView() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mGlobalSeekBar.setMax(100);  // Set the max value (0-100)
+
+        mGlobalSeekBar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return modelControl.isRecording();
+            }
+        });
         SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -134,12 +142,16 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 // The current progress level. This will be in the range 0..max
                 // where max was set by setMax(int). (The default value for max is 100.)
                 // TODO Auto-generated method stub
-
-                if(fromUser) {
-                    Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
-                    modelControl.updateCurrentPosition(progress);
+                if (!modelControl.isRecording()) {
+                    if (fromUser) {
+                        Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
+                        modelControl.updateCurrentPosition(progress);
+                    } else if (progress == 100) {
+                        seekBar.setProgress(0);
+                    }
                 }
             }
+
         };
         mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
         modelControl.setGlobalSeekBar(mGlobalSeekBar);
@@ -751,7 +763,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 mShareActionProvider.setShareIntent(null);
             }
         }
-
     }
 
     // TODO: Clean up resources & Save track state to DB

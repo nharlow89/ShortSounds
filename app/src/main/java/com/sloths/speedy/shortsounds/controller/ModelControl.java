@@ -162,8 +162,9 @@ public class ModelControl implements PlaybackListener {
 
     public void endOfTrack() {
         seekBarPosition = 0;
-        mGlobalSeekBar.setProgress(0);
-        onPlayToggle();
+
+//        mGlobalSeekBar.setProgress(0);
+//        onPlayToggle();
         // TODO: Update Play Button
     }
 }
