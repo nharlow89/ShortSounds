@@ -44,6 +44,9 @@ public class AudioPlayer {
         Log.d(DEBUG_TAG, "Creating new AudioPlayer");
         trackPlayers = new HashMap<>();
         tracks = new ArrayList<>();
+        mModelControl = ModelControl.instance();
+        mCurrentShortSound = ss;
+        mLongestTrack = ss.getLongestTrack();
         for ( ShortSoundTrack track : ss.getTracks() ) {
             TrackPlayer tp = new TrackPlayer(track, this);
             trackPlayers.put(track, tp);
@@ -52,10 +55,6 @@ public class AudioPlayer {
                 mLongestTrackPlayer = tp;
             }
         }
-        mModelControl = ModelControl.instance();
-        mCurrentShortSound = ss;
-        mLongestTrack = ss.getLongestTrack();
-
         playerState = PlayerState.STOPPED_ALL;
     }
 
@@ -310,9 +309,11 @@ public class AudioPlayer {
                     ShortSoundTrack.BUFFER_SIZE,
                     ShortSoundTrack.MODE);
             audioTrack.setPositionNotificationPeriod( ShortSoundTrack.SAMPLE_RATE );
-            audioTrack.setPlaybackPositionUpdateListener( new AudioTrack.OnPlaybackPositionUpdateListener() {
+            audioTrack.setPlaybackPositionUpdateListener(new AudioTrack.OnPlaybackPositionUpdateListener() {
                 @Override
-                public void onMarkerReached(AudioTrack track) {}
+                public void onMarkerReached(AudioTrack track) {
+                }
+
                 @Override
                 public void onPeriodicNotification(AudioTrack track) {
                     Log.d(DEBUG_TAG, "PlaybackListener");
@@ -432,7 +433,7 @@ public class AudioPlayer {
                     e.printStackTrace();
                 }
             } else {
-                Log.w(DEBUG_TAG, "Tried to stop track["+track.getId()+"] but was already stopped");
+                Log.w(DEBUG_TAG, "Tried to stop track[" + track.getId() + "] but was already stopped");
             }
         }
 
