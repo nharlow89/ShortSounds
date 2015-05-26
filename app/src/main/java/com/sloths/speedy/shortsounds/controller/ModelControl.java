@@ -1,13 +1,8 @@
 package com.sloths.speedy.shortsounds.controller;
 
-import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.SeekBar;
 
-import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
@@ -31,8 +26,6 @@ public class ModelControl implements PlaybackListener {
     private int seekBarPosition;
     private static ModelControl instance = null;
     private SeekBar mGlobalSeekBar;
-    private ImageButton mGlobalPlayButton;
-    private Context mMainContext;
 
 
     /**
@@ -142,11 +135,6 @@ public class ModelControl implements PlaybackListener {
 
     }
 
-    @Override
-    public void saveShortSoundTrack(int track) {
-
-    }
-
     /**
      * Set the AudioPlayer that this controller will interact with.
      * @param mAudioPlayer
@@ -179,13 +167,13 @@ public class ModelControl implements PlaybackListener {
 
     public void volumeChanged(int track, float volume) { mAudioPlayer.volumeChanged(track, volume); }
 
-    public void endOfTrack() {
-        seekBarPosition = 0;
-
-//        mGlobalSeekBar.setProgress(0);
-//        onPlayToggle();
-        // TODO: Update Play Button
-    }
+//    public void endOfTrack() {
+//        seekBarPosition = 0;
+//
+////        mGlobalSeekBar.setProgress(0);
+////        onPlayToggle();
+//        // TODO: Update Play Button
+//    }
 
     /**
      * This method does what it says, it goes through and cleans up any resources that were
@@ -194,5 +182,14 @@ public class ModelControl implements PlaybackListener {
      */
     private void cleanUpTheDirty() {
         mAudioPlayer.destroy();
+    }
+
+    public boolean isPlaying() {
+        return mAudioPlayer.isPlayingAll();
+    }
+
+    public void removeTrack(int track) {
+        ShortSoundTrack sst = mAudioPlayer.getTrack(track);
+        mAudioPlayer.removeTrack(sst);
     }
 }

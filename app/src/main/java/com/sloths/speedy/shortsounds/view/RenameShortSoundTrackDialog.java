@@ -9,29 +9,35 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 /**
  * This DialogFragment inflates a dialog box to rename a ShortSound.
  */
-public class NoticeDialogFragment extends DialogFragment {
-    EditText newTitle;
-    Button okay;
-    Button cancel;
+public class RenameShortSoundTrackDialog extends DialogFragment {
     static String DialogboxTitle;
+    private int track;
+
+
+    public void setTrack(int track) {
+        this.track = track;
+    }
+
 
     /**
-     * The interface that has an onOkay button for the MainActivity to implement.
+     * The interface that has an onRenameShortSound button for the MainActivity to implement.
      */
-    public interface NoticeDialogListener {
-        void onOkay(String inputText);
+    public interface RenameShortSoundTrackDialogListener {
+        void onRenameShortSoundTrack(String inputText, int track);
     }
 
     /**
      * Creates a new Dialog Box.
      */
-    public NoticeDialogFragment() {
-        DialogboxTitle = "Rename ShortSound";
+    public RenameShortSoundTrackDialog() {
+        DialogboxTitle = "Rename ShortSound track";
     }
+
 
     /**
      * Prepares the DialogBox.
@@ -42,13 +48,14 @@ public class NoticeDialogFragment extends DialogFragment {
      */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.dialog_rename, container);
-        newTitle = (EditText) view.findViewById(R.id.newTitle);
-        okay = (Button) view.findViewById(R.id.okay);
-        cancel = (Button) view.findViewById(R.id.cancel);
+        final EditText newTitle = (EditText) view.findViewById(R.id.newTitle);
+        Button okay = (Button) view.findViewById(R.id.okay);
+        Button cancel = (Button) view.findViewById(R.id.cancel);
         okay.setOnClickListener(new View.OnClickListener() {
+            final EditText trackName = newTitle;
             public void onClick(View view) {
-                NoticeDialogListener activity = (NoticeDialogListener) getActivity();
-                activity.onOkay(newTitle.getText().toString());
+                RenameShortSoundTrackDialogListener activity = (RenameShortSoundTrackDialogListener) getActivity();
+                activity.onRenameShortSoundTrack(trackName.getText().toString(), track);
                 dismiss();
             }
         });

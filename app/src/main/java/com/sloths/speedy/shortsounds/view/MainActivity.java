@@ -1,7 +1,6 @@
 package com.sloths.speedy.shortsounds.view;
 
 import android.app.ActionBar;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PointF;
@@ -15,8 +14,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,13 +27,11 @@ import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewAnimator;
 
 import com.sloths.speedy.shortsounds.R;
@@ -52,7 +49,6 @@ import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +58,10 @@ import java.util.TimerTask;
 /**
  * The MainActivity for the application. Contains setup for the framework of the UI.
  */
-public class MainActivity extends FragmentActivity implements NoticeDialogFragment.NoticeDialogListener {
+public class MainActivity extends FragmentActivity
+                          implements RenameShortSoundDialog.NoticeDialogListener,
+                                     RenameShortSoundTrackDialog.RenameShortSoundTrackDialogListener {
+    public static final String TAG = "MainActivity";
     public static final String EQ = "EQ";
     public static final String REVERB = "Reverb";
     public static final String BIT = "Bit Crush";
@@ -175,7 +174,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
         };
 
-
         mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
         modelControl.setGlobalSeekBar(mGlobalSeekBar);
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
@@ -251,13 +249,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * Retrieve the currently selected ShortSound track names.
      * @return
     */
-    public List<String> getCurShortSoundNames() {
-        List<String> list = new ArrayList<>();
-        if (mActiveShortSound != null) {
-            for (ShortSoundTrack track : mActiveShortSound.getTracks())
-                list.add(track.getTitle());
-        }
-        return list;
+    public String getCurrentTrackNameAt(int track) {
+        Log.i(TAG, "getcurrentShortSoundNames()");
+        return mActiveShortSound.getTrackName(track);
+
     }
 
     /**
@@ -385,7 +380,13 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     public void saveShortSoundTrack(int track) {
-        modelControl.saveShortSoundTrack(track);
+        mActiveShortSound.getTracks().get(track).saveShortSoundTrack();
+    }
+
+    public int getCurrentShortSoundSize() {
+        if (mActiveShortSound == null)
+            return 0;
+        return mActiveShortSound.getSize();
     }
 
     /**
@@ -493,7 +494,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     @Override
     public void onBackPressed() {
-
         if (currentView.equals(TRACKS)) {
             super.onBackPressed();
         } else {
@@ -769,7 +769,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 createNew();
                 return true;
             case R.id.action_rename:
-                rename();
+                renameShortSound();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -792,6 +792,13 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             createNew();
         }
     }
+
+    public void removeShortSoundTrack(int track) {
+        modelControl.removeTrack(track);
+        mActiveShortSound.removeTrack(mActiveShortSound.getTracks().get(track));
+    }
+
+
 
     /**
      * Creates a new ShortSound and takes it to an empty screen with no
@@ -838,10 +845,29 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     /**
      * Renames a ShortSound
      */
-    private void rename() {
-        FragmentManager fragmentManager = getFragmentManager();
-        NoticeDialogFragment inputNameDialog = new NoticeDialogFragment();
-        inputNameDialog.show(fragmentManager, "Input Dialog");
+    private void renameShortSound() {
+        RenameShortSoundDialog inputNameDialog = new RenameShortSoundDialog();
+        inputNameDialog.show(getFragmentManager(), "Input Dialog");
+    }
+
+    /**
+     * Handles event okay selected from NoticeDialogFragment
+     * @param inputText
+     */
+    public void onRenameShortSound(String inputText) {
+        if (!inputText.matches("\\s+") && !inputText.equals("")) {
+            mActiveShortSound.setTitle(inputText);
+            mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
+            setTitle(inputText);
+            mDrawerList.setAdapter(new ArrayAdapter<>(this,
+                    R.layout.drawer_list_item, mShortSoundsTitles));
+        }
+    }
+
+    public void renameTrack(int position) {
+        RenameShortSoundTrackDialog dialog = new RenameShortSoundTrackDialog();
+        dialog.setTrack(position);
+        dialog.show(getFragmentManager(), "Input Dialog");
     }
 
     /**
@@ -849,13 +875,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * @param inputText
      */
     @Override
-    public void onOkay(String inputText) {
+    public void onRenameShortSoundTrack(String inputText, int track) {
         if (!inputText.matches("\\s+") && !inputText.equals("")) {
-            mActiveShortSound.setTitle(inputText);
-            mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
-            setTitle(inputText);
-            mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                    R.layout.drawer_list_item, mShortSoundsTitles));
+            mActiveShortSound.getTracks().get(track).saveTrackName(inputText);
+            ((TrackView) findViewById(R.id.track_list)).getAdapter().notifyDataSetChanged();
         }
     }
 
@@ -911,7 +934,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         @Override
         public void onClick(View v) {
             // Show message
-            showToast("Canceled " + effect);
+            ((ShortSoundsApplication)getApplicationContext()).showToast("Canceled " + effect);
             // Got back to track view
             onBackPressed();
         }
@@ -937,7 +960,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         @Override
         public void onClick(View v) {
             // Show message
-            showToast("Saved " + this.effect);
+            ((ShortSoundsApplication)getApplicationContext()).showToast("Saved " + this.effect);
 
             // Switch view back
             animateToTrack();
@@ -949,26 +972,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
-    /**
-     * shows toast
-     * @param text The String text associated with the toast
-     */
-    private void showToast(String text) {
-        Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
-        LinearLayout layout =(LinearLayout)toast.getView();
-        TextView textView = ((TextView)layout.getChildAt(0));
-        textView.setTextSize(20);
-        textView.setGravity(Gravity.CENTER);
-        toast.show();
-    }
-
-    /**
-     * Returns current short sound
-     * @return
-     */
-    public ShortSound getMActiveShortSound() {
-        return mActiveShortSound;
-    }
 
     /**
      *
@@ -976,7 +979,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * @param position
      * @return
      */
-    public boolean getEffectChecked(Effect.Type effect, int position) {
-        return mActiveShortSound.getTracks().get(position).isEffectChecked(effect);
+    public boolean isEffectOn(Effect.Type effect, int position) {
+        return mActiveShortSound.isEffectOn(effect, position);
     }
 }

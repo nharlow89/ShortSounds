@@ -248,8 +248,19 @@ public class AudioPlayer {
      */
     public void removeTrack( ShortSoundTrack track ) {
         trackPlayers.remove(track);
-        if(mLongestTrack == track) {
-            // TODO: find new longest track
+        tracks.remove(track);
+        if(mLongestTrack == track ) {
+            mLongestTrack = null;
+            if (trackPlayers.size() > 0) {
+                long max = 0l;
+                for (ShortSoundTrack sst : trackPlayers.keySet()) {
+                    long length = sst.getLengthInBytes();
+                    if (length > max) {
+                        max = length;
+                        mLongestTrack = sst;
+                    }
+                }
+            }
         }
     }
 

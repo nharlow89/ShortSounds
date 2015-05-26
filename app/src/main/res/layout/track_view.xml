@@ -34,7 +34,21 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:textColor="@android:color/primary_text_light"
-                android:textSize="30sp"/>
+                android:textSize="30sp"
+                android:layout_toLeftOf="@+id/deleteTrack"
+                android:layout_toStartOf="@+id/deleteTrack" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/delete"
+                android:id="@+id/deleteTrack"
+                android:background="@drawable/delete_button"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:textColor="@color/accent_material_dark"
+                android:layout_centerVertical="true" />
 
         </RelativeLayout>
 
@@ -65,33 +79,31 @@
                     <Button
                         android:id="@+id/eq_button"
                         android:layout_width="100dp"
-                        android:layout_height="100dp"
+                        android:layout_height="80dp"
                         android:text="@string/EQ"
                         android:gravity="center"
                         android:textColor="@color/accent_material_dark"
-                        android:textSize="20sp"
-                        android:layout_centerVertical="true"
+                        android:textSize="18sp"
                         android:layout_centerHorizontal="true" />
-
 
                     <com.sloths.speedy.shortsounds.view.CrossView
                         android:id="@+id/eq_switch"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:padding="14dp"
                         app:lineColor="@android:color/black"
-                        android:layout_below="@+id/eq_button"
-                        android:layout_centerHorizontal="true" />
+                        android:layout_below="@+id/Espace"
+                        android:layout_centerHorizontal="true"/>
 
                     <Space
                         android:layout_width="0dp"
-                        android:layout_height="0dp"
+                        android:layout_height="20dp"
                         android:id="@+id/Espace"
                         android:layout_below="@id/eq_button"
                         android:layout_alignLeft="@id/eq_button"
                         android:layout_alignStart="@id/eq_button"
                         android:layout_alignRight="@+id/eq_button"
-                        android:layout_alignEnd="@+id/eq_button" />
+                        android:layout_alignEnd="@+id/eq_button"
+                        android:layout_centerInParent="true" />
 
                 </RelativeLayout>
 
@@ -108,33 +120,32 @@
 
                     <Button
                         android:layout_width="100dp"
-                        android:layout_height="100dp"
+                        android:layout_height="80dp"
                         android:id="@+id/reverb_button"
                         android:text="@string/Reverb"
                         android:gravity="center"
                         android:textColor="@color/accent_material_dark"
-                        android:textSize="20sp"
-                        android:layout_centerVertical="true"
+                        android:textSize="18sp"
                         android:layout_centerHorizontal="true"/>
 
                     <com.sloths.speedy.shortsounds.view.CrossView
                         android:id="@+id/reverb_switch"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:padding="14dp"
                         app:lineColor="@android:color/black"
-                        android:layout_below="@+id/reverb_button"
-                        android:layout_centerHorizontal="true" />
+                        android:layout_below="@+id/Rspace"
+                        android:layout_centerHorizontal="true"/>
 
                     <Space
                         android:layout_width="0dp"
-                        android:layout_height="0dp"
+                        android:layout_height="20dp"
                         android:id="@+id/Rspace"
-                        android:layout_below="@id/reverb_switch"
+                        android:layout_below="@id/reverb_button"
                         android:layout_alignLeft="@id/reverb_switch"
                         android:layout_alignStart="@id/reverb_switch"
                         android:layout_alignRight="@+id/reverb_switch"
-                        android:layout_alignEnd="@+id/reverb_switch"/>
+                        android:layout_alignEnd="@+id/reverb_switch"
+                        android:layout_centerInParent="true" />
 
                 </RelativeLayout>
 

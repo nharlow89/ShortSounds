@@ -8,19 +8,18 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.sloths.speedy.shortsounds.controller.ModelControl;
@@ -35,6 +34,8 @@ import java.util.List;
  * with the RecyclerView
  */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+    public static final String TAG = "RecyclerViewAdapter";
+    MainActivity main;
     private Context mContext;
     private ModelControl modelControl;
     private List<ViewHolder> mViews;
@@ -49,8 +50,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     public RecyclerViewAdapter(Context context) {
         this.mContext = context;
+        main = (MainActivity) context;
         modelControl = ModelControl.instance();
-//        modelControl = ((MainActivity) context).getModelControl();
         mViews = new ArrayList<>();
         Display display = ((Activity)mContext).getWindowManager().getDefaultDisplay();
         Point p = new Point();
@@ -156,8 +157,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      */
     @Override
     public int getItemCount() {
-        return ((MainActivity) mContext).getCurShortSoundNames().size();
+        return main.getCurrentShortSoundSize();
     }
+
 
     /**
      * This view holder holds the views for a track that will be part of a short sound
@@ -173,18 +175,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // Switches
         private CrossView[] xViews;
         private Effect.Type[] effectTypes;
+        private TrackAnimator trackAnimator;
+
 
         /**
          * Constructor for a ViewHolder
          * @param v The View associated with this ViewHolder
          */
-        public ViewHolder(View v) {
+        public ViewHolder(View v)  {
             super(v);
             // init instance variables
             vView = v;
-
+            trackAnimator = new TrackAnimator();
             vTitle = (TextView) v.findViewById(R.id.track_title);
-            vTitle.setOnClickListener(new TrackListener());
+            vTitle.setOnClickListener(trackAnimator);
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             vTrackChild.setVisibility(View.GONE);
             xViews = new CrossView[]{((CrossView) v.findViewById(R.id.eq_switch)),
@@ -196,20 +200,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
             // init buttons
             setUpButtons(new Button[]{((Button) v.findViewById(R.id.eq_button)),
-                    ((Button) v.findViewById(R.id.reverb_button))});
+                                      ((Button) v.findViewById(R.id.reverb_button))});
             // perform setup
             setUpToggle();
+
+            setUpDelete();
+
+            setUpLongClick();
         }
 
 
 
-        private void setUpVolume(final View v, final int track) {
+        private void setUpVolume(final View v, int track) {
             SeekBar volumeSlider = (SeekBar) v.findViewById(R.id.volumeSlider);
             volumeSlider.setMax(MAX_VOLUME);
 
             float lvl = 0.8f;
             if (getPosition() >= 0)
-                lvl = ((MainActivity) mContext).getShortSoundVolume(getPosition());
+                lvl = main.getShortSoundVolume(track);
             volumeSlider.setProgress((int) (MAX_VOLUME * lvl));
             volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -224,7 +232,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    ((MainActivity) mContext).saveShortSoundTrack(track);
+                    main.saveShortSoundTrack(getPosition());
                 }
             });
         }
@@ -257,12 +265,32 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             });
         }
 
+        private void setUpDelete() {
+            ImageButton button = (ImageButton) vView.findViewById(R.id.deleteTrack);
+            button.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return modelControl.isPlaying() || modelControl.isRecording();
+                }
+            });
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO make confirmation dialogue
+                    String name = main.getCurrentTrackNameAt(getPosition());
+                    trackAnimator.deleteTrackView();
+                    ((ShortSoundsApplication) mContext.getApplicationContext())
+                            .showToast(name + " deleted");
+                }
+            });
+        }
+
         /**
          * Sets the titles for tracks in RecyclerView
          * @param position The position of a track
          */
         public void setTitleView(int position) {
-            vTitle.setText(((MainActivity) mContext).getCurShortSoundNames().get(position));
+            vTitle.setText(main.getCurrentTrackNameAt(position));
         }
 
 
@@ -276,7 +304,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 bs[i].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ((MainActivity) mContext).effectEditSelected(getPosition(), name);
+                        main.effectEditSelected(getPosition(), name);
                     }
                 });
             }
@@ -303,20 +331,29 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         /**
          * Sets up the initial toggle values, pulled from the backend model
-         * @param track
          */
-        public void setInitToggleState(int track) {
-            MainActivity main = (MainActivity) mContext;
+        public void setInitToggleState(int position) {
+
             for (int i = 0; i < xViews.length; i++) {
-                boolean checked = main.getEffectChecked(effectTypes[i], getPosition());
+                boolean checked = main.isEffectOn(effectTypes[i], position);
                 xViews[i].setInitialState(checked);
             }
+        }
+
+        public void setUpLongClick() {
+            vTitle.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    main.renameTrack(getPosition());
+                    return true;
+                }
+            });
         }
 
         /**
          * The listener for when a track is clicked on
          */
-        private class TrackListener implements View.OnClickListener  {
+        private class TrackAnimator implements View.OnClickListener  {
             @Override
             public void onClick(View v) {
                 if (!modelControl.isRecording()) {
@@ -324,9 +361,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         // Expand a track
                         collapseAllOtherTracks();
                         expandTrackChildView(vTrackChild);
+                        Log.i(TAG, "track " + getPosition() + " expanded");
                     } else {
                         // Close the current open track
                         collapseTrackChildView(vTrackChild);
+                        Log.i(TAG, "track " + getPosition() + " collapsed");
                     }
                 }
             }
@@ -340,6 +379,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     }
                 }
             }
+
+//            public void deleteView(final View v) {
+//                if (vTrackChild.getVisibility() == View.VISIBLE) {
+//                    deleteTrackView(vView);
+//                }
+////                deleteTrackView();
+//            }
 
             /**
              * Uses animation to expand the child view of a track
@@ -355,6 +401,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 {
                     @Override
                     protected void applyTransformation(float interpolatedTime, Transformation t) {
+                        if (interpolatedTime == 1) {
+                            v.getLayoutParams().height = RecyclerView.LayoutParams.MATCH_PARENT;
+                        } else {
+                            v.getLayoutParams().height = (int) (targetHeight * interpolatedTime);
+                        }
                         v.getLayoutParams().height = (int)(targetHeight * interpolatedTime);
                         v.requestLayout();
                     }
@@ -375,10 +426,37 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
              * @param v The view to collapse
              */
             public void collapseTrackChildView(final View v) {
-                final int initialHeight = v.getMeasuredHeight();
+                Animation a = getCollapseAnimation(v);
+                v.startAnimation(a);
+            }
 
-                Animation a = new Animation()
-                {
+            /**
+             * Uses animation to collapse the child view of a track
+             */
+            public void deleteTrackView() {
+                Animation a = getCollapseAnimation(vTrackChild);
+                a.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) { }
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        int position = getPosition();
+                        main.removeShortSoundTrack(position);
+                        Log.i(TAG, "track " + position + " deleted");
+                        mViews.remove(position);
+//                        vView.setVisibility(View.GONE);
+//                        notifyDataSetChanged();
+//                        notifyItemRemoved(getPosition());
+                    }
+                    @Override
+                    public void onAnimationRepeat(Animation animation) { }
+                });
+                vTrackChild.startAnimation(a);
+            }
+
+            private Animation getCollapseAnimation(final View v) {
+                final int initialHeight = v.getMeasuredHeight();
+                Animation a = new Animation() {
                     @Override
                     protected void applyTransformation(float interpolatedTime, Transformation t) {
                         if(interpolatedTime == 1){
@@ -386,18 +464,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         } else {
                             v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
                             v.requestLayout();
+
                         }
                     }
-
                     @Override
                     public boolean willChangeBounds() {
                         return true;
                     }
                 };
-
                 // 1 dp/ms
                 a.setDuration((int)(initialHeight / (v.getContext().getResources().getDisplayMetrics().density)));
-                v.startAnimation(a);
+                return a;
             }
         }
     }
