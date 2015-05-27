@@ -144,7 +144,10 @@ public class ShortSound {
      * from the database, and from disk
      */
     public void removeShortSound() {
-        
+        for( ShortSoundTrack track: this.tracks ) {
+            track.delete();
+        }
+        sqlHelper.removeShortSound(this);
     }
 
     /**
@@ -173,17 +176,6 @@ public class ShortSound {
         this.title = new_title;
         sqlHelper.updateShortSound( this );  // Update the DB
         repInvariant();
-    }
-
-
-    /**
-     * delete_button this ShortSound
-     */
-    public void delete() {
-        for( ShortSoundTrack track: this.tracks ) {
-            track.delete();
-        }
-        sqlHelper.removeShortSound(this);
     }
 
      /* Getter for Duration

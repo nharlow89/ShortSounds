@@ -1,11 +1,15 @@
 package com.sloths.speedy.shortsounds.view;
 
+import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.sloths.speedy.shortsounds.R;
 
 /**
  * ShortSoundsApplication allows other classes to get the overall
@@ -40,4 +44,5 @@ public class ShortSoundsApplication extends Application {
         textView.setGravity(Gravity.CENTER);
         toast.show();
     }
+
 }

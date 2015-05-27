@@ -36,7 +36,7 @@ public class TrackView extends RecyclerView {
      * ShortSound.
      */
     public void notifyTrackAdded( int index ) {
-        mAdapter.notifyDataSetChanged();
+//        mAdapter.notifyDataSetChanged();
         mAdapter.notifyItemInserted(index);
     }
 }

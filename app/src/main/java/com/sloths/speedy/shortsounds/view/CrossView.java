@@ -49,7 +49,7 @@ public class CrossView extends View {
     private static final long ANIMATION_DURATION_MS = 300l;
 
     private static final int DEFAULT_COLOR = Color.BLACK;
-    private static final float DEFAULT_STROKE_WIDTH = 8f;
+    private static final float DEFAULT_STROKE_WIDTH = 10f;
 
     // Arcs that define the set of all points between which the two lines are drawn
     // Names (top, bottom, etc) are from the reference point of the "plus" configuration.
@@ -65,6 +65,7 @@ public class CrossView extends View {
     private float mArcLengthRight;
 
     private Paint mPaint;
+    private Paint mBackPaint;
     private int mColor = DEFAULT_COLOR;
     private RectF mRect;
     private PathMeasure mPathMeasure;
@@ -119,11 +120,13 @@ public class CrossView extends View {
         setPointFromPercent(mArcTop, mArcLengthTop, mPercent, mFromXY);
         setPointFromPercent(mArcBottom, mArcLengthBottom, mPercent, mToXY);
 
+        canvas.drawLine(mFromXY[0], mFromXY[1], mToXY[0], mToXY[1], mBackPaint);
         canvas.drawLine(mFromXY[0], mFromXY[1], mToXY[0], mToXY[1], mPaint);
 
         setPointFromPercent(mArcLeft, mArcLengthLeft, mPercent, mFromXY);
         setPointFromPercent(mArcRight, mArcLengthRight, mPercent, mToXY);
 
+        canvas.drawLine(mFromXY[0], mFromXY[1], mToXY[0], mToXY[1], mBackPaint);
         canvas.drawLine(mFromXY[0], mFromXY[1], mToXY[0], mToXY[1], mPaint);
     }
 
@@ -191,7 +194,6 @@ public class CrossView extends View {
     }
 
     public void setColor(int argb) {
-//        mColor = getContext().getResources().getColor(android.R.color.black);
         mColor = argb;
         if (mPaint == null) {
             mPaint = new Paint();
@@ -288,6 +290,7 @@ public class CrossView extends View {
      */
     private void init() {
         mPaint = new Paint();
+        mBackPaint = new Paint();
         mRect = new RectF();
         mRect.left = getPaddingLeft();
         mRect.right = getWidth() - getPaddingRight();
@@ -319,8 +322,14 @@ public class CrossView extends View {
         mPaint.setAntiAlias(true);
         mPaint.setColor(mColor);
         mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setStrokeCap(Paint.Cap.SQUARE);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH);
+
+        mBackPaint.setAntiAlias(true);
+        mBackPaint.setColor(getContext().getResources().getColor(R.color.accent_material_dark));
+        mBackPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mBackPaint.setStrokeCap(Paint.Cap.ROUND);
+        mBackPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH * 1.5f);
 
         mFromXY = new float[]{0f, 0f};
         mToXY = new float[]{0f, 0f};

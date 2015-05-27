@@ -787,7 +787,7 @@ public class MainActivity extends FragmentActivity
             Log.d("CHECK", "" + sounds.size());
             sounds.remove(mActiveShortSound);
             Log.d("CHECK", "" + sounds.size());
-            mActiveShortSound.delete();
+            mActiveShortSound.removeShortSound();
             mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
             createNew();
         }

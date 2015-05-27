@@ -161,10 +161,13 @@ public class AudioPlayer {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void soloTrack(int track) {
         tracks.get(track).toggleSolo();
+        boolean atLeastOneSoloTrack = false;
+        for (int i = 0; i < tracks.size(); i++)
+            atLeastOneSoloTrack = atLeastOneSoloTrack || tracks.get(i).isSolo();
         for (int i = 0; i < tracks.size(); i++) {
             ShortSoundTrack sst = tracks.get(i);
             TrackPlayer tp = trackPlayers.get(sst);
-            if (!sst.isSolo())
+            if (!sst.isSolo() && atLeastOneSoloTrack)
                 tp.audioTrack.setVolume(0.0f);
             else
                 tp.audioTrack.setVolume(sst.getVolume());
@@ -248,19 +251,8 @@ public class AudioPlayer {
     public void removeTrack( ShortSoundTrack track ) {
         trackPlayers.remove(track);
         tracks.remove(track);
-        if(mLongestTrack == track ) {
-            mLongestTrack = null;
-            if (trackPlayers.size() > 0) {
-                long max = 0l;
-                for (ShortSoundTrack sst : trackPlayers.keySet()) {
-                    long length = sst.getLengthInBytes();
-                    if (length > max) {
-                        max = length;
-                        mLongestTrack = sst;
-                    }
-                }
-            }
-        }
+        if(mLongestTrack == track )
+            mLongestTrack = mCurrentShortSound.getLongestTrack();
     }
 
     /**
