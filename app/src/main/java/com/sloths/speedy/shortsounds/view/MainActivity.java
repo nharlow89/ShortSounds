@@ -463,7 +463,7 @@ public class MainActivity extends FragmentActivity
             this.position = position;
 
                 // load the mix into a view and replace it in the animator
-            if (mActiveShortSound != null && mActiveShortSound.getTracks().size() > 0) {
+            if (mActiveShortSound != null && mActiveShortSound.getTracks().size() >= 0) {
                 setPopulatedTrackView();
             } else {
                 setEmptyTrackView();
