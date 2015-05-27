@@ -14,7 +14,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -163,9 +162,10 @@ public class MainActivity extends FragmentActivity
                 if(fromUser) { //!modelControl.isRecording()
                     Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
                     modelControl.updateCurrentPosition(progress);
+                    drawPlayButton();
                 } else {
                     if(progress == 100) {
-                        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                        drawPlayButton();
                         mGlobalSeekBar.setProgress(0);
                         modelControl.updateCurrentPosition(0);
                     }
@@ -177,16 +177,17 @@ public class MainActivity extends FragmentActivity
         mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
         modelControl.setGlobalSeekBar(mGlobalSeekBar);
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
-
-        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+        drawPlayButton();
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!modelControl.onPlayToggle())
+                if (!modelControl.onPlayToggle()) {
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
-                else
-                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                    mGlobalPlayButton.setColorFilter(getResources().getColor(R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY);
+                } else {
+                    drawPlayButton();
+                }
             }
         });
         setPlayerVisibility(View.INVISIBLE);
@@ -218,6 +219,7 @@ public class MainActivity extends FragmentActivity
                         setPlayerVisibility(View.VISIBLE);
                         mGlobalSeekBar.setEnabled(true);
                         stopTimer();
+                        resetSeekBarToZero();
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
@@ -235,6 +237,7 @@ public class MainActivity extends FragmentActivity
                         endRecording();
                         setPlayerVisibility(View.VISIBLE);
                         mGlobalSeekBar.setEnabled(true);
+                        resetSeekBarToZero();
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
@@ -389,18 +392,6 @@ public class MainActivity extends FragmentActivity
         return mActiveShortSound.getSize();
     }
 
-    /**
-     * Toggles the play and pause buttons
-     * @return boolean true of toggled, false else
-     */
-//    @Override
-//    public boolean onPlayToggle() {
-//        if ( !modelControl.onPlayToggle() )
-//            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
-//        else
-//            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
-//        return true;
-//    }
     
     /**
      * The click listener for ListView in the navigation drawer
@@ -473,7 +464,7 @@ public class MainActivity extends FragmentActivity
 
             resetSeekBarToZero();
 
-            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+            drawPlayButton();
         }
         // selected mix is already loaded so close the drawer
         try {
@@ -485,8 +476,8 @@ public class MainActivity extends FragmentActivity
     }
 
     private void resetSeekBarToZero() {
-        mGlobalSeekBar.setProgress(0);
         modelControl.updateCurrentPosition(0);
+        mGlobalSeekBar.setProgress(0);
     }
 
     /**
@@ -887,9 +878,9 @@ public class MainActivity extends FragmentActivity
      */
     private void endRecording() {
         mGlobalPlayButton.setEnabled(true);
-        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));//TODO
+        drawPlayButton();
         ShortSound newShortSound = modelControl.onRecordStop( mActiveShortSound );
-        if ( newShortSound != null ) {
+        if ( newShortSound != null) {
             Log.d("DEBUG", "Ended recording while no ShortSound existed");
             // Update the sidebar with the new ShortSound.
             sounds.add(newShortSound);
@@ -909,6 +900,11 @@ public class MainActivity extends FragmentActivity
                 mShareActionProvider.setShareIntent(null);
             }
         }
+    }
+
+    private void drawPlayButton() {
+        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));//TODO
+        mGlobalPlayButton.setColorFilter(getResources().getColor(R.color.green_500), android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 
     // TODO: Clean up resources & Save track state to DB
