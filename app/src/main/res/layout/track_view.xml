@@ -1,44 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <android.support.v7.widget.CardView
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="6dp"
     android:layout_marginLeft="6dp"
     android:layout_marginRight="6dp"
-    card_view:cardCornerRadius="4dp"
-    card_view:cardElevation="2dp"
-    style="@style/AppTheme"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="2dp"
+
     android:background="@android:color/background_dark">
+    <!--style="@style/AppTheme"-->
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        style="@style/AppTheme"
-        android:background="@android:color/darker_gray">
+        android:layout_height="match_parent">
+
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:id="@+id/track_parent">
 
             <TextView
                 android:id="@+id/track_title"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:fontFamily="sans-serif-medium"
                 android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:textColor="@android:color/primary_text_light"
-                android:textSize="18dp"/>
+                android:textSize="24sp"
+                android:layout_toLeftOf="@+id/deleteTrack"
+                android:layout_toStartOf="@+id/deleteTrack" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/delete"
+                android:id="@+id/deleteTrack"
+                android:background="@drawable/ic_remove"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="1dp"
+                android:textColor="@color/accent_material_dark"
+                android:layout_centerVertical="true"/>
 
         </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/track_child"
             android:layout_below="@+id/track_parent"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:orientation="vertical">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -49,104 +69,94 @@
                 <!-- Equalizer -->
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="match_parent"
                     android:id="@+id/eq_layout"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_toLeftOf="@+id/space"
+                    android:layout_toStartOf="@+id/space">
 
                     <Button
                         android:id="@+id/eq_button"
-                        android:layout_width="140dp"
-                        android:layout_height="40dp"
-                        android:text="EQ"
+                        android:layout_width="100dp"
+                        android:layout_height="80dp"
+                        android:text="@string/EQ"
                         android:gravity="center"
-                        android:textColor="@color/accent_material_dark" />
+                        android:textColor="@color/accent_material_dark"
+                        android:textSize="18sp"
+                        android:layout_centerHorizontal="true" />
 
-                    <Switch
+                    <com.sloths.speedy.shortsounds.view.CrossView
                         android:id="@+id/eq_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@+id/eq_button"
-                        android:layout_toEndOf="@+id/eq_button"
-                        android:gravity="center"/>
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        app:lineColor="@android:color/black"
+                        android:layout_below="@+id/Espace"
+                        android:layout_centerHorizontal="true"/>
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/Espace"
+                        android:layout_below="@id/eq_button"
+                        android:layout_alignLeft="@id/eq_button"
+                        android:layout_alignStart="@id/eq_button"
+                        android:layout_alignRight="@+id/eq_button"
+                        android:layout_alignEnd="@+id/eq_button"
+                        android:layout_centerInParent="true" />
 
                 </RelativeLayout>
-
-                <!-- Distortion -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:id="@+id/dist_layout"
-                    android:gravity="center"
-                    android:layout_below="@+id/eq_layout">
-
-                    <Button
-                        android:layout_width="140dp"
-                        android:layout_height="40dp"
-                        android:id="@+id/dist_button"
-                        android:text="Distortion"
-                        android:gravity="center"
-                        android:textColor="@color/accent_material_dark"/>
-
-                    <Switch
-                        android:id="@+id/dist_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@+id/dist_button"
-                        android:layout_toEndOf="@+id/dist_button"
-                        android:gravity="center"/>
-                 </RelativeLayout>
 
                 <!-- Reverb -->
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="match_parent"
                     android:id="@+id/reverb_layout"
                     android:gravity="center"
-                    android:layout_below="@+id/dist_layout">
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_toRightOf="@+id/space"
+                    android:layout_toEndOf="@+id/space">
 
                     <Button
-                        android:layout_width="140dp"
-                        android:layout_height="40dp"
+                        android:layout_width="100dp"
+                        android:layout_height="80dp"
                         android:id="@+id/reverb_button"
-                        android:text="Reverb"
+                        android:text="@string/Reverb"
                         android:gravity="center"
-                        android:textColor="@color/accent_material_dark"/>
+                        android:textColor="@color/accent_material_dark"
+                        android:textSize="18sp"
+                        android:layout_centerHorizontal="true"/>
 
-                    <Switch
+                    <com.sloths.speedy.shortsounds.view.CrossView
                         android:id="@+id/reverb_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@+id/reverb_button"
-                        android:layout_toEndOf="@+id/reverb_button"
-                        android:gravity="center"/>
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        app:lineColor="@android:color/black"
+                        android:layout_below="@+id/Rspace"
+                        android:layout_centerHorizontal="true"/>
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/Rspace"
+                        android:layout_below="@id/reverb_button"
+                        android:layout_alignLeft="@id/reverb_switch"
+                        android:layout_alignStart="@id/reverb_switch"
+                        android:layout_alignRight="@+id/reverb_switch"
+                        android:layout_alignEnd="@+id/reverb_switch"
+                        android:layout_centerInParent="true" />
 
                 </RelativeLayout>
 
-                <!-- BitCrush -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:id="@+id/bit_layout"
-                    android:gravity="center"
-                    android:layout_below="@+id/reverb_layout">
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/space" />
 
-                    <Button
-                        android:layout_width="140dp"
-                        android:layout_height="40dp"
-                        android:id="@+id/bit_button"
-                        android:text="Bit Crush"
-                        android:gravity="center"
-                        android:textColor="@color/accent_material_dark"/>
-
-                    <Switch
-                        android:id="@+id/bit_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="false"
-                        android:layout_toRightOf="@+id/bit_button"
-                        android:gravity="center"/>
-
-                </RelativeLayout>
             </RelativeLayout>
 
             <RelativeLayout
@@ -160,33 +170,31 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:id="@+id/controls"
                     android:layout_centerVertical="true">
 
                     <SeekBar
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight=".87"
                         android:id="@+id/volumeSlider"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
+                        android:layout_weight=".87"
                         android:layout_gravity="center_vertical" />
+
                     <Button
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".13"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
                         android:id="@+id/trackSolo"
+                        android:layout_weight=".13"
                         android:background="@color/button_material_light"
                         android:textColor="@color/accent_material_light"
-                        android:text="SOLO"
+                        android:text="@string/solo"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
                         android:layout_gravity="center_vertical" />
                 </LinearLayout>
 
+
             </RelativeLayout>
 
-            <!-- This is all the effects stuff -->
         </LinearLayout>
     </RelativeLayout>
 </android.support.v7.widget.CardView>

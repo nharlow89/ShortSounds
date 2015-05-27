@@ -5,6 +5,7 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class ShortSound {
         Log.d("DB_TEST", "ShortSound:constructor()");
         this.title = DEFAULT_TITLE;  // Default
         this.tracks = new ArrayList<ShortSoundTrack>();  // Initially no tracks
-        this.id = sqlHelper.insertShortSound( this );  // Add ShortSound to the DB
+        this.id = sqlHelper.insertShortSound(this);  // Add ShortSound to the DB
         Log.d("DB_TEST", "Inserted ShortSound: " + this.toString() );
         repInvariant();
     }
@@ -97,7 +98,7 @@ public class ShortSound {
      * @return A list of the ShortSoundTracks associated with this ShortSound.
      */
     public List<ShortSoundTrack> getTracks() {
-        return this.tracks;
+        return Collections.unmodifiableList(tracks);
     }
 
     /**
@@ -118,13 +119,35 @@ public class ShortSound {
         repInvariant();
     }
 
+    public String getTrackName(int track) {
+        return tracks.get(track).getTitle();
+    }
+
+    /**
+     *
+     * @param effect
+     * @param position
+     * @return
+     */
+    public boolean isEffectOn(Effect.Type effect, int position) {
+        return tracks.get(position).isEffectChecked(effect);
+    }
+
+    public int getSize() {
+        return tracks.size();
+    }
+
+
     /**
      * Remove a ShortSound, including all of its tracks
      * @postcondition this will be null, and this ShortSound will be removed
      * from the database, and from disk
      */
     public void removeShortSound() {
-        
+        for( ShortSoundTrack track: this.tracks ) {
+            track.delete();
+        }
+        sqlHelper.removeShortSound(this);
     }
 
     /**
@@ -153,16 +176,6 @@ public class ShortSound {
         this.title = new_title;
         sqlHelper.updateShortSound( this );  // Update the DB
         repInvariant();
-    }
-
-    /**
-     * Delete this ShortSound
-     */
-    public void delete() {
-        for( ShortSoundTrack track: this.tracks ) {
-            track.delete();
-        }
-        sqlHelper.removeShortSound( this );
     }
 
      /* Getter for Duration
@@ -214,4 +227,6 @@ public class ShortSound {
             if ( track.getParentId() != this.id ) throw new AssertionError("ShortSoundTrack does not belong to this ShortSound!");
         }
     }
+
+
 }

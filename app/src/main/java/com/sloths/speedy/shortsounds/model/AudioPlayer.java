@@ -44,6 +44,9 @@ public class AudioPlayer {
         Log.d(DEBUG_TAG, "Creating new AudioPlayer");
         trackPlayers = new HashMap<>();
         tracks = new ArrayList<>();
+        mModelControl = ModelControl.instance();
+        mCurrentShortSound = ss;
+        mLongestTrack = ss.getLongestTrack();
         for ( ShortSoundTrack track : ss.getTracks() ) {
             TrackPlayer tp = new TrackPlayer(track, this);
             trackPlayers.put(track, tp);
@@ -52,10 +55,6 @@ public class AudioPlayer {
                 mLongestTrackPlayer = tp;
             }
         }
-        mModelControl = ModelControl.instance();
-        mCurrentShortSound = ss;
-        mLongestTrack = ss.getLongestTrack();
-
         playerState = PlayerState.STOPPED_ALL;
     }
 
@@ -89,6 +88,7 @@ public class AudioPlayer {
             entry.getValue().stop();
 
             if (position == 0) {
+                Log.d(DEBUG_TAG,"play position 0");
                 entry.getValue().play(position);
             } else {
                 ShortSoundTrack currentTrack = entry.getKey();
@@ -104,12 +104,6 @@ public class AudioPlayer {
             }
         }
         playerState = PlayerState.PLAYING_ALL;
-    }
-
-    private void notifyEndOfTrack(TrackPlayer notifier) {
-        if (notifier == mLongestTrackPlayer) {
-            mModelControl.endOfTrack();
-        }
     }
 
 
@@ -167,10 +161,13 @@ public class AudioPlayer {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void soloTrack(int track) {
         tracks.get(track).toggleSolo();
+        boolean atLeastOneSoloTrack = false;
+        for (int i = 0; i < tracks.size(); i++)
+            atLeastOneSoloTrack = atLeastOneSoloTrack || tracks.get(i).isSolo();
         for (int i = 0; i < tracks.size(); i++) {
             ShortSoundTrack sst = tracks.get(i);
             TrackPlayer tp = trackPlayers.get(sst);
-            if (!sst.isSolo())
+            if (!sst.isSolo() && atLeastOneSoloTrack)
                 tp.audioTrack.setVolume(0.0f);
             else
                 tp.audioTrack.setVolume(sst.getVolume());
@@ -253,8 +250,14 @@ public class AudioPlayer {
      */
     public void removeTrack( ShortSoundTrack track ) {
         trackPlayers.remove(track);
-        if(mLongestTrack == track) {
-            // TODO: find new longest track
+        tracks.remove(track);
+        if(mLongestTrack.getLengthInBytes() == track.getLengthInBytes()) {
+            mLongestTrack = mCurrentShortSound.getLongestTrack();
+            for(ShortSoundTrack sst : trackPlayers.keySet()) {
+                if(sst.getLengthInBytes() == mLongestTrack.getLengthInBytes()) {
+                    mLongestTrackPlayer = trackPlayers.get(sst);
+                }
+            }
         }
     }
 
@@ -315,9 +318,11 @@ public class AudioPlayer {
                     ShortSoundTrack.BUFFER_SIZE,
                     ShortSoundTrack.MODE);
             audioTrack.setPositionNotificationPeriod( ShortSoundTrack.SAMPLE_RATE );
-            audioTrack.setPlaybackPositionUpdateListener( new AudioTrack.OnPlaybackPositionUpdateListener() {
+            audioTrack.setPlaybackPositionUpdateListener(new AudioTrack.OnPlaybackPositionUpdateListener() {
                 @Override
-                public void onMarkerReached(AudioTrack track) {}
+                public void onMarkerReached(AudioTrack track) {
+                }
+
                 @Override
                 public void onPeriodicNotification(AudioTrack track) {
                     Log.d(DEBUG_TAG, "PlaybackListener");
@@ -437,7 +442,7 @@ public class AudioPlayer {
                     e.printStackTrace();
                 }
             } else {
-                Log.w(DEBUG_TAG, "Tried to stop track["+track.getId()+"] but was already stopped");
+                Log.w(DEBUG_TAG, "Tried to stop track[" + track.getId() + "] but was already stopped");
             }
         }
 
@@ -489,17 +494,11 @@ public class AudioPlayer {
                         // We reached the end of the track
                         Log.d(DEBUG_TAG, "Reached end of track["+track.getId()+"]");
                         stop();
-                        // TODO notify the audio player that we have finished playback on this track.
-                        notifyAudioPlayerEndOfTrack();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        }
-
-        private void notifyAudioPlayerEndOfTrack() {
-            mAudioPlayerListener.notifyEndOfTrack(this);
         }
 
         private void notifyAudioPlayerOfPosition() {

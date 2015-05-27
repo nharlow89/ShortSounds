@@ -1,12 +1,16 @@
 package com.sloths.speedy.shortsounds.tests;
 
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
+import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
 import junit.framework.TestCase;
+
+import java.io.File;
 
 /**
  * Created by jbusc_000 on 5/15/2015.
@@ -14,7 +18,9 @@ import junit.framework.TestCase;
  */
 public class AudioPlayerTest extends TestCase {
 
-    private String TAG = "AudioPlayerTest";
+    private static final String TAG = "AudioPlayerTest";
+    private static final String TEST_TITLE = "TestTrack";
+    private static final String TEST_FILE_NAME = "test-file-modified";
 
     /*
     Helper method, returns constructed player. Reduces redundent calls
@@ -23,6 +29,19 @@ public class AudioPlayerTest extends TestCase {
         ShortSound ss = new ShortSound();
         AudioPlayer player = null;
         return new AudioPlayer(ss);
+    }
+
+    private AudioPlayer constructPlayerWithTracks() {
+        ShortSound ss = new ShortSound();
+        ShortSoundTrack sst = newSSTrack();
+        ss.addTrack(sst);
+        return new AudioPlayer(ss);
+    }
+
+    private ShortSoundTrack newSSTrack() {
+
+        ShortSoundTrack sst = new ShortSoundTrack(ShortSoundTrackTest.makeTestValues());
+        return sst;
     }
 
 
@@ -41,6 +60,11 @@ public class AudioPlayerTest extends TestCase {
             assertEquals("Constructor Failure, Audio player in incorrect state after construction",
                     AudioPlayer.PlayerState.STOPPED_ALL, player.getPlayerState());
         }
+
+        AudioPlayer player2 = constructPlayerWithTracks();
+        assertEquals("Constructor Failure, Incorrect number of tracks after constructing with " +
+                        "premade short sound",
+                1, player2.getCurrentShortSound().getTracks().size());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -53,8 +77,16 @@ public class AudioPlayerTest extends TestCase {
         // test that state is properly changed
         AudioPlayer player = constructEmptyPlayer();
         player.playAll(0);
-        assertTrue("playAll Failure, not changing players state.",
+        assertTrue("playAll Failure, State should remain stopped if no tracks contained.",
+                !player.isPlayingAll());
+
+        //TODO Make tests capable of playing fake tracks to confirm behavior
+        // AudioPlayer player2 = constructPlayerWithTracks();
+/*        player.playAll(0);
+        assertTrue("playAll Failure, State should change to Playing when play all is called" +
+                        "with non-null tracks in the audio player.",
                 player.isPlayingAll());
+*/
 
     }
 
@@ -102,7 +134,6 @@ public class AudioPlayerTest extends TestCase {
     // Tests that tracks can be added, played, paused, and stopped
     ///////////////////////////////////////////////////////////////////////////
     public void testTrackFunctionality() {
-
     }
 
 }

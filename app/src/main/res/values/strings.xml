@@ -41,4 +41,7 @@
     <string name="Cancel">Cancel</string>
     <string name="Save">Save</string>
     <string name="recordASound">Record a Sound!</string>
+    <string name="Reverb">Reverb</string>
+    <string name="solo">SOLO</string>
+    <string name="delete">DELETE</string>
 </resources>

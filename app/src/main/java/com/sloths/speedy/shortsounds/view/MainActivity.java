@@ -1,23 +1,24 @@
 package com.sloths.speedy.shortsounds.view;
 
 import android.app.ActionBar;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -25,13 +26,11 @@ import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewAnimator;
 
 import com.sloths.speedy.shortsounds.R;
@@ -48,15 +47,20 @@ import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * The MainActivity for the application. Contains setup for the framework of the UI.
  */
-public class MainActivity extends FragmentActivity implements NoticeDialogFragment.NoticeDialogListener {
+public class MainActivity extends FragmentActivity
+                          implements RenameShortSoundDialog.NoticeDialogListener,
+                                     RenameShortSoundTrackDialog.RenameShortSoundTrackDialogListener {
+    public static final String TAG = "MainActivity";
     public static final String EQ = "EQ";
     public static final String REVERB = "Reverb";
     public static final String BIT = "Bit Crush";
@@ -83,6 +87,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private int position;
     private ModelControl modelControl;
     private EffectController effectController;
+    private Timer mRecordTimer;
+    private boolean mTimerIsRunning;
+    private int mElapsedTime;
 
     /**
      * Sets up MainActivity
@@ -95,6 +102,8 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         Log.d("DB_TEST", "MainActivity:onCreate()");
         sounds = ShortSound.getAll();
         Log.d("DB_TEST", sounds.toString());
+        mTimerIsRunning = false;
+        mElapsedTime = 0;
         mShortSoundsTitles = getShortSoundTitles(sounds);
         modelControl = ModelControl.instance();
         final AudioRecorder mAudioRecorder = new AudioRecorder( getCacheDir() );
@@ -124,6 +133,14 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     private void setUpControllerView() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mGlobalSeekBar.setMax(100);  // Set the max value (0-100)
+
+        mGlobalSeekBar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return modelControl.isRecording();
+            }
+        });
+
         SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -142,25 +159,35 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 // where max was set by setMax(int). (The default value for max is 100.)
                 // TODO Auto-generated method stub
 
-                if(fromUser) {
+                if(fromUser) { //!modelControl.isRecording()
                     Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
                     modelControl.updateCurrentPosition(progress);
+                    drawPlayButton();
+                } else {
+                    if(progress == 100) {
+                        drawPlayButton();
+                        mGlobalSeekBar.setProgress(0);
+                        modelControl.updateCurrentPosition(0);
+                    }
                 }
             }
+
         };
+
         mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
         modelControl.setGlobalSeekBar(mGlobalSeekBar);
-        
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
-        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+        drawPlayButton();
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
         mGlobalPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!modelControl.onPlayToggle())
+                if (!modelControl.onPlayToggle()) {
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
-                else
-                    mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+                    mGlobalPlayButton.setColorFilter(getResources().getColor(R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY);
+                } else {
+                    drawPlayButton();
+                }
             }
         });
         setPlayerVisibility(View.INVISIBLE);
@@ -190,9 +217,14 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                     if ( !isChecked ) {
                         endRecording();
                         setPlayerVisibility(View.VISIBLE);
+                        mGlobalSeekBar.setEnabled(true);
+                        stopTimer();
+                        resetSeekBarToZero();
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
+                        mGlobalSeekBar.setEnabled(false);
+                        startTimer();
                     }
                 }
             });
@@ -204,9 +236,12 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                     if (modelControl.isRecording()) {
                         endRecording();
                         setPlayerVisibility(View.VISIBLE);
+                        mGlobalSeekBar.setEnabled(true);
+                        resetSeekBarToZero();
                     } else {
                         mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
+                        mGlobalSeekBar.setEnabled(false);;
                     }
                 }
             });
@@ -217,13 +252,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * Retrieve the currently selected ShortSound track names.
      * @return
     */
-    public List<String> getCurShortSoundNames() {
-        List<String> list = new ArrayList<>();
-        if (mActiveShortSound != null) {
-            for (ShortSoundTrack track : mActiveShortSound.getTracks())
-                list.add(track.getTitle());
-        }
-        return list;
+    public String getCurrentTrackNameAt(int track) {
+        Log.i(TAG, "getcurrentShortSoundNames()");
+        return mActiveShortSound.getTrackName(track);
+
     }
 
     /**
@@ -351,21 +383,15 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     public void saveShortSoundTrack(int track) {
-        modelControl.saveShortSoundTrack(track);
+        mActiveShortSound.getTracks().get(track).saveShortSoundTrack();
     }
 
-    /**
-     * Toggles the play and pause buttons
-     * @return boolean true of toggled, false else
-     */
-//    @Override
-//    public boolean onPlayToggle() {
-//        if ( !modelControl.onPlayToggle() )
-//            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
-//        else
-//            mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
-//        return true;
-//    }
+    public int getCurrentShortSoundSize() {
+        if (mActiveShortSound == null)
+            return 0;
+        return mActiveShortSound.getSize();
+    }
+
     
     /**
      * The click listener for ListView in the navigation drawer
@@ -428,7 +454,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             this.position = position;
 
                 // load the mix into a view and replace it in the animator
-            if (mActiveShortSound != null && mActiveShortSound.getTracks().size() > 0) {
+            if (mActiveShortSound != null && mActiveShortSound.getTracks().size() >= 0) {
                 setPopulatedTrackView();
             } else {
                 setEmptyTrackView();
@@ -437,14 +463,21 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             invalidateOptionsMenu();
 
             resetSeekBarToZero();
+
+            drawPlayButton();
         }
         // selected mix is already loaded so close the drawer
+        try {
+            mShareActionProvider.setShareIntent(createShareIntent());
+        } catch (IOException e) {
+            mShareActionProvider.setShareIntent(null);
+        }
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
     private void resetSeekBarToZero() {
-        mGlobalSeekBar.setProgress(0);
         modelControl.updateCurrentPosition(0);
+        mGlobalSeekBar.setProgress(0);
     }
 
     /**
@@ -452,7 +485,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     @Override
     public void onBackPressed() {
-
         if (currentView.equals(TRACKS)) {
             super.onBackPressed();
         } else {
@@ -625,6 +657,50 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     }
 
     /**
+     * Start a timer that times the how long a track is recording for
+     */
+    private void startTimer() {
+        mRecordTimer = new Timer();
+        mTimerIsRunning = true;
+        TextView timerTextView = (TextView)findViewById(R.id.timerView);
+        timerTextView.setVisibility(View.VISIBLE);
+        mRecordTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                mElapsedTime += 1; //increase every sec
+                mTimeHandler.obtainMessage(1).sendToTarget();
+
+            }
+        }, 0, 1000);
+    }
+
+    /**
+     * Used by startTimer(). Updates the textview associated with the record timer.
+     */
+    private Handler mTimeHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            TextView timerTextView = (TextView)findViewById(R.id.timerView);
+            int minutes = mElapsedTime / 60;
+            int seconds = mElapsedTime - (60 * minutes);
+            String z = "";
+            if (seconds < 10) z = "0";
+            String time = "0" + minutes + ":" + z + seconds;
+            timerTextView.setText(time);
+        }
+    };
+
+    /**
+     * stops the timer associated with track recording.
+     */
+    private void stopTimer() {
+        mRecordTimer.cancel();
+        TextView timerTextView = (TextView)findViewById(R.id.timerView);
+        timerTextView.setVisibility(View.INVISIBLE);
+        timerTextView.setText("00:00");
+        mElapsedTime = 0;
+        mTimerIsRunning = false;
+    }
+
+    /**
      * Creates the Action Bar Options Menu
      * @param menu The Action Bar menu
      * @return true if menu created, false else
@@ -638,7 +714,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         MenuItem shareItem = menu.findItem(R.id.action_share);
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
-        mShareActionProvider.setShareIntent(createShareIntent());
         return true;
     }
 
@@ -646,17 +721,20 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * Specifies the share intent
      * @return the share Intent
      */
-    private Intent createShareIntent() {
+    private Intent createShareIntent() throws IOException {
+        if (mActiveShortSound == null) {
+            return null;
+        }
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        File absolutePath = new File(getFilesDir(), "ss1-track1.mp3");
+        File absolutePath = mActiveShortSound.generateAudioFile();
+
         Uri contentURI = FileProvider.getUriForFile(MainActivity.this, "com.sloths.speedy.shortsounds.fileprovider", absolutePath);
 
         if (contentURI != null) {
             shareIntent.putExtra(Intent.EXTRA_STREAM, contentURI);
-            shareIntent.setType("audio/mpeg3");
+            shareIntent.setType("audio/wav");
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
-
         return shareIntent;
     }
 
@@ -682,7 +760,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
                 createNew();
                 return true;
             case R.id.action_rename:
-                rename();
+                renameShortSound();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -692,21 +770,24 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
 
     /**
      * Deletes the current ShortSound from the library.
-     * If there are other ShortSounds in the library, opens the first
-     * ShortSound.
-     * If there are no ShortSounds in the library, creates and opens a new
-     * ShortSound
+     * And returns the user to a blank start recording screen.
      */
     private void deleteShortSound() {
         if (mActiveShortSound != null) {
             this.position = -1;
-            Log.d("CHECK", "" + sounds.size());
             sounds.remove(mActiveShortSound);
-            Log.d("CHECK", "" + sounds.size());
-            mActiveShortSound.delete();
+            mActiveShortSound.removeShortSound();
+            mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
             createNew();
         }
     }
+
+    public void removeShortSoundTrack(int track) {
+        mActiveShortSound.removeTrack(mActiveShortSound.getTracks().get(track));
+        modelControl.removeTrack(track);
+    }
+
+
 
     /**
      * Creates a new ShortSound and takes it to an empty screen with no
@@ -753,10 +834,29 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
     /**
      * Renames a ShortSound
      */
-    private void rename() {
-        FragmentManager fragmentManager = getFragmentManager();
-        NoticeDialogFragment inputNameDialog = new NoticeDialogFragment();
-        inputNameDialog.show(fragmentManager, "Input Dialog");
+    private void renameShortSound() {
+        RenameShortSoundDialog inputNameDialog = new RenameShortSoundDialog();
+        inputNameDialog.show(getFragmentManager(), "Input Dialog");
+    }
+
+    /**
+     * Handles event okay selected from NoticeDialogFragment
+     * @param inputText
+     */
+    public void onRenameShortSound(String inputText) {
+        if (!inputText.matches("\\s+") && !inputText.equals("")) {
+            mActiveShortSound.setTitle(inputText);
+            mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
+            setTitle(inputText);
+            mDrawerList.setAdapter(new ArrayAdapter<>(this,
+                    R.layout.drawer_list_item, mShortSoundsTitles));
+        }
+    }
+
+    public void renameTrack(int position) {
+        RenameShortSoundTrackDialog dialog = new RenameShortSoundTrackDialog();
+        dialog.setTrack(position);
+        dialog.show(getFragmentManager(), "Input Dialog");
     }
 
     /**
@@ -764,13 +864,10 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * @param inputText
      */
     @Override
-    public void onOkay(String inputText) {
+    public void onRenameShortSoundTrack(String inputText, int track) {
         if (!inputText.matches("\\s+") && !inputText.equals("")) {
-            mActiveShortSound.setTitle(inputText);
-            mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
-            setTitle(inputText);
-            mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                    R.layout.drawer_list_item, mShortSoundsTitles));
+            mActiveShortSound.getTracks().get(track).saveTrackName(inputText);
+            ((TrackView) findViewById(R.id.track_list)).getAdapter().notifyDataSetChanged();
         }
     }
 
@@ -779,9 +876,9 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      */
     private void endRecording() {
         mGlobalPlayButton.setEnabled(true);
-        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));//TODO
+        drawPlayButton();
         ShortSound newShortSound = modelControl.onRecordStop( mActiveShortSound );
-        if ( newShortSound != null ) {
+        if ( newShortSound != null) {
             Log.d("DEBUG", "Ended recording while no ShortSound existed");
             // Update the sidebar with the new ShortSound.
             sounds.add(newShortSound);
@@ -795,7 +892,17 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
             // Update the existing fragment manager to add new track to list
             TrackView tv = ((TrackView) findViewById(R.id.track_list));
             tv.notifyTrackAdded(mActiveShortSound.getTracks().size() - 1);
+            try {
+                mShareActionProvider.setShareIntent(createShareIntent());
+            } catch (IOException e) {
+                mShareActionProvider.setShareIntent(null);
+            }
         }
+    }
+
+    private void drawPlayButton() {
+        mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));//TODO
+        mGlobalPlayButton.setColorFilter(getResources().getColor(R.color.green_500), android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 
     // TODO: Clean up resources & Save track state to DB
@@ -821,7 +928,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         @Override
         public void onClick(View v) {
             // Show message
-            showToast("Canceled " + effect);
+            ((ShortSoundsApplication)getApplicationContext()).showToast("Canceled " + effect);
             // Got back to track view
             onBackPressed();
         }
@@ -847,7 +954,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         @Override
         public void onClick(View v) {
             // Show message
-            showToast("Saved " + this.effect);
+            ((ShortSoundsApplication)getApplicationContext()).showToast("Saved " + this.effect);
 
             // Switch view back
             animateToTrack();
@@ -859,26 +966,6 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
         }
     }
 
-    /**
-     * shows toast
-     * @param text The String text associated with the toast
-     */
-    private void showToast(String text) {
-        Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
-        LinearLayout layout =(LinearLayout)toast.getView();
-        TextView textView = ((TextView)layout.getChildAt(0));
-        textView.setTextSize(20);
-        textView.setGravity(Gravity.CENTER);
-        toast.show();
-    }
-
-    /**
-     * Returns current short sound
-     * @return
-     */
-    public ShortSound getMActiveShortSound() {
-        return mActiveShortSound;
-    }
 
     /**
      *
@@ -886,7 +973,7 @@ public class MainActivity extends FragmentActivity implements NoticeDialogFragme
      * @param position
      * @return
      */
-    public boolean getEffectChecked(Effect.Type effect, int position) {
-        return mActiveShortSound.getTracks().get(position).isEffectChecked(effect);
+    public boolean isEffectOn(Effect.Type effect, int position) {
+        return mActiveShortSound.isEffectOn(effect, position);
     }
 }

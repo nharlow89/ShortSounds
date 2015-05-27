@@ -60,8 +60,10 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void onRecordStart() {
 //        main.onRecordStart();
-        if (mAudioPlayer != null)
-            mAudioPlayer.playAll( 0 );  // Play from the beginning
+        if (mAudioPlayer != null) {
+            Log.d("Debug", "onRecordStart() playALL!!!");
+            mAudioPlayer.playAll(0);  // Play from the beginning
+        }
         // Setup the MediaRecorder
         mAudioRecorder.start();
     }
@@ -98,12 +100,6 @@ public class ModelControl implements PlaybackListener {
             if (!mAudioRecorder.isRecording()) {
                 mAudioPlayer.stopAll();
             }
-            boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
-            if (isOkToPlayAllWithNewPosition) {
-                // TODO: This scenario is super buggy
-                //mAudioPlayer.stopAll();
-                //mAudioPlayer.playAll(this.seekBarPosition);
-            }
         }
     }
 
@@ -130,11 +126,6 @@ public class ModelControl implements PlaybackListener {
     public void turnOnEffect(Effect.Type effect, int track) {
         mAudioPlayer.getTrack( track ).setEffectToggle(effect, true);
         Log.i(TAG, "turn on effect on track " + track);
-
-    }
-
-    @Override
-    public void saveShortSoundTrack(int track) {
 
     }
 
@@ -170,13 +161,6 @@ public class ModelControl implements PlaybackListener {
 
     public void volumeChanged(int track, float volume) { mAudioPlayer.volumeChanged(track, volume); }
 
-    public void endOfTrack() {
-        seekBarPosition = 0;
-        mGlobalSeekBar.setProgress(0);
-        onPlayToggle();
-        // TODO: Update Play Button
-    }
-
     /**
      * This method does what it says, it goes through and cleans up any resources that were
      * in use by the previously active shortsound. This includes AudioTracks, AudioRecorders,
@@ -184,5 +168,14 @@ public class ModelControl implements PlaybackListener {
      */
     private void cleanUpTheDirty() {
         mAudioPlayer.destroy();
+    }
+
+    public boolean isPlaying() {
+        return mAudioPlayer.isPlayingAll();
+    }
+
+    public void removeTrack(int track) {
+        ShortSoundTrack sst = mAudioPlayer.getTrack(track);
+        mAudioPlayer.removeTrack(sst);
     }
 }

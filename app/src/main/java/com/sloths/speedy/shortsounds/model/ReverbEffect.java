@@ -120,8 +120,12 @@ public class ReverbEffect extends Effect {
      */
     public void enable() {
         Log.d("Reverb", "Enabled Reverb effect");
-        effect.setEnabled(true);
-        isActive = true;
+        if (effect != null) {
+            effect.setEnabled(true);
+            isActive = true;
+        }
+
+        //TODO handle null effect case
     }
 
     /**
@@ -129,8 +133,12 @@ public class ReverbEffect extends Effect {
      */
     public void disable() {
         Log.d("Reverb", "Disabled Reverb effect");
-        effect.setEnabled(false);
+        if (effect != null) {
+            effect.setEnabled(false);
+        }
         isActive = false;
+
+        //TODO handle null case
     }
 
     /**

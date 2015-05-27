@@ -213,6 +213,16 @@ public class ShortSoundTrack {
         return title;
     }
 
+
+    /**
+     * Changes the current track name to the given string and updates the database.
+     * @param name
+     */
+    public void saveTrackName(String name) {
+        title = name;
+        sqlHelper.updateShortSoundTrack(this);
+    }
+
     /**
      * Returns the title of this ShortSoundTrack
      * @return String
