@@ -26,14 +26,14 @@ public class ShortSoundTest extends TestCase {
      * tests to confirm constructor makes a non-null shortsound and
      * that it contains an empty list of tracks.
      */
-    public void testConstructor() {
+/*    public void testConstructor() {
         ShortSound ss = new ShortSound();
         assertNotNull(ss);
         assertEquals(0, ss.getTracks().size());
 
         // So that the fact that ss is inserted into the database doesn't affect the other tests.
         ShortSoundSQLHelper.getInstance().removeShortSound(ss);
-    }
+    }*/
 
     /**
      * Tests that an empty map passed to the constructor results in an AssertionError.
@@ -152,17 +152,15 @@ public class ShortSoundTest extends TestCase {
     /**
      * Tests that calling getById with an ID that exists returns the correct ShortSound.
      */
-    public void testGetByIdWithMatchingId() {
-        ShortSound ss = new ShortSound();
+/*    public void testGetByIdWithMatchingId() {
+        ShortSound ss = new ShortSound(makeTestMap());
         ShortSound retreivedSS = ShortSound.getById(ss.getId());
 
         assertNotNull(retreivedSS);
         assertEquals(ss.getTitle(), retreivedSS.getTitle());
         assertEquals(ss.getTracks().size(), retreivedSS.getTracks().size());
         assertEquals(ss.getId(), retreivedSS.getId());
-
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
-    }
+    }*/
 
     /*
      * getLongestTrack
@@ -172,17 +170,15 @@ public class ShortSoundTest extends TestCase {
      * Tests that the returned track is null if there are no tracks
      */
     public void testLongestTrackWhenThereAreNoTracksIsNull() {
-        ShortSound ss = new ShortSound();
+        ShortSound ss = new ShortSound(makeTestMap());
         assertNull(ss.getLongestTrack());
-
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
     }
 
     /**
      * Tests that when the ShortSound has only one track that getLongestTrack returns the one track.
      */
     public void testLongestTrackWithOneTrackReturnsTheOneTrack() {
-        ShortSound ss = new ShortSound();
+        ShortSound ss = new ShortSound(makeTestMap());
         HashMap<String, String> shortSoundTrackTestMap = ShortSoundTrackTest.makeTestValues();
         ShortSoundTrack sst = new ShortSoundTrack(shortSoundTrackTestMap);
         ss.addTrack(sst);
@@ -190,15 +186,13 @@ public class ShortSoundTest extends TestCase {
         ShortSoundTrack retreivedTrack = ss.getLongestTrack();
         assertNotNull(retreivedTrack);
         assertTrue(sst == retreivedTrack);
-
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
     }
 
     /**
      * Tests that when the ShortSound has two tracks, getLongestTrack picks the longer of the two.
      */
     public void testLongestTrackBetweenTwoTracksIsTheCorrectOne() {
-        ShortSound ss = new ShortSound();
+        ShortSound ss = new ShortSound(makeTestMap());
         HashMap<String, String> shortSoundTrackTestMap = ShortSoundTrackTest.makeTestValues();
         ShortSoundTrack shortTrack = new ShortSoundTrack(shortSoundTrackTestMap);
         shortSoundTrackTestMap.put(ShortSoundSQLHelper.TRACK_LENGTH, "10");
@@ -209,8 +203,6 @@ public class ShortSoundTest extends TestCase {
 
         assertNotNull(returnedTrack);
         assertTrue(longTrack == returnedTrack);
-
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
     }
 
     /*
@@ -221,13 +213,11 @@ public class ShortSoundTest extends TestCase {
      * Tests that getTracks returns an empty List when the ShortSound has no tracks.
      */
     public void testGetTracksWithNoTracks() {
-        ShortSound ss = new ShortSound();
+        ShortSound ss = new ShortSound(makeTestMap());
         List<ShortSoundTrack> ssTracks = ss.getTracks();
 
         assertNotNull(ssTracks);
         assertEquals(0, ssTracks.size());
-
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
     }
 
     /**
@@ -236,16 +226,14 @@ public class ShortSoundTest extends TestCase {
      * in the ShortSound.
      */
     public void testGetTracksWithOneTrack() {
-        ShortSound ss = new ShortSound();
-        ShortSoundTrack sst = new ShortSoundTrack(new File(""), 1);
+        ShortSound ss = new ShortSound(makeTestMap());
+        ShortSoundTrack sst = new ShortSoundTrack(ShortSoundTrackTest.makeTestValues());
         ss.addTrack(sst);
         List<ShortSoundTrack> ssTracks = ss.getTracks();
 
         assertNotNull(ssTracks);
         assertEquals(1, ssTracks.size());
         assertTrue(sst == ssTracks.get(0));
-
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
     }
 
     /*
@@ -256,10 +244,10 @@ public class ShortSoundTest extends TestCase {
      * Tests that adding a track to a track list with one track appends the bew track to the end.
      */
     public void testAddTrackToListWithOneTrack() {
-        ShortSound ss = new ShortSound();
-        ShortSoundTrack firstTrack = new ShortSoundTrack(new File(""), 1);
+        ShortSound ss = new ShortSound(makeTestMap());
+        ShortSoundTrack firstTrack = new ShortSoundTrack(ShortSoundTrackTest.makeTestValues());
         ss.addTrack(firstTrack);
-        ShortSoundTrack secondTrack = new ShortSoundTrack(new File(""), 1);
+        ShortSoundTrack secondTrack = new ShortSoundTrack(ShortSoundTrackTest.makeTestValues());
         ss.addTrack(secondTrack);
         List<ShortSoundTrack> ssTracks = ss.getTracks();
 
@@ -267,8 +255,6 @@ public class ShortSoundTest extends TestCase {
         assertEquals(2, ssTracks.size());
         assertTrue(firstTrack == ssTracks.get(0));
         assertTrue(secondTrack == ssTracks.get(1));
-
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
     }
 
     /*
@@ -299,8 +285,8 @@ public class ShortSoundTest extends TestCase {
      * ShortSound.
      */
     public void testRemoveTrackWhenTrackIsInShortSoundAndThereIsOnlyOneTrack() {
-        ShortSound ss = new ShortSound();
-        ShortSoundTrack shortSoundTrack = new ShortSoundTrack(new File(""), 0);
+        ShortSound ss = new ShortSound(makeTestMap());
+        ShortSoundTrack shortSoundTrack = new ShortSoundTrack(ShortSoundTrackTest.makeTestValues());
         ss.addTrack(shortSoundTrack);
 
         ss.removeTrack(shortSoundTrack);
@@ -308,8 +294,6 @@ public class ShortSoundTest extends TestCase {
 
         assertNotNull(shortSoundTracks);
         assertEquals(0, shortSoundTracks.size());
-
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
     }
 
     /**
