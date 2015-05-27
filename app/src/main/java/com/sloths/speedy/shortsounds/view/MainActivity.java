@@ -785,8 +785,8 @@ public class MainActivity extends FragmentActivity
     }
 
     public void removeShortSoundTrack(int track) {
-        modelControl.removeTrack(track);
         mActiveShortSound.removeTrack(mActiveShortSound.getTracks().get(track));
+        modelControl.removeTrack(track);
     }
 
 
