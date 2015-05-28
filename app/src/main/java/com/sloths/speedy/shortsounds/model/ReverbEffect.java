@@ -82,9 +82,11 @@ public class ReverbEffect extends Effect {
      * point value
      */
     private void setEffectProperties() {
-        EnvironmentalReverb.Settings revSettings = convertParamsToSettings();
-        EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
-        reverb.setProperties(revSettings);
+        if (effect != null) { //TODO deal with null effect
+            EnvironmentalReverb.Settings revSettings = convertParamsToSettings();
+            EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
+            reverb.setProperties(revSettings);
+        }
     }
 
     /**

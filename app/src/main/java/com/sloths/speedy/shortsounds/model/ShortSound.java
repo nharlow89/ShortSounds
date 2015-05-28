@@ -47,11 +47,17 @@ public class ShortSound {
     public ShortSound( HashMap<String, String> map ) {
         if ( !map.containsKey( sqlHelper.KEY_ID ) ) throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.KEY_ID + " field.");
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.KEY_TITLE + " field.");
-        if ( !map.containsKey( sqlHelper.NEXT_TRACK_NUM ) ) throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.NEXT_TRACK_NUM + " field.");
-        this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
-        this.nextTrackNumber = Integer.parseInt( map.get(sqlHelper.NEXT_TRACK_NUM ) );
+
         this.title = map.get(sqlHelper.KEY_TITLE);
         this.tracks = new ArrayList<ShortSoundTrack>();
+        if ( !map.containsKey( sqlHelper.NEXT_TRACK_NUM ) ) {
+//            throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.NEXT_TRACK_NUM + " field.");
+            nextTrackNumber = 1;
+            sqlHelper.updateShortSound(this);
+        } else {
+            this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
+            this.nextTrackNumber = Integer.parseInt(map.get(sqlHelper.NEXT_TRACK_NUM));
+        }
         repInvariant();
     }
 
@@ -110,6 +116,7 @@ public class ShortSound {
      * @postcondition track will be the last element in the list of tracks.
      */
     public void addTrack( ShortSoundTrack track ) {
+        track.saveTrackName("Track " + nextTrackNumber);
         this.tracks.add(track);  // Add track to list
         nextTrackNumber++;
         this.sqlHelper.updateShortSound(this);

@@ -75,6 +75,8 @@ public class EqEffect extends Effect {
      * Set the properties of the Equalizer effect
      */
     private void setEffectProperties() {
+
+
         Equalizer eq = (Equalizer) this.effect;
         short[] levelRange = eq.getBandLevelRange();
 
