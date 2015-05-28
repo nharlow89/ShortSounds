@@ -14,6 +14,9 @@ import android.widget.Toast;
 public class ShortSoundsApplication extends Application {
     private static Context context;
 
+    /**
+     * Sets up the ShortSounds application when the app is created
+     */
     @Override
     public void onCreate(){
         super.onCreate();
