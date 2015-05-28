@@ -2,10 +2,16 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.TextView;
+
+import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.controller.ModelControl;
 
 /**
  * TrackSwipeListener is a helper class that takes care of the "swipe to delete" feature as well
@@ -149,4 +155,28 @@ public class TrackSwipeListener implements View.OnTouchListener {
         }
         return false;
     }
+//    private void confirmDelete() {
+//        if (!ModelControl.instance().isPlaying() && !ModelControl.instance().isRecording()) {
+//            final String name = ((TextView)mView.findViewById(R.id.track_title)).getText().toString();
+//            new AlertDialog.Builder(mView.getContext())
+//                    .setTitle("\tDelete track?")
+//                    .setIcon(R.drawable.ic_action_mic)
+//                    .setMessage("Are you sure you want to delete track" + name + "?")
+//                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            dialog.dismiss();
+//                        }
+//                    })
+//                    .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            mListener.onTrackDelete();
+//                            ((ShortSoundsApplication) mView.getContext().getApplicationContext())
+//                                    .showToast(name + " deleted");
+//                            dialog.dismiss();
+//                        }
+//                    }).create().show();
+//        }
+//    }
 }
