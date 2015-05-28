@@ -43,6 +43,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     public static final String KEY_CREATED_AT = "created_at";
     public static final String KEY_UPDATED_AT = "updated_at";
     public static final String KEY_SHORT_SOUND_ID = "short_sound_id";
+    public static final String NEXT_TRACK_NUM = "next_track_num";
     public static final String KEY_TRACK_FILENAME_ORIGINAL = "filename_original";
     public static final String KEY_TRACK_FILENAME_MODIFIED = "filename_modified";
     public static final String EQ_EFFECT_PARAMS = "eq_effects";
@@ -57,6 +58,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                     "CREATE TABLE " + TABLE_NAME + " (" +
                     KEY_ID + " INTEGER PRIMARY KEY," +
                     KEY_TITLE + " TEXT, " +
+                    NEXT_TRACK_NUM + " INTEGER," +
                     KEY_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
                     KEY_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP);";
 
@@ -163,6 +165,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         Log.d("DB_TEST", "ShortSoundSQLHelper:insertShortSound()");
         ContentValues values = new ContentValues();
         values.put( KEY_TITLE, ss.getTitle() );
+        values.put( NEXT_TRACK_NUM, ss.getNextTrackNumber() );
         return db.insert( TABLE_NAME, null, values );  // Returns the new entry id
     }
 
@@ -176,6 +179,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         ContentValues args = new ContentValues();
         args.put( KEY_TITLE, ss.getTitle() );
         args.put( KEY_UPDATED_AT, this.getCurrentTimestamp() );
+        args.put( NEXT_TRACK_NUM, ss.getNextTrackNumber() );
         db.update( TABLE_NAME, args, strFilter, null );
         Log.d("DB_TEST", "Updated ShortSound: " + ss.toString() );
     }

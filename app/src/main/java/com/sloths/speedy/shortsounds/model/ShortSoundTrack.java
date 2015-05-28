@@ -55,8 +55,8 @@ public class ShortSoundTrack {
      * @postcondition This ShortSoundTrack will be stored in the database and a
      *      copy of the file referenced by filename will be made.
      */
-    public ShortSoundTrack( File audioFile, long shortSoundId ) {
-        this.title = DEFAULT_TITLE;
+    public ShortSoundTrack( File audioFile, long shortSoundId, int nextTrackNum ) {
+        this.title = "Track " + nextTrackNum;
         this.parentId = shortSoundId;
         this.mEqEffect = new EqEffect();
         this.mReverbEffect = new ReverbEffect();
