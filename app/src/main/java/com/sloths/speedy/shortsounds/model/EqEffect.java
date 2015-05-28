@@ -269,6 +269,8 @@ public class EqEffect extends Effect {
     @Override
     public void enable() {
         if ( this.effect == null ) {
+            //TODO DO NOT ERASE
+            //TODO deal with null case
             Log.e(TAG, "Error trying to enable EQ effect that is null");
         } else {
             Log.d(TAG, "Enabled EQ effect");
@@ -282,6 +284,8 @@ public class EqEffect extends Effect {
      */
     public void disable() {
         if ( this.effect == null ) {
+            //TODO DO NOT ERASE
+            //TODO deal with null case
             Log.e(TAG, "Error trying to disable EQ effect that is null");
         } else {
             Log.d(TAG, "Disabled EQ effect");

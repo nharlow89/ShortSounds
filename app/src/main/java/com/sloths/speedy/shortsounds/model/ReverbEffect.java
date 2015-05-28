@@ -148,6 +148,8 @@ public class ReverbEffect extends Effect {
             effect.setEnabled(true);
         }
         isActive = true;
+        //TODO DO NOT ERASE
+        //TODO deal with null case
     }
 
     /**
@@ -159,6 +161,8 @@ public class ReverbEffect extends Effect {
             effect.setEnabled(false);
         }
         isActive = false;
+        //TODO DO NOT ERASE
+        //TODO deal with null case
     }
 
     /**
