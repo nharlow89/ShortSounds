@@ -775,9 +775,7 @@ public class MainActivity extends FragmentActivity
     private void deleteShortSound() {
         if (mActiveShortSound != null) {
             this.position = -1;
-            Log.d("CHECK", "" + sounds.size());
             sounds.remove(mActiveShortSound);
-            Log.d("CHECK", "" + sounds.size());
             mActiveShortSound.removeShortSound();
             mShortSoundsTitles = getShortSoundTitles(ShortSound.getAll());
             createNew();
@@ -785,8 +783,8 @@ public class MainActivity extends FragmentActivity
     }
 
     public void removeShortSoundTrack(int track) {
-        modelControl.removeTrack(track);
         mActiveShortSound.removeTrack(mActiveShortSound.getTracks().get(track));
+        modelControl.removeTrack(track);
     }
 
 

@@ -86,7 +86,7 @@ public class ModelControl implements PlaybackListener {
         // Create the new ShortSoundTrack (that this will record to)
         ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
         mActiveShortSound.addTrack(newTrack);
-        mAudioPlayer.addTrack(newTrack);
+        if (!isNewShortSound) mAudioPlayer.addTrack(newTrack);
         mAudioRecorder.reset();  // Have to reset for the next recording
         if ( isNewShortSound )
             return mActiveShortSound;
@@ -100,12 +100,6 @@ public class ModelControl implements PlaybackListener {
             if (!mAudioRecorder.isRecording()) {
                 mAudioPlayer.stopAll();
             }
-//            boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
-//            if (isOkToPlayAllWithNewPosition) {
-//                // TODO: This scenario is super buggy
-//                mAudioPlayer.stopAll();
-//                mAudioPlayer.playAll(this.seekBarPosition);
-//            }
         }
     }
 
@@ -166,14 +160,6 @@ public class ModelControl implements PlaybackListener {
     }
 
     public void volumeChanged(int track, float volume) { mAudioPlayer.volumeChanged(track, volume); }
-
-//    public void endOfTrack() {
-//        seekBarPosition = 0;
-//
-////        mGlobalSeekBar.setProgress(0);
-////        onPlayToggle();
-//        // TODO: Update Play Button
-//    }
 
     /**
      * This method does what it says, it goes through and cleans up any resources that were
