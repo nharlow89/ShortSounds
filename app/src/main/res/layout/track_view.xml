@@ -28,16 +28,13 @@
 
             <TextView
                 android:id="@+id/track_title"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center"
                 android:textColor="@android:color/primary_text_light"
                 android:textSize="24sp"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentBottom="false"
-                android:layout_alignParentRight="true"
+                android:layout_centerInParent="true"
                 android:padding="10dip" />
 
             <ImageButton
