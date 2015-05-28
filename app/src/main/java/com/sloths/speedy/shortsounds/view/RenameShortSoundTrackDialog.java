@@ -9,7 +9,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import com.sloths.speedy.shortsounds.R;
-import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 /**
  * This DialogFragment inflates a dialog box to rename a ShortSound.
@@ -18,7 +17,10 @@ public class RenameShortSoundTrackDialog extends DialogFragment {
     static String DialogboxTitle;
     private int track;
 
-
+    /**
+     * Sets the track to the desired track
+     * @param track the number of the track in the desired ShortSound
+     */
     public void setTrack(int track) {
         this.track = track;
     }
