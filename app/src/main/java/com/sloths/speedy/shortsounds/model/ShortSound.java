@@ -206,6 +206,33 @@ public class ShortSound {
     }
 
     /**
+     *
+     * @param o the object to compare
+     * @return true if this ShortSound is equal to the given ShortSound
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ShortSound))
+            return false;
+        ShortSound ss = (ShortSound) o;
+        if ((ss.tracks.size() != tracks.size()) || (id != ss.id) || (!title.equals(ss.title)))
+            return false;
+        for (int i = 0; i < tracks.size(); i++) {
+            if (!tracks.get(i).equals(ss.tracks.get(i)))
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return the hashcode of this ShortSound
+     */
+    @Override
+    public int hashCode() {
+        return (int) (title.hashCode() * (id + 13) * 17);
+    }
+
+    /**
      * Get the id associated with this ShortSound.
      * @return long
      */

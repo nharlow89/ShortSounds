@@ -27,4 +27,6 @@ public abstract class EffectController {
      */
     public abstract void resetModel();
 
+
+
 }

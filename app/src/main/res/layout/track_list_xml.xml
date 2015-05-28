@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <com.sloths.speedy.shortsounds.view.TrackView
+    <com.sloths.speedy.shortsounds.view.TrackList
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/track_list"
+    android:id="@+id/track_list_not"
     android:clickable="true">
-    </com.sloths.speedy.shortsounds.view.TrackView>
+    </com.sloths.speedy.shortsounds.view.TrackList>

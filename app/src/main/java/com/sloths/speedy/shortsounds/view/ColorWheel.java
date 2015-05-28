@@ -7,7 +7,7 @@ import com.sloths.speedy.shortsounds.R;
 
 /**
  * Created by nj on 5/26/15.
- *
+ * TODO get color by index 0 - 5 and create save color in SQL database
  * The ColorWheel distributes a primary and secondary color for the list of tracks
  */
 public class ColorWheel {

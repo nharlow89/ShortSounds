@@ -23,8 +23,7 @@ import java.util.Map;
  * This player is capable of playing multiple tracks or a single track.
  */
 public class AudioPlayer {
-    public static final String DEBUG_TAG = "SHORT_SOUNDS";
-    private static final String TAG = "AudioPlayer";
+    public static final String TAG = "AudioPlayer";
     public Float MAX_VOLUME = 1.0f;
     public Float MIN_VOLUME = 0.0f;
 
@@ -41,7 +40,7 @@ public class AudioPlayer {
     private ModelControl mModelControl;
 
     public AudioPlayer( ShortSound ss ) {
-        Log.d(DEBUG_TAG, "Creating new AudioPlayer");
+        Log.d(TAG, "Creating new AudioPlayer");
         trackPlayers = new HashMap<>();
         tracks = new ArrayList<>();
         mModelControl = ModelControl.instance();
@@ -62,7 +61,7 @@ public class AudioPlayer {
      * Teardown and cleanup any resources that were in use by this AudioPlayer.
      */
     public void destroy() {
-        Log.d(DEBUG_TAG, "Destroying AudioPlayer.");
+        Log.d(TAG, "Destroying AudioPlayer.");
         for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
             TrackPlayer trackPlayer = entry.getValue();
             trackPlayer.destroy();
@@ -74,21 +73,21 @@ public class AudioPlayer {
      * (an integer percentage of the total length).
      */
     public void playAll( int position ) {
-        Log.d(DEBUG_TAG, "Play all tracks starting at ["+position+"%]");
+        Log.d(TAG, "Play all tracks starting at ["+position+"%]");
         if (mCurrentShortSound.getLongestTrack() == null) {
             return;
         }
         long longestTrackMaxByteOffset = mCurrentShortSound.getLongestTrack().getLengthInBytes();
         long longestBytePosition = (longestTrackMaxByteOffset * position) / 100 ;
         //if (longestBytePosition % 2 == 1) longestBytePosition--;
-        Log.d(DEBUG_TAG, "longestTrackMaxByteOffset ["+longestTrackMaxByteOffset+"]");
-        Log.d(DEBUG_TAG, "longestBytePosition ["+longestBytePosition+"]");
+        Log.d(TAG, "longestTrackMaxByteOffset ["+longestTrackMaxByteOffset+"]");
+        Log.d(TAG, "longestBytePosition ["+longestBytePosition+"]");
 
         for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
             entry.getValue().stop();
 
             if (position == 0) {
-                Log.d(DEBUG_TAG,"play position 0");
+                Log.d(TAG,"play position 0");
                 entry.getValue().play(position);
             } else {
                 ShortSoundTrack currentTrack = entry.getKey();
@@ -96,9 +95,9 @@ public class AudioPlayer {
                 boolean isPlayable = currentTrackMaxByteOffset >= longestBytePosition;
                 if ( isPlayable ) {
                     // play with a normalized position
-                    Log.d(DEBUG_TAG, "DIV " + longestBytePosition + "/" + currentTrackMaxByteOffset);
+                    Log.d(TAG, "DIV " + longestBytePosition + "/" + currentTrackMaxByteOffset);
                     double normalizedPosition = ((double)longestBytePosition / (double)currentTrackMaxByteOffset) * 100.0 ;
-                    Log.d(DEBUG_TAG, "normalized position ["+(int)Math.round(normalizedPosition)+"]");
+                    Log.d(TAG, "normalized position ["+(int)Math.round(normalizedPosition)+"]");
                     entry.getValue().play((int)Math.round(normalizedPosition));
                 }
             }
@@ -319,7 +318,7 @@ public class AudioPlayer {
 
                 @Override
                 public void onPeriodicNotification(AudioTrack track) {
-                    Log.d(DEBUG_TAG, "PlaybackListener");
+                    Log.d(TAG, "PlaybackListener");
                     // TODO: update seekbar
 
                 }
@@ -335,7 +334,7 @@ public class AudioPlayer {
          * Cleanup any resources tied to this TrackPlayer.
          */
         public void destroy() {
-            Log.d(DEBUG_TAG, "Destroy TrackPlayer associated with Track["+track.getId()+"]");
+            Log.d(TAG, "Destroy TrackPlayer associated with Track["+track.getId()+"]");
             // Cleanup any effect objects
             track.releaseEffects();
             // Take care of the input stream.
@@ -343,7 +342,7 @@ public class AudioPlayer {
                 try {
                     audioInputStream.close();
                 } catch (IOException e) {
-                    Log.d(DEBUG_TAG, "Failed closing an existing AudioInputStream.");
+                    Log.d(TAG, "Failed closing an existing AudioInputStream.");
                     e.printStackTrace();
                 }
             }
@@ -371,7 +370,7 @@ public class AudioPlayer {
             float maxVolume = AudioTrack.getMaxVolume();
             int result = audioTrack.setAuxEffectSendLevel(maxVolume);
             if ( result != AudioTrack.SUCCESS )
-                Log.e(DEBUG_TAG, "ERROR: unable to set the effect volume");
+                Log.e(TAG, "ERROR: unable to set the effect volume");
         }
 
         private void setInputStream( int position ) {
@@ -418,7 +417,7 @@ public class AudioPlayer {
             AudioTask task = new AudioTask();
             audioThread = new Thread(task);
             audioThread.start();
-            Log.d(DEBUG_TAG, "Play track [" + track.getId() + "] from new thread.");
+            Log.d(TAG, "Play track [" + track.getId() + "] from new thread.");
         }
 
         /**
@@ -426,7 +425,7 @@ public class AudioPlayer {
          */
         public void stop() {
             if ( trackState == TrackState.PLAYING || trackState == TrackState.PAUSED ) {
-                Log.d(DEBUG_TAG, "Stop track["+track.getId()+"].");
+                Log.d(TAG, "Stop track["+track.getId()+"].");
                 audioTrack.flush();  // Clear the playback buffer and set Playback position to 0
                 trackState = TrackState.STOPPED;
                 try {
@@ -436,7 +435,7 @@ public class AudioPlayer {
                     e.printStackTrace();
                 }
             } else {
-                Log.w(DEBUG_TAG, "Tried to stop track[" + track.getId() + "] but was already stopped");
+                Log.w(TAG, "Tried to stop track[" + track.getId() + "] but was already stopped");
             }
         }
 
@@ -445,12 +444,12 @@ public class AudioPlayer {
          */
         public void pause() {
             if ( trackState == TrackState.PLAYING ) {
-                Log.d(DEBUG_TAG, "Pause track [" + track.getId() + "]");
+                Log.d(TAG, "Pause track [" + track.getId() + "]");
                 audioTrack.pause();
                 trackState = TrackState.PAUSED;
 //                track.getmEqEffect().disable();  // TODO remove after eq debugging
             } else {
-                Log.e(DEBUG_TAG, "Tried to pause track ["+track.getId()+"] in invalid state ["+trackState+"]");
+                Log.e(TAG, "Tried to pause track ["+track.getId()+"] in invalid state ["+trackState+"]");
             }
         }
 
@@ -474,7 +473,7 @@ public class AudioPlayer {
             @Override
             public void run() {
                 try {
-                    Log.d(DEBUG_TAG, "Running thread to play ShortSoundTrack["+track.getId()+"]");
+                    Log.d(TAG, "Running thread to play ShortSoundTrack["+track.getId()+"]");
                     audioTrack.play();
                     int bytesRead;
                     while( trackState == TrackState.PLAYING && (bytesRead = audioInputStream.read( audioTrackBuffer ) ) != -1 ) {
@@ -486,7 +485,7 @@ public class AudioPlayer {
                     }
                     if ( trackState == TrackState.PLAYING ) {
                         // We reached the end of the track
-                        Log.d(DEBUG_TAG, "Reached end of track["+track.getId()+"]");
+                        Log.d(TAG, "Reached end of track["+track.getId()+"]");
                         stop();
                     }
                 } catch (IOException e) {
@@ -502,7 +501,7 @@ public class AudioPlayer {
     }
 
     public interface PlaybackCompleteListener {
-        public void playbackComplete();
+        void playbackComplete();
     }
 
     public ShortSoundTrack getTrack(int pos) {

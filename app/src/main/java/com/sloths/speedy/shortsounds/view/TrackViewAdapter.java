@@ -35,7 +35,7 @@ import java.util.List;
  * The RecyclerViewAdapter takes track data and uses it to populate the views associated
  * with the RecyclerView
  */
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.ViewHolder> {
     public static final String TAG = "RecyclerViewAdapter";
     MainActivity main;
     private Context mContext;
@@ -51,7 +51,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      * Constructor for the RecyclerViewAdapter.
      * @param context The Context associated with this RecyclerViewAdapter.
      */
-    public RecyclerViewAdapter(Context context) {
+    public TrackViewAdapter(Context context) {
         this.mContext = context;
         main = (MainActivity) context;
         colorWheel = ColorWheel.instance();
@@ -259,6 +259,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             trackAnimator.deleteTrackView();
+
                             ((ShortSoundsApplication) mContext.getApplicationContext())
                                     .showToast(name + " deleted");
                             dialog.dismiss();
@@ -427,6 +428,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
              * Deletes a track from the view and notifies the appropriate model classes
              */
             public void deleteTrackView() {
+                final TrackList trackList =
+                        (TrackList) ((Activity)mContext).findViewById(R.id.track_list);
                 Animation a;
                 if (vTrackChild.getVisibility() == View.VISIBLE) {
                     a = getCollapseAnimation(vTrackChild);
@@ -439,6 +442,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                             main.removeShortSoundTrack(position);
                             Log.i(TAG, "track " + position + " deleted");
                             notifyItemRemoved(position);
+                            main.updateRecordText();
                         }
                         @Override
                         public void onAnimationRepeat(Animation animation) { }
@@ -448,6 +452,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     int position = getPosition();
                     main.removeShortSoundTrack(position);
                     notifyItemRemoved(position);
+                    main.updateRecordText();
                 }
 
 

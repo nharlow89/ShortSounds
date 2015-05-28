@@ -69,15 +69,16 @@ public class ModelControl implements PlaybackListener {
     }
 
     @Override
-    public ShortSound onRecordStop( ShortSound mActiveShortSound ) {
+    public void onRecordStop( ShortSound mActiveShortSound ) {
         File recordedFile = mAudioRecorder.end();
         Log.d("DEBUG", "endRecording() recordedFile: " + recordedFile.getAbsolutePath());
 
-        boolean isNewShortSound = mActiveShortSound == null;
+        boolean isNewShortSound = mActiveShortSound == null || mActiveShortSound.getSize() == 0;
         if ( isNewShortSound ) {
             // Case 1. There is no active ShortSound, create one and continue.
             // Create the new ShortSound and add it the list.
-            mActiveShortSound = new ShortSound();
+            if (mActiveShortSound == null)
+                mActiveShortSound = new ShortSound();
             mAudioPlayer = new AudioPlayer(mActiveShortSound);
         } else {
             mAudioPlayer.stopAll();
@@ -88,9 +89,9 @@ public class ModelControl implements PlaybackListener {
         mActiveShortSound.addTrack(newTrack);
         mAudioPlayer.addTrack(newTrack);
         mAudioRecorder.reset();  // Have to reset for the next recording
-        if ( isNewShortSound )
-            return mActiveShortSound;
-        return null;
+//        if ( isNewShortSound )
+//            return mActiveShortSound;
+//        return null;
     }
 
     @Override
@@ -192,4 +193,5 @@ public class ModelControl implements PlaybackListener {
         ShortSoundTrack sst = mAudioPlayer.getTrack(track);
         mAudioPlayer.removeTrack(sst);
     }
+
 }

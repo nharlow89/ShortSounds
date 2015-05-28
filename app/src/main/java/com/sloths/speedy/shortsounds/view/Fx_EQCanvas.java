@@ -58,7 +58,7 @@ public class Fx_EQCanvas extends View {
         currentGroup = PointInit.NONE;
     }
 
-    public void resetPoints() {
+    private void resetPoints() {
         left = new EQPointF(0, getMeasuredHeight() / 2);
         right = new EQPointF(getMeasuredWidth(), getMeasuredHeight() / 2);
         lo = new PointGroup(PointInit.LO);
@@ -67,7 +67,7 @@ public class Fx_EQCanvas extends View {
         invalidate();
     }
 
-    void setStyles() {
+    private void setStyles() {
         // Paint specs for line
         linePaint.setAntiAlias(true);
         linePaint.setColor(Color.GREEN);

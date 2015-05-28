@@ -11,7 +11,7 @@ public interface PlaybackListener {
 
     boolean onPlayToggle();
     void onRecordStart();
-    ShortSound onRecordStop( ShortSound sound );
+    void onRecordStop( ShortSound sound );
     void soloTrack(int track);
     boolean isTrackSolo(int track);
     void volumeChanged(int track, float volume);

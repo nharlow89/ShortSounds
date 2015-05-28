@@ -23,14 +23,13 @@ import java.util.HashMap;
  * file. A ShortSoundTrack should belong to a single ShortSound at any given time.
  */
 public class ShortSoundTrack {
-    public static final String DEBUG_TAG = "SHORT_SOUNDS";
+    public static final String TAG = "ShortSoundTrack";
     // AudioTrack Params
     public static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
     public static final int SAMPLE_RATE = 44100;  // NOTE: also used for buffer size
     public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_MONO;
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     public static final int MODE = AudioTrack.MODE_STREAM;
-    private static final String TAG = "ShortSoundTrack";
     public static int BUFFER_SIZE = 44100; // Default
     public static float DEFAULT_VOLUME = 0.8f;
 
@@ -334,8 +333,28 @@ public class ShortSoundTrack {
         }
     }
 
+    /**
+     * @return true if the given object is equal to this one
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ShortSoundTrack))
+            return false;
+        ShortSoundTrack sst = (ShortSoundTrack) o;
+        return fileName.equals(sst.fileName) &&
+               id == sst.id && mTrackLength == sst.mTrackLength;
+    }
+
+    /**
+     * @return the hashCode of this ShortSoundTrack
+     */
+    @Override
+    public int hashCode() {
+        return fileName.hashCode() * 17 + (int) (13 * id / mTrackLength);
+    }
+
     public void releaseEffects() {
-        Log.d(DEBUG_TAG, "Release effects associated with track["+this.id+"]");
+        Log.d(TAG, "Release effects associated with track["+this.id+"]");
         mReverbEffect.release();
         mEqEffect.release();
     }
