@@ -38,8 +38,8 @@ public class Fx_ReverbCanvas extends View {
 
     /**
      * Constructor for setting up the canvas
-     * @param c
-     * @param attrs
+     * @param c The context of where to make the canvas
+     * @param attrs The attributes of the canvas
      */
     public Fx_ReverbCanvas(Context c, AttributeSet attrs) {
         super(c, attrs);
@@ -84,6 +84,7 @@ public class Fx_ReverbCanvas extends View {
      * On draw is used to actually draw on the canvas
      * It's main purpose is to draw the updated point, line &
      * the echo lines.
+     * @param canvas the Canvas to draw on
      */
     @Override
     protected void onDraw(Canvas canvas) {
@@ -152,8 +153,8 @@ public class Fx_ReverbCanvas extends View {
 
     /**
      * This handles touching and controlling points
-     * @param event
-     * @return
+     * @param event The motion event (i.e. touching the screen, moving, or lifting)
+     * @return true if successful, false otherwise
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -188,6 +189,8 @@ public class Fx_ReverbCanvas extends View {
      * Uses the controller to update the backend model
      * This will let the backend change its parameters for controlling
      * the effect
+     * @param x The x value of the point
+     * @param y the y value of the point
      */
     private void controlGraphicsAndEffect(float x, float y) {
         controlGraphics(x, y);
@@ -196,6 +199,11 @@ public class Fx_ReverbCanvas extends View {
         }
     }
 
+    /**
+     * Controls the graphics
+     * @param x the x value of the point
+     * @param y the y value of the point
+     */
     private void controlGraphics(float x, float y) {
         point.set(x, y);
         setLine();
@@ -213,7 +221,7 @@ public class Fx_ReverbCanvas extends View {
 
     /**
      * Sets the controller the for the backend
-     * @param controller
+     * @param controller The controller that will be set to control the back end
      */
     public void setController(ReverbEffectController controller) {
         this.controller = controller;
@@ -221,7 +229,7 @@ public class Fx_ReverbCanvas extends View {
 
     /**
      * Gets the value of the point that controls the UI
-     * @return PointF
+     * @return PointF, the value of the point that controls the UI
      */
     public PointF getValue() {
         float percentX = point.x / (float) getMeasuredWidth();
@@ -231,7 +239,7 @@ public class Fx_ReverbCanvas extends View {
 
     /**
      * Sets the value for the point that controls the UI
-     * @param value
+     * @param value the point that controls the UI
      */
     public void setValue(PointF value) {
         // Data coming from database
@@ -253,6 +261,9 @@ public class Fx_ReverbCanvas extends View {
         private float x;
         private float y;
 
+        /**
+         * Creates a ControlPoint
+         */
         ControlPoint() {
             RECTSIZE = getMeasuredWidth() / 16f;
             // Initialize x & y at default locations
@@ -267,8 +278,8 @@ public class Fx_ReverbCanvas extends View {
 
         /**
          * Sets new values for the point
-         * @param x
-         * @param y
+         * @param x The new x value for the point
+         * @param y The new y value for the point
          */
         void set(float x, float y) {
             if (x > X_MIN + 4 * MARGIN && x < X_MAX - 4 * MARGIN)
@@ -346,7 +357,7 @@ public class Fx_ReverbCanvas extends View {
 
         /**
          * Draws the echos
-         * @param canvas
+         * @param canvas The canvas to draw the echoes on
          */
         void draw(Canvas canvas) {
             for (int i = 0; i < ECHO_SIZE; i++) {

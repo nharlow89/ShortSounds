@@ -24,7 +24,7 @@ public class FloatingActionButtonBasicFragment extends Fragment implements Float
      * @param inflater the LayoutInflator
      * @param container the ViewGroup
      * @param savedInstanceState the Bundle
-     * @return
+     * @return The root view
      */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

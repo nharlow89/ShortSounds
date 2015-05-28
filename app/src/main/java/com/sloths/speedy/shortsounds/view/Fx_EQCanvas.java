@@ -46,8 +46,8 @@ public class Fx_EQCanvas extends View {
 
     /**
      * Constructor for setting up the canvas
-     * @param c
-     * @param attrs
+     * @param c The current context
+     * @param attrs The attributes for the canvas
      */
     public Fx_EQCanvas(Context c, AttributeSet attrs) {
         super(c, attrs);
@@ -96,9 +96,10 @@ public class Fx_EQCanvas extends View {
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
     }
 
-    /** On draw is used to actually draw on the canvas
-    * It's main purpose is to draw the new two points and line
-    */
+    /**
+     * On draw is used to actually draw on the canvas
+     * It's main purpose is to draw the new two points and line
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -180,6 +181,7 @@ public class Fx_EQCanvas extends View {
 
     /**
      * This is where we will handle controlling points
+     * @param event the current motion event
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -238,7 +240,7 @@ public class Fx_EQCanvas extends View {
 
     /**
      * Gives the lo center point
-     * @return
+     * @return the lo center point
      */
     public PointF getPointA() {
         return getBand(lo.centerPoint);
@@ -246,7 +248,7 @@ public class Fx_EQCanvas extends View {
 
     /**
      * Gives the high center point
-     * @return
+     * @return the high center point
      */
     public PointF getPointB() {
         return getBand(hi.centerPoint);
@@ -254,8 +256,8 @@ public class Fx_EQCanvas extends View {
 
     /**
      * Helper method for turning the points values in terms of percentages
-     * @param point
-     * @return
+     * @param point the point to get percentage values of
+     * @return the a new point with values in terms of percentages
      */
     private PointF getBand(EQPointF point) {
         float midY = (float) getMeasuredHeight() / (float) 2;
@@ -268,7 +270,7 @@ public class Fx_EQCanvas extends View {
 
     /**
      * Sets the new values for the points
-     * @param points
+     * @param points the new values of the points
      */
     public void setValues(PointF[] points) {
         // Nothing pulled from model --> Set to default
@@ -296,7 +298,7 @@ public class Fx_EQCanvas extends View {
 
     /**
      * Sets the controller to be used for changing backend model values
-     * @param controller
+     * @param controller the controller to be used for changing the backend model
      */
     public void setController(EQEffectController controller) {
         this.controller = controller;
@@ -344,6 +346,10 @@ public class Fx_EQCanvas extends View {
         private EQPointF centerPoint;
         private EQPointF rightPoint;
 
+        /**
+         * Creates a new PointGroup
+         * @param init the initial PointInit
+         */
         PointGroup(PointInit init) {
             BANDWIDTH = getMeasuredWidth() / BANDWIDTH_DIVIDER;
             RECTSIZE = BANDWIDTH / RECT_DIVIDER;
@@ -363,8 +369,8 @@ public class Fx_EQCanvas extends View {
 
         /**
          * Sets the points to new values
-         * @param x
-         * @param y
+         * @param x the desired x value of the point
+         * @param y the desired y value of the point
          */
         void set(float x, float y) {
             if (x > BANDWIDTH / RECT_DIVIDER && x < getMeasuredWidth() - BANDWIDTH / RECT_DIVIDER) {

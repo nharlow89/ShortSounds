@@ -45,18 +45,40 @@ public class FloatingActionButton extends FrameLayout implements Checkable {
     // A listener to communicate that the FAB has changed it's state
     private OnCheckedChangeListener mOnCheckedChangeListener;
 
+    /**
+     * Creates a Floating Action Button
+     * @param context The context in which to create the button
+     */
     public FloatingActionButton(Context context) {
         this(context, null, 0, 0);
     }
 
+    /**
+     * Creates a Floating Action Button
+     * @param context The context in which to create the button
+     * @param attrs The attributes to apply to the button
+     */
     public FloatingActionButton(Context context, AttributeSet attrs) {
         this(context, attrs, 0, 0);
     }
 
+    /**
+     * Creates a Floating Action Button
+     * @param context The context in which to create the button
+     * @param attrs The attributes to apply to the button
+     * @param defStyleAttr The style attributes to apply to the button
+     */
     public FloatingActionButton(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
+    /**
+     * Creates a Floating Action Button
+     * @param context The context in which to create the button
+     * @param attrs The attributes to apply to the button
+     * @param defStyleAttr The style attributes to apply to the button
+     * @param defStyleRes The style res to apply to the button
+     */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public FloatingActionButton(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
@@ -107,11 +129,18 @@ public class FloatingActionButton extends FrameLayout implements Checkable {
         mOnCheckedChangeListener = listener;
     }
 
+    /**
+     * Returns whether or not the button is checked
+     * @return true if it is checked, false otherwise
+     */
     @Override
     public boolean isChecked() {
         return mChecked;
     }
 
+    /**
+     * Toggles the button (if was checked, is no longer checked and vice versa)
+     */
     @Override
     public void toggle() {
         setChecked(!mChecked);
@@ -126,6 +155,13 @@ public class FloatingActionButton extends FrameLayout implements Checkable {
         return super.performClick();
     }
 
+    /**
+     * Changes the size of the button
+     * @param w width
+     * @param h height
+     * @param oldw old width
+     * @param oldh old height
+     */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -136,6 +172,11 @@ public class FloatingActionButton extends FrameLayout implements Checkable {
         invalidateOutline();
     }
 
+    /**
+     * Creates a drawable state
+     * @param extraSpace the amount of extra space
+     * @return the drawable state
+     */
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
         final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);
