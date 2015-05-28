@@ -70,12 +70,18 @@
       Conceptual Models
     </h3>
     <p>
-      A ShortSound is essentially a compilation of separate tracks that each have their own effects.  In order to demonstrate this concept, each track within a ShortSound has its own separate view, where effects can be added and adjusted.
+      A ShortSound is essentially a compilation of separate tracks that each have their own effects.  In order to demonstrate this concept, each track within a ShortSound has its own separate pull-down view, where effects can be added and adjusted.
     </p> <p>  
-      Effects are designed to be as intuitive as possible, modeled as either adjustable knobs that the user can slide up and down, as with effect controllers in the real world, or modeled as a graph where changes along the x axis affects one variable, and changes along the y axis affect the other variable.
+      Effects are designed to be as intuitive as possible, modeled as a graph where changes along the x axis affects one variable, and changes along the y axis affect the other variable.
     </p> <p>
       The ShortSounds library is modeled after other software music libraries, with all of the ShortSounds in a list, along with a share button and a play button for each individual sound.
-    </p> <p>  
+    </p> 
+
+    <h3>
+      <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+      ShortSound Workflow
+    </h3>
+    <p>  
       If a user wishes to create a new ShortSound, the user will first record a track.  After that, the user has the option to add effects to the track or record another track.  Effects can always be added or adjusted later after recording new tracks as well.  After recording and editing as many tracks as desired, the user will save their ShortSound to the ShortSound library to listen to, share, or edit later.
     </p> <p>  
       If a user wishes to edit a previously created ShortSound, the user would select the desired ShortSound from the ShortSound library.  Then the user could either add or remove tracks from the ShortSound or add effects to the current tracks in the ShortSound.  The user could then save and/or share the edited ShortSound.
@@ -90,21 +96,27 @@
     </p>
     <h4>Record a Track</h4>
     <p>  
-      The application’s home screen should have the words “RECORD A SOUND” and a red recording button. To begin recording, press the button. When you are finished, press the red recording button for a second time to stop the recording. After you have recorded your track, the screen will look like the second phone diagram in the top row of Figure 1.  To listen to the track that you have just recorded, press the little green play button in the upper right corner.
-    </p><p>      
-      Once you have a track recorded, you can either add effects to that track or a previously recorded track from your current ShortSound, save your ShortSound, or record a new track.  To record a new track, simply press the record button again to begin recording, and again to stop the recording, just as with your first track.
-    </p>
-    <h4>Delete a Track</h4>
-    <p>
-      To delete a track, swipe from right to left along the track’s name.  A delete button and a cancel button will appear.  Hit the button to delete the track, or cancel if you decide to keep the track and not delete it.
+      The application’s home screen should have the words “RECORD A SOUND” and a recording button.  To begin recording, press the button.  The timer immediately under the button will let you know how long you have been recording.  When you are finished, press the recording button for a second time to stop the recording.  After you have recorded your track, the screen will look like the second phone diagram in the top row of Figure 1.
     </p>
     <h4>Add effects to a Track</h4>
     <p>  
-      After you have recorded a track, there will be options for different effects to add in a box, as seen in the second phone diagram on the top of Figure 1.  If you have more than one track recorded, the tracks will be shown in layers as seen in the middle phone diagram on the bottom of Figure 1.  Touch the layer of the track that you wish to edit.  Pick one of the different effects options, and a screen will be displayed with either knobs or a graph to adjust the different components of the effect.  For example, if Reverb was the selected effect a graph would pop up as seen in the third phone diagram on the top of Figure 1.  Simply move the point up and down to adjust echo and left and right to adjust length.  As you are adding effects, you may press the green triangle play button near the track name to hear how the track sounds with the effect you are adding.  Alternatively, if you wish to hear how the whole ShortSound sounds with the effect that you are adding, you can press the large green play button on the bottom left of the screen.  Once you are done adjusting the effect, you can press the back arrow to return to the screen with all of your tracks, as shown in the top right phone diagram of Figure 1.  Now, there should be a checkmark next to the effect that you just added to the sound to show that the effect has been added to the track.  From here, you can either add another effect to this track or another track, record a new track, save your ShortSound to your library, or share your ShortSound.
+      After you have recorded a track, there will be options for different effects to add in a box, as seen in the second phone diagram on the top of Figure 1.  If you have more than one track recorded, the tracks will be shown in layers as seen in the first phone diagram on the bottom of Figure 1.  Touch the layer of the track that you wish to edit.  Pick one of the different effects options, and a screen will be displayed with either knobs or a graph to adjust the different components of the effect.  For example, if Reverb was the selected effect a graph would pop up as seen in the third phone diagram on the bottom of Figure 1.  Simply move the point to adjust echo and length.  After you click save (or cancel), you may press the white triangle play button near the bottom of the track to hear how the track sounds with the effect you are adding.  Alternatively, if you wish to hear how the whole ShortSound sounds with the effect that you are adding, you can press the play button on the bottom left of the screen.  Now, you can toggle the on/off switch by the effect to turn the effect that you have just adjusted on or off for the track.  From here, you can either add another effect to this track or another track, record a new track, save your ShortSound to your library, or share your ShortSound.
     </p>
-    <h4>Save a ShortSound to Your Library</h4>
-    <p>  
-      After you are content with your ShortSound and would like to save it to your library to listen to or work on again later, click the three dots in the upper right corner.  A menu will pop up.  Select save.  If you have not previously saved this ShortSound, you will be prompted for a name.  Type in a name for your ShortSound.  The saved ShortSound is available in your library.  From here, you can select the three dots in the upper right corner and select “New ShortSound” to start working on a new ShortSound, load a ShortSound from your library, or continue recording and/or adding effects to your current ShortSound. From here, you can create a new ShortSound, load a ShortSound from your library, or continue recording and/or adding effects to your current ShortSound.
+    <h4>Rename a Track</h4>
+    <p>
+      Tapping the track's title will present a dialog where you can change this.
+    </p>
+    <h4>Seek to Position in Track</h4>
+    <p>
+      Once one or more tracks are recorded, it is possible to select a position from which you would like to start playback. To do this, you simply click or drag the indicator on the seekbar located on the lower toolbar. The leftmost side of the seekbar represents the start of the tracks, the rightmost indicator represents the end of the tracks. If you are currently playing tracks, it will pause and you will have to hit play again. When you hit play, it will play from that position. 
+    </p>
+    <h4>Delete a Track</h4>
+    <p>
+      To delete a track, there is a "swipe to delete" funcionality. Simply swipe the track's title left or right until the track dissapears.
+    </p>
+    <h4>Rename a ShortSound</h4>
+    <p>
+      To rename a ShortSound, tap the menu option in the upper right corner of the screen.  Select the rename option.  A dialog box will appear.  Type in your desired name (something other than just whitespace) and click okay and the ShortSound will be renamed.  Click cancel and the ShortSound will retain its name.
     </p>
     <h4>Load a ShortSound From Your Library</h4>
     <p>  
@@ -112,16 +124,21 @@
     </p>
     <h4>Create a ShortSound</h4>
     <p>
-      If at any point, you would like to create a new ShortSound, simply click the menu button in the upper right corner and select new.  If you haven’t saved the ShortSound that you are currently working on, a dialog box will appear asking if you would like to save your current ShortSound first.  Respond accordingly.  You will now be at the screen in the upper left of Figure 1, creating a new ShortSound.
+      If at any point, you would like to create a new ShortSound, simply click the menu button in the upper right corner and select new.
     </p>
     <h4>Share a ShortSound</h4>
     <p>  
-      To share a ShortSound, you must first load the ShortSound from your library (or already have your ShortSound open).  Then click the menu button in the upper right corner and select the share option.  You will be given a list of different options of platforms on which to share your mp3 file that your ShortSound is saved on, including via Facebook and email.  Select your choice and share!
+      To share a ShortSound, you must first load the ShortSound from your library (or already have your ShortSound open).  Then click the share button in the upper right corner and select the share option.  You will be given a list of different options of platforms on which to share your file that your ShortSound is saved on, including via Facebook Messenger and email.  Select your choice and share!
     </p>
+    <h4>Delete a ShortSound</h4>
+    <p>
+      To delete a ShortSound, you must have it open.  Then, click the upper right menu button and hit delete.  Your ShortSound will be deleted, and the top ShortSound in your library will open.  If this was the only ShortSound in the library, a new Untitled ShortSound will be created and opened when the last ShortSound is deleted.
+    </p>
+    
 
     <p>
-      <img src="https://raw.githubusercontent.com/nharlow89/ShortSounds/gh-pages/deliverables/Master%20Prototype.jpg" width="100%"><br>
-      *Please note that this figure does not exactly convey how the application looks.  Some buttons, color, and detail may differ or be omitted in the application.  This picture is just for a general reference point.
+      <img src="https://raw.githubusercontent.com/nharlow89/ShortSounds/gh-pages/deliverables/ui.png" width="100%"><br>
+      * Please note that because this project is in development, the figure may not reflect the latest changes to our user interface.
     </p>  
 
     <h3>
