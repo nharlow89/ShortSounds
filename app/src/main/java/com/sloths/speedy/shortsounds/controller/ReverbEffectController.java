@@ -16,8 +16,8 @@ public class ReverbEffectController extends EffectController {
 
     /**
      * We need to store the reverb model and the previous values
-     * @param effect
-     * @param value
+     * @param effect the current effect
+     * @param value the previous values of the points
      */
     public ReverbEffectController(ReverbEffect effect, PointF value) {
         this.effect = effect;
@@ -31,7 +31,7 @@ public class ReverbEffectController extends EffectController {
 
     /**
      * This will be for changing the effect model
-     * @param effect
+     * @param effect the current effect
      */
     public void setEffect(ReverbEffect effect) {
         this.effect = effect;
@@ -42,7 +42,7 @@ public class ReverbEffectController extends EffectController {
      * Method for updating the parameter values held on the
      * reverb effect model. It will run a conversion function to
      * convert the point values to the actual effect params
-     * @param point
+     * @param point The point to convert to effect parameters
      */
     public void updateEffectValues(PointF point) {
         effect.setPointVal(point);

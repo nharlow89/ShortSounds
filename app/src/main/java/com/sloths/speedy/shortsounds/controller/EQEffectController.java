@@ -16,8 +16,8 @@ public class EQEffectController extends EffectController {
 
     /**
      * We need to store the EQ model & its previous values
-     * @param effect
-     * @param values
+     * @param effect the current effect
+     * @param values the previous values
      */
     public EQEffectController(EqEffect effect, PointF[] values) {
         this.effect = effect;
@@ -47,7 +47,7 @@ public class EQEffectController extends EffectController {
      * Method for updating the parameter values held on the
      * eq effect model. It will run a conversion function to
      * convert the point values to the actual effect params
-     * @param points
+     * @param points the point values
      */
     public void updateEffectValues(PointF[] points) {
         effect.setPointVals(points);
