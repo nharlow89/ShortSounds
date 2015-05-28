@@ -1,7 +1,6 @@
 package com.sloths.speedy.shortsounds.view;
 
 import android.content.Context;
-import android.view.View;
 
 import com.sloths.speedy.shortsounds.R;
 
@@ -9,6 +8,7 @@ import com.sloths.speedy.shortsounds.R;
  * Created by nj on 5/26/15.
  *
  * The ColorWheel distributes a primary and secondary color for the list of tracks
+ * The ColorWheel is a singleton
  */
 public class ColorWheel {
     private static ColorWheel instance = null;
@@ -19,13 +19,17 @@ public class ColorWheel {
     private static final int NUM_COLORS = 6;
 
 
-    // singleton pattern
+    /**
+     * Private constructor for a color wheel
+     */
     private ColorWheel() {
         pCount = 0;
         sCount = 0;
     }
 
     /**
+     * If no color wheel exists, constructs and returns one,
+     * else returns the instance of the colorwheel
      * @return a static instance of this colorwheel
      */
     public static ColorWheel instance() {
@@ -36,7 +40,7 @@ public class ColorWheel {
 
     /**
      * Takes a context to define colors and builds the values of the colorwheel
-     * @param mContext
+     * @param mContext The context of the app
      */
     public void buildWheel(Context mContext) {
         if (primary == null) {
@@ -62,6 +66,7 @@ public class ColorWheel {
     }
 
     /**
+     * Gets the next primary color in the color wheel
      * @return the next primary color in the color wheel
      */
     public int nextPrimary() {
@@ -75,6 +80,7 @@ public class ColorWheel {
     }
 
     /**
+     * Gets the next secondary color in the color whell
      * @return the next secondary color in the color wheel
      */
     public int nextSecondary() {
