@@ -156,10 +156,6 @@ public class ModelControl implements PlaybackListener {
      * @param mAudioPlayer the audio player to interact with the controller
      */
     public void setmAudioPlayer(AudioPlayer mAudioPlayer) {
-        // Whenever setting the AudioPlayer, we should check if there is already an existing one.
-        // If so, clean up any resources related to that AudioPlayer.
-        if ( this.mAudioPlayer != null )
-            this.cleanUpTheDirty();
         this.mAudioPlayer = mAudioPlayer;
     }
 
@@ -208,16 +204,6 @@ public class ModelControl implements PlaybackListener {
     }
 
     /**
-     * Goes through and cleans up any resources that were
-     * in use by the previously active shortsound.
-     * This includes AudioTracks, AudioRecorders,
-     * and Effect objects.
-     */
-    private void cleanUpTheDirty() {
-        mAudioPlayer.destroy();
-    }
-
-    /**
      * Determines whether or not the audio player is playing
      * @return true if playing, false otherwise
      */
@@ -234,4 +220,13 @@ public class ModelControl implements PlaybackListener {
         mAudioPlayer.removeTrack(sst);
     }
 
+    /**
+     * Release an existing AudioPlayer within this controller.
+     * This includes AudioTracks, AudioRecorders, and Effect objects.
+     */
+    public void release() {
+        if ( mAudioPlayer != null ) {
+            mAudioPlayer.destroy();
+        }
+    }
 }

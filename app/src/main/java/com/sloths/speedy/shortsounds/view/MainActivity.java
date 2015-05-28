@@ -433,6 +433,7 @@ public class MainActivity extends FragmentActivity
         mActiveShortSound = sounds.get(position);// Set the currently active ShortSound.
         Log.d("SHORT_SOUNDS", "Selected ShortSound ["+mActiveShortSound.getId()+"] from the sidebar.");
         //TODO double check this is not causing bugs
+        modelControl.release();
         modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
         currentView = TRACKS;
         // Highlight item, update title, close drawer
@@ -764,6 +765,7 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume");
         if (mActiveShortSound != null && sounds.contains(mActiveShortSound))
             selectShortSoundFromDrawer(sounds.indexOf(mActiveShortSound));
         else if (!sounds.isEmpty())
@@ -816,7 +818,8 @@ public class MainActivity extends FragmentActivity
         ShortSound newSound = new ShortSound();
         setTitle(newSound.getTitle());
         sounds.add(newSound);
-        modelControl.setmAudioPlayer(new AudioPlayer(newSound));  // Clear the existing AudioPlayer
+        modelControl.release();
+        modelControl.setmAudioPlayer(new AudioPlayer(newSound));
         mActiveShortSound = newSound;
         mDrawerList.setAdapter(new ArrayAdapter<>(this,
                 R.layout.drawer_list_item, getShortSoundTitles()));
