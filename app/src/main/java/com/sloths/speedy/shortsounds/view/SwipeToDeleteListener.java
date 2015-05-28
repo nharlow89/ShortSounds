@@ -8,10 +8,12 @@ public interface SwipeToDeleteListener {
     /**
      * Handles the event when a track is deleted
      */
-    public void onTrackDelete();
+    void onTrackDelete();
 
     /**
      * Handles the event when a track title is edited
      */
-    public void onEditTrackTitle();
+    void onEditTrackTitle();
+    
+    
 }
