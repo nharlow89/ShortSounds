@@ -50,13 +50,17 @@
     </h3>
     <p>
       Directory Structure (of the master branch)<br>
-      app/src/: Contains all the source code for the app.<br>
-      main/: Contains all the source code for the main app.<br>
-      java/com/sloths/speedy/shortsounds: Contains all the Java source code for the main app.<br>
-      res/: Contains various resources necessary for the main app (image files, XML files of the layout etc.<br>
-      AndroidManifest.xml: XML file containing some information about the app including its version number.<br>
-      androidTest/java/com/sloths/speedy/shortsounds/: Contains all the Java source code for the tests.<br>
-      README.md: Contains a link to the development webpage and documentation for both users and developers.
+      
+      <b>app/src/</b>: Contains all the source code for the app.<br>
+      <div style="padding-left: 20px;">
+        <b>main/</b>: Contains all the source code for the main app.<br>
+        <div style="padding-left: 20px;">
+          <b>java/com/sloths/speedy/shortsounds</b>: Contains all the Java source code for the main app.<br>
+          <b>res/</b>: Contains various resources necessary for the main app (image files, XML files of the layout etc.<br>
+        </div>
+        <b>androidTest/java/com/sloths/speedy/shortsounds/</b>: Contains all the Java source code for the tests.<br>
+      </div>
+      <b>README.md</b>: Contains a link to the development webpage and documentation for both users and developers.
     </p>
 
     <h3>
@@ -64,7 +68,7 @@
       Build Instructions
     </h3>
     <p>
-      These instructions assume you’re using Android Studio which can be downloaded here: <a href="https://developer.android.com/sdk/index.html">https://developer.android.com/sdk/index.html</a><br>
+      These instructions assume you’re using Android Studio which can be downloaded here: <a href="https://developer.android.com/sdk/index.html">https://developer.android.com/sdk/index.html</a>.
       After you’ve opened up the project, click on the Build tab and click Generate Signed APK…. Follow along with the Generate Signed APK Wizard that appears and an APK file will be generated in the destination folder you selected.
     </p>
 
@@ -80,7 +84,7 @@
       <ol>
         <li>Follow the Build Instructions to generate the .apk file</li>
         <li>Connect your android device to your computer via USB</li>
-        <li>Move the application (.apk file) onto your Android. http://developer.servalproject.org/dokuwiki/doku.php?id=content:android:tips:install_apk Instructions if needed</li>
+        <li>Move the application (.apk file) onto your Android. <a href="http://developer.servalproject.org/dokuwiki/doku.php?id=content:android:tips:install_apk">Instructions if needed</a>.</li>
         <li>Once the application is on your device, locate it using a file manager and click on it to install.</li>
         <li>Once installed, locate the app and run it!</li>
       </ol>
@@ -126,16 +130,14 @@
       Automated Build and Test
     </h3>
     <p>
-      To set up an automated build, a Short Sounds team member need only log into the dedicated Jenkin’s web server, located at DNS:
-      http://ec2-52-11-0-15.us-west-2.compute.amazonaws.com:8080/
+      To set up an automated build, a Short Sounds team member need only log into the dedicated Jenkin’s web server, located at DNS: <b>http://ec2-52-11-0-15.us-west-2.compute.amazonaws.com:8080/</b>.
     </p><p>
       * Cse 403 staff can login and view the Jenkin’s dashboard and the Short Sounds job with: 
-      <br>username: cse_403_staff
-      <br>password: emina
+      <br><span style="padding-left: 20px;">username: cse_403_staff</span>
+      <br><span style="padding-left: 20px;">password: emina</span>
     </p><p>
       If a Short Sounds team member has not previously created an account with Jenkins and logged in, they need to create an account and send their newly created username to Joel at the email:
-      sigoj@cs.washington.edu<br>
-      Joel will respond when they have been given the credentials to access the count.
+      <b>sigoj@cs.washington.edu</b>. Joel will respond when they have been given the credentials to access the count.
       Upon successfully logging in, creating a new automated build is as simple as click the Short Sounds job and hitting Build Now, located on the left.
     </p><p>
       In order to set up the daily build, I first launched an EC2 instance on Amazon AWS that runs an Ubuntu server. I installed Jenkins on the Ubuntu server. In order to get Jenkins to pull the Short Sounds master branch repository I installed the Git and GitHub plugins on Jenkins and then configured it with the repository information. I installed the Android Emulator Plugin. This enables Jenkins to launch a pre-defined emulator before it performs its build steps. I also installed the Gradle Build plugin so that we can perform Gradle builds, which is what Short Sounds utilizes. After installing the required plugins, I set up Jenkins to run 1 build and test a day automatically, as well as when changes are pushed to master. I created build steps that include:
@@ -165,7 +167,7 @@
       Bugs
     </h3>
     <p>
-      A list of bugs (both current and resolved) can be found in the repository page linked to above by clicking on the Issues tab on the side. To resolve a bug, you can either do it via commit messages (https://help.github.com/articles/closing-issues-via-commit-messages/)or through Pull Requests (https://github.com/blog/1506-closing-issues-via-pull-requests).
+      A list of bugs (both current and resolved) can be found in the repository page linked to above by clicking on the Issues tab on the side. To resolve a bug, you can either do it via <a href="https://help.github.com/articles/closing-issues-via-commit-messages/">commit messages</a> or through <a href="https://github.com/blog/1506-closing-issues-via-pull-requests">pull requests</a>.
     </p>
 
     <h3>
