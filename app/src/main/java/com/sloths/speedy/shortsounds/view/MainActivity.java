@@ -243,7 +243,7 @@ public class MainActivity extends FragmentActivity
     
     /**
      * Retrieve the currently selected ShortSound track names.
-     * @return
+     * @return the name of the current track
     */
     public String getCurrentTrackNameAt(int track) {
         Log.i(TAG, "getcurrentShortSoundNames()");
@@ -450,6 +450,9 @@ public class MainActivity extends FragmentActivity
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
+    /**
+     * Resets the seek bar to 0
+     */
     private void resetSeekBarToZero() {
         modelControl.updateCurrentPosition(0);
         mGlobalSeekBar.setProgress(0);
@@ -474,6 +477,9 @@ public class MainActivity extends FragmentActivity
         }
     }
 
+    /**
+     * Animates the track
+     */
     private void animateToTrack() {
         Animation in = animator.getInAnimation();
         Animation out = animator.getOutAnimation();
@@ -576,8 +582,8 @@ public class MainActivity extends FragmentActivity
      * for the EQ & Reverb effect.  It gets the view, attaches the controller to it,
      * attaches the model to the controller, and then sets the click listeners for cancel
      * and save.
-     * @param track
-     * @param effect
+     * @param track The track to set up the effect view on
+     * @param effect The name of the effect being set up
      */
     private void setupEffect(int track, String effect) {
         PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
@@ -752,6 +758,9 @@ public class MainActivity extends FragmentActivity
  
     }
 
+    /**
+     * Resumes state on reopening the app
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -787,6 +796,10 @@ public class MainActivity extends FragmentActivity
         }
     }
 
+    /**
+     * Removes a track from the ShortSound
+     * @param track The track to remove
+     */
     public void removeShortSoundTrack(int track) {
         modelControl.removeTrack(track);
         mActiveShortSound.removeTrack(mActiveShortSound.getTracks().get(track));
@@ -841,7 +854,8 @@ public class MainActivity extends FragmentActivity
 
     /**
      * Handles event okay selected from NoticeDialogFragment
-     * @param inputText
+     * to rename a ShortSound
+     * @param inputText the text inputted for the new title
      */
     @Override
     public void onRenameShortSound(String inputText) {
@@ -853,6 +867,11 @@ public class MainActivity extends FragmentActivity
         }
     }
 
+    /**
+     * Renames a track
+     * @param position the position of the track in the ShortSound to
+     *                 rename
+     */
     public void renameTrack(int position) {
         RenameShortSoundTrackDialog dialog = new RenameShortSoundTrackDialog();
         dialog.setTrack(position);
@@ -861,7 +880,7 @@ public class MainActivity extends FragmentActivity
 
     /**
      * Handles event okay selected from NoticeDialogFragment
-     * @param inputText
+     * @param inputText the input text from the user to rename the track title to
      */
     @Override
     public void onRenameShortSoundTrack(String inputText, int track) {
@@ -890,6 +909,9 @@ public class MainActivity extends FragmentActivity
         updateRecordText();
     }
 
+    /**
+     * Updates the record text
+     */
     public void updateRecordText() {
         TextView recordSound =
                 (TextView) animator.getChildAt(viewMap.get(TRACKS))
@@ -904,6 +926,9 @@ public class MainActivity extends FragmentActivity
         }
     }
 
+    /**
+     * draws the play button
+     */
     private void drawPlayButton() {
         mGlobalPlayButton.setImageDrawable(getResources()
                 .getDrawable(R.drawable.ic_action_play));//TODO
@@ -911,6 +936,9 @@ public class MainActivity extends FragmentActivity
                 .getColor(R.color.green_500), android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 
+    /**
+     * Cleans up resources and saves track state to the database
+     */
     // TODO: Clean up resources & Save track state to DB
     @Override
     public void onDestroy() {
@@ -973,10 +1001,11 @@ public class MainActivity extends FragmentActivity
     }
 
     /**
-     *
-     * @param effect
-     * @param position
-     * @return
+     * Checks to see if an effect is on
+     * @param effect The effect type to check
+     * @param position The position of the track that we are checking to see
+     *                 if it has the effect on
+     * @return true if effect is on in specified track, false otherwise
      */
     public boolean isEffectOn(Effect.Type effect, int position) {
         return mActiveShortSound.isEffectOn(effect, position);
