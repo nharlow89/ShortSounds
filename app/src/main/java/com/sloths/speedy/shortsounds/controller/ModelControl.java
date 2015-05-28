@@ -86,7 +86,7 @@ public class ModelControl implements PlaybackListener {
         // Create the new ShortSoundTrack (that this will record to)
         ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
         mActiveShortSound.addTrack(newTrack);
-        mAudioPlayer.addTrack(newTrack);
+        if (!isNewShortSound) mAudioPlayer.addTrack(newTrack);
         mAudioRecorder.reset();  // Have to reset for the next recording
         if ( isNewShortSound )
             return mActiveShortSound;
