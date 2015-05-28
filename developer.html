@@ -95,9 +95,10 @@
     </p><p>
       System tests will be written after major feature modules are implemented, to insure that they interact as expected. The teams which created the modules will be responsible for writing the system tests.
     </p><p>
-      We have decided against implementing a full automated testing suite due to the circumstances of the project. Tests must be run manually.
-    </p>
-    <p>
+      We have decided against implementing a full automated testing suite due to the circumstances of the project. Running the tests from a server automatically has proven difficult with android tools. Instead, developers can follow the instructions in the Running the Test Suite section to run the test suite provided before making changes to master.
+    </p><p>
+      To add a new test, it needs to be added to the correct directory, found in shortsounds/app/src/androidTest/java/package. All tests run by the test suite are found in this directory.
+    </p><p>
       Unit tests will require packages that do not come standard with Android Studio. If you are getting dependency errors, follow these instructions:
       <ol>
         <li>Start the Android SDK Manager.</li>
@@ -108,30 +109,42 @@
       To run a test in Android Studio, hit Alt+Shift+F10 and choose the option that matches the name of the test. Make sure to choose the one with the android icon since that means it’s being run as an AndroidTest rather than a JUnit test. Running the test re quires opening up an emulator which may be an issue if you’re using something other than Android Studio.
     </p>
 
+    <h3>
+      <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+      Running the Test Suite
+    </h3>
+    <p>
+      To run all of test suites, first start an emulator, or plug in a debug enabled android device into your computer. Then, open the ShortSounds directory in terminal or in cmd. Mac/Linux users should type and run the command <b>./test_suite.sh</b>. Windows users should type the command <b>test_suite.bat</b>. The first time this is done, the files necessary for the test suite will be automatically downloaded and extracted. Afterwards the test suite should run, and a browser window should open up with the results of all the test results. Below is a screenshot of a sample webpage that should open after a test suite is ran.
+    </p>
+    <p>
+      <img src="https://raw.githubusercontent.com/nharlow89/ShortSounds/gh-pages/deliverables/sample_test_summary.png" width="100%"><br>
+    </p>
+
 
     <h3>
       <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
       Automated Build and Test
     </h3>
     <p>
-    To set up an automated build, a Short Sounds team member need only log into the dedicated Jenkin’s web server, located at DNS:
-    ec2-52-11-7-187.us-west-2.compute.amazonaws.com:8080
+      To set up an automated build, a Short Sounds team member need only log into the dedicated Jenkin’s web server, located at DNS:
+      http://ec2-52-11-0-15.us-west-2.compute.amazonaws.com:8080/
     </p><p>
-    * Cse 403 staff can login and view the Jenkin’s dashboard and the Short Sounds job with: username: cse_403_staff
-    password: emina
+      * Cse 403 staff can login and view the Jenkin’s dashboard and the Short Sounds job with: 
+      <br>username: cse_403_staff
+      <br>password: emina
     </p><p>
-    If a Short Sounds team member has not previously created an account with Jenkins and logged in, they need to create an account and send their newly created username to Joel at the email:
-    sigoj@cs.washington.edu<br>
-    Joel will respond when they have been given the credentials to access the count.
-    Upon successfully logging in, creating a new automated build is as simple as click the Short Sounds job and hitting Build Now, located on the left.
+      If a Short Sounds team member has not previously created an account with Jenkins and logged in, they need to create an account and send their newly created username to Joel at the email:
+      sigoj@cs.washington.edu<br>
+      Joel will respond when they have been given the credentials to access the count.
+      Upon successfully logging in, creating a new automated build is as simple as click the Short Sounds job and hitting Build Now, located on the left.
     </p><p>
-    In order to set up the daily build and test system, I first launched an EC2 instance on Amazon AWS that runs an Ubuntu server. I installed Jenkins on the Ubuntu server. In order to get Jenkins to pull the Short Sounds master branch repository I installed the Git and GitHub plugins on Jenkins and then configured it with the repository information. Short Sounds utilizes AndroidJUnitRunner to run its unit tests. In order to run tests utilizing that framework, as well as most of Android’s testing frameworks, an Android emulator must be launched. For this reason, I installed the Android Emulator Plugin. This enables Jenkins to launch a pre-defined emulator before it performs its build steps. I also installed the Gradle Build plugin so that we can perform Gradle builds, which is what Short Sounds utilizes. After installing the required plugins, I set up Jenkins to run 1 build and test a day automatically, as well as when changes are pushed to master. I created build steps that include:
+      In order to set up the daily build, I first launched an EC2 instance on Amazon AWS that runs an Ubuntu server. I installed Jenkins on the Ubuntu server. In order to get Jenkins to pull the Short Sounds master branch repository I installed the Git and GitHub plugins on Jenkins and then configured it with the repository information. I installed the Android Emulator Plugin. This enables Jenkins to launch a pre-defined emulator before it performs its build steps. I also installed the Gradle Build plugin so that we can perform Gradle builds, which is what Short Sounds utilizes. After installing the required plugins, I set up Jenkins to run 1 build and test a day automatically, as well as when changes are pushed to master. I created build steps that include:
     <ol>
       <li>update the Android SDK to use Build Tools 21.1.2.</li>
       <li>Invoke a Gradle script that performs a full build of the Short Sounds application.</li>
       <li>Perform a shell command that runs all of the tests that utilize AndroidJUnitRunner. I configured Jenkins to send out emails to all Short Sounds team members when a build or test fails. This was done by creating a Gmail account especially for the purpose. I then added that email account as the SMTP host on Jenkins. Having it send out the emails for failed builds was as simple as adding a post-build step for emailing users on failed builds and inputting Short Sounds teammates emails into the box.</li>
     </ol>
-    * On occasion the Android Emulator on Jenkins will not fully bootup during a build. In this instance, the build eventually times out. It does not include it as a failed build, but as status ‘Not Built’. This is a currently unresolved issue which is documented on Jenkins.com. It has to do with the abd server failing to start. See link for more information: https://issues.jenkins-ci.org/browse/JENKINS-27456.
+      <b>* We no longer have Jenkins as an automated tester. At this point it has proven unreliable for unit testing. It commonly doesn’t detect certain types of unit tests. See Testing section above for information about testing.</b>
     </p>
     
     <h3>
@@ -153,6 +166,17 @@
     </h3>
     <p>
       A list of bugs (both current and resolved) can be found in the repository page linked to above by clicking on the Issues tab on the side. To resolve a bug, you can either do it via commit messages (https://help.github.com/articles/closing-issues-via-commit-messages/)or through Pull Requests (https://github.com/blog/1506-closing-issues-via-pull-requests).
+    </p>
+
+    <h3>
+      <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+      Design Patterns and Principles
+    </h3>
+    <p>
+      <b>Singleton:</b>  The <a href="https://github.com/nharlow89/ShortSounds/blob/master/app/src/main/java/com/sloths/speedy/shortsounds/model/ShortSoundSQLHelper.java">ShortSoundSQLHelper</a> is an example of a Singleton that we are using this application.  The reason we chose to have this class be a singleton is because we only want the application to have a single database and a single class to access that database.  Multiple databases are not, and should not be allowed in the storage of the ShortSounds.
+    </p>
+    <p>
+      <b>Model-View-Controller:</b>  The Model-View-Controller design pattern is implemented in ShortSounds in order to separate the model as much as possible from the view and keep the application modular.  Since this is an Android application, the view and the controller are largely kept in the same files, but the model is kept entirely separate.  As seen in <a href="https://github.com/nharlow89/ShortSounds/tree/master/app/src/main/java/com/sloths/speedy/shortsounds">here</a>, there is a folder with all of the files for the model including the model for a ShortSound, the model for a ShortSound track, and the model for various recorders, players and effect implementations.  In the view folder, all of the files have to do with how the user interacts with the user interface, including the MainActivity and various other view files like a dialog box.  Many of these files also contain elements of a controller, as these are hard to separate in Android development.  Finally, there are two controller files outside of the model and view folders.  These files connect the view to the backend model.
     </p>
 
     <footer class="site-footer">
