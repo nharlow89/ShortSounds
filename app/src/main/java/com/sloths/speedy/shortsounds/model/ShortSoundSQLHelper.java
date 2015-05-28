@@ -280,48 +280,6 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         // Create the tables
         db.execSQL(SHORT_SOUND_TABLE_CREATE);
         db.execSQL(SHORT_SOUND_TRACK_TABLE_CREATE);
-        // Seed the DB
-//        String ssSeed1 = "INSERT INTO " + TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + ") VALUES(2,\"Here Comes the Sun\")";
-//        String trackSeed4 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(4,\"track 1\",2,\"ss2-track1\")";
-//        String trackSeed5 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(5,\"track 2\",2,\"ss2-track2\")";
-//        String trackSeed6 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(6,\"track 3\",2,\"ss2-track3\")";
-//        String trackSeed7 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(7,\"track 4\",2,\"ss2-track4\")";
-//        String trackSeed8 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(8,\"track 5\",2,\"ss2-track5\")";
-//        db.execSQL( ssSeed1 );
-//        db.execSQL( trackSeed4 );
-//        db.execSQL(trackSeed5);
-//        db.execSQL(trackSeed6);
-//        db.execSQL(trackSeed7);
-//        db.execSQL(trackSeed8);
-//        // Seed the internal storage with given audio files
-//        seedSampleAudioFile(R.raw.sun01, "ss2-track1");
-//        seedSampleAudioFile(R.raw.sun02, "ss2-track2");
-//        seedSampleAudioFile(R.raw.sun03, "ss2-track3");
-//        seedSampleAudioFile(R.raw.sun04, "ss2-track4");
-//        seedSampleAudioFile(R.raw.sun05, "ss2-track5");
-
-//        String ssSeed2 = "INSERT INTO " + TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + ") VALUES(3,\"I Want You (She's so Heavy)\")";
-//        String trackSeed9 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(9,\"track 1\",3,\"ss3-track1\",\"ss3-track1-modified\")";
-//        String trackSeed10 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(10,\"track 2\",3,\"ss3-track2\",\"ss3-track2-modified\")";
-//        String trackSeed11 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(11,\"track 3\",3,\"ss3-track3\",\"ss3-track3-modified\")";
-//        String trackSeed12 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(12,\"track 4\",3,\"ss3-track4\",\"ss3-track4-modified\")";
-//        String trackSeed13 = "INSERT INTO " + TRACK_TABLE_NAME + "(" + KEY_ID + "," + KEY_TITLE + "," + KEY_SHORT_SOUND_ID  + "," + KEY_TRACK_FILENAME_ORIGINAL + "," + KEY_TRACK_FILENAME_MODIFIED + ") VALUES(13,\"track 5\",3,\"ss3-track5\",\"ss3-track5-modified\")";
-//        db.execSQL( ssSeed2 );
-//        db.execSQL( trackSeed9);
-//        db.execSQL(trackSeed10);
-//        db.execSQL(trackSeed11);
-//        db.execSQL(trackSeed12);
-//        db.execSQL(trackSeed13);
-//        seedSampleAudioFile(R.raw.shessoheavy01, "ss3-track1");
-//        seedSampleAudioFile(R.raw.shessoheavy01, "ss3-track1-modified");
-//        seedSampleAudioFile(R.raw.shessoheavy02, "ss3-track2");
-//        seedSampleAudioFile(R.raw.shessoheavy02, "ss3-track2-modified");
-//        seedSampleAudioFile(R.raw.shessoheavy03, "ss3-track3");
-//        seedSampleAudioFile(R.raw.shessoheavy03, "ss3-track3-modified");
-//        seedSampleAudioFile(R.raw.shessoheavy04, "ss3-track4");
-//        seedSampleAudioFile(R.raw.shessoheavy04, "ss3-track4-modified");
-//        seedSampleAudioFile(R.raw.shessoheavy05, "ss3-track5");
-//        seedSampleAudioFile(R.raw.shessoheavy05, "ss3-track5-modified");
     }
 
     private void seedSampleAudioFile( int rawId, String outputFileName ) {
@@ -350,7 +308,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Shouldn't have to worry about this??
+        // Not necessary
     }
 
 }

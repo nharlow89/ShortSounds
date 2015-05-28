@@ -491,8 +491,8 @@ public class MainActivity extends FragmentActivity
             animateToTrack();
         }
 
-        // This is done globally because BackPressed is global
-        // for effect's views
+        // Controller is global because this method needs knowledge of
+        // the last stored values, where model values are always up to date
         if (effectController != null) {
             // Resets model to default values
             effectController.resetModel();
@@ -603,43 +603,35 @@ public class MainActivity extends FragmentActivity
      * @param effect
      */
     private void setupEffect(int track, String effect) {
-        // Resets effect controller
-        // Set effect view with values pulled from model
         PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
         if (effect.equals(EQ)) {
-            // EQ
-            Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
             // Set saved values -- if null it defaults
+            Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
             eqCanvas.setValues(values);
-            // Attach the EQ model to the EQ controller
+
+            // Attach the EQ model to the EQ controller & controller to view
             EqEffect eqEffect = mActiveShortSound.getTracks().get(track).getmEqEffect();
-            EQEffectController eqController = new EQEffectController(eqEffect);
-            // Attach the EQ controller to the EQ view
+            EQEffectController eqController = new EQEffectController(eqEffect, values);
             eqCanvas.setController(eqController);
-            eqController.setCancel(values);
+
             // Set current controller
             effectController = eqController;
-            // Set button listeners on save & cancel on EQ
+
             findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(effect, track));
             findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(effect));
         } else if (effect.equals(REVERB)) {
-            //REVERB
-            Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
             // Set saved point value (if null it defaults)
-            reverbCanvas.setValue(values);
-            // Attach the Reverb model to the Reverb controller
+            Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
+            reverbCanvas.setValue(values[0]);
+
+            // Attach the model to controller & controller to view
             ReverbEffect reverbEffect = mActiveShortSound.getTracks().get(track).getmReverbEffect();
-            ReverbEffectController reverbController = new ReverbEffectController(reverbEffect);
-            // Attach the Reverb controller to the Reverb view
+            ReverbEffectController reverbController = new ReverbEffectController(reverbEffect, values[0]);
             reverbCanvas.setController(reverbController);
-            reverbController.setCancel(values);
+
             // Set current controller
             effectController = reverbController;
-            // Set button listeners on save & cancel on Reverb
-            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect, track));
-            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
-        } else {
-            // Set cancel and save for other effects
+
             findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect, track));
             findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
         }
@@ -905,14 +897,14 @@ public class MainActivity extends FragmentActivity
         mGlobalPlayButton.setColorFilter(getResources().getColor(R.color.green_500), android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 
-    // TODO: Clean up resources & Save track state to DB
     @Override
     public void onDestroy() {
         super.onDestroy();
     }
 
     /**
-     * Cancels button listeners
+     * Cancels button class used for listening on cancel button clicked
+     * on the effect UI
      */
     public class CancelButtonListener implements View.OnClickListener {
         private String effect;
@@ -935,8 +927,7 @@ public class MainActivity extends FragmentActivity
     }
 
     /**
-     * Class used for saving an effect on the UI.
-     * Should save the values to the model
+     * Class used for saving an effect on the UI. It loads the track view when clicked
      */
     public class SaveButtonListener implements View.OnClickListener {
         private String effect;
@@ -965,7 +956,6 @@ public class MainActivity extends FragmentActivity
             currTrack.saveShortSoundTrack();
         }
     }
-
 
     /**
      *

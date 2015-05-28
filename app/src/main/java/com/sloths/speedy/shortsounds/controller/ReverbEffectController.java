@@ -1,9 +1,6 @@
 package com.sloths.speedy.shortsounds.controller;
 
 import android.graphics.PointF;
-import android.util.Log;
-
-import com.sloths.speedy.shortsounds.model.EqEffect;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;
 
 /**
@@ -11,16 +8,25 @@ import com.sloths.speedy.shortsounds.model.ReverbEffect;
  * This controller will be attached to the reverb view, & when
  * the point changes it will update the reverb params and send it
  * to the model accordingly.
- * Created by shampson on 5/15/15.
  */
 public class ReverbEffectController extends EffectController {
 
     private ReverbEffect effect;
     private PointF cancelPoint;
 
-    public ReverbEffectController(ReverbEffect effect) {
+    /**
+     * We need to store the reverb model and the previous values
+     * @param effect
+     * @param value
+     */
+    public ReverbEffectController(ReverbEffect effect, PointF value) {
         this.effect = effect;
-        this.cancelPoint = null;
+        if (value == null) {
+            cancelPoint = null;
+        } else {
+            cancelPoint = new PointF(value.x, value.y);
+        }
+        repInvariant();
     }
 
     /**
@@ -43,29 +49,6 @@ public class ReverbEffectController extends EffectController {
     }
 
     /**
-     * Sets the effect controller uses
-     * @param effect
-     */
-    @Override
-    public void setEffect(EqEffect effect) {
-
-    }
-
-    /**
-     * Sets the cancel point values for when back/cancel
-     * is pressed
-     * @param values
-     */
-    @Override
-    public void setCancel(PointF[] values) {
-        if (values == null) {
-            cancelPoint = null;
-        } else {
-            cancelPoint = new PointF(values[0].x, values[0].y);
-        }
-    }
-
-    /**
      * Resets the reverb effect model for when back/cancel
      * is pressed
      */
@@ -76,6 +59,15 @@ public class ReverbEffectController extends EffectController {
         } else {
             effect.setPointVal(cancelPoint);
         }
-        cancelPoint = null;
+    }
+
+    /**
+     * A representation of an Reverb controller, which essentially holds
+     * the eq model & the cancel points (which can be null)
+     */
+    private void repInvariant() {
+        if (effect == null) {
+            throw new AssertionError("Invalid eq effect value");
+        }
     }
 }

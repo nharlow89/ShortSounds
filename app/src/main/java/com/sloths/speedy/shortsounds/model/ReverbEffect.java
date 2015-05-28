@@ -5,37 +5,47 @@ import android.media.audiofx.EnvironmentalReverb;
 import android.util.Log;
 
 /**
- * Created by caseympfischer on 4/28/15.
+ * This is the backend model that represents the Reverb effect.
+ * It stores two important pieces: The point value for the UI &
+ * the actual EnvironmentalReverb AudioEffect for using the effect
+ * with the TrackPlayer. It also holds logic for converting the
+ * point value to the values for the EnvironmentalReverb.
  */
 public class ReverbEffect extends Effect {
-    // these INDEX constants are for accessing the values encoded in the string after
-    // it has been split by "."
 
-    private static final int DEFAULT_DECAY = 1;
-    private static final int DEFAULT_REFLECTION_DELAY = 150;
-    private static final int DEFAULT_REFLECTION_LEVEL = 5000;
-    private static final int DEFAULT_DENSITY = 500;
     private static final String ON = "ON";
     private static final float DEFAULT_X = 0.5f;
     private static final float DEFAULT_Y = 0.5f;
     private static final String TAG = "REVERB-EFFECT";
-
+    private static final short DEFAULT_REVERB_LEVEL = 2000;
+    private static final short DEFAULT_DIFFUSION = 0;
+    private static final short DEFAULT_ROOM_LEVEL = 0;
+    private static final short DEFAULT_DECAY_HF = 1000;
+    private static final float DEFAULT_REVERB_DELAY = 100;
+    private static final float DEFAULT_REFLECTIONS_DELAY = 300;
+    private static final float DEFEAULT_DECAY_TIME = 20000;
+    private static final float DEFAULT_REFLECTIONS_LEVEL = 1000;
+    private static final int DEFAULT_DENSITY = 500;
+    private static final String REVERB_TITLE = "Reverb";
     private PointF pointVal;
     private boolean isActive;
 
 
-
-    // Constructor used when loading a track from a recorded file
+    /**
+     *
+     */
     public ReverbEffect() {
         // Sets up default reverb until track player sets it
-//        this.effect = new EnvironmentalReverb(0, 0);
         this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
         isActive = false;
-//        effect.setEnabled( false );
         repInvariant();
     }
 
-    // Constructor used when loading an effect from the database
+    /**
+     * Constructor used when loading reverb effect from the database
+     *  Stored in DB as "ON/OFF:float,float" or "NULL" w/o a value
+     * @param effectVals
+     */
     public ReverbEffect(String effectVals) {
         this();  // Setup from other constructor.
         if ( !effectVals.equals( "NULL" ) ) {
@@ -43,7 +53,6 @@ public class ReverbEffect extends Effect {
             // Stored in DB as "ON/OFF:float,float,float,float"
             String[] params = effectVals.split(":");
             isActive = params[0].equals(ON);
-//            effect.setEnabled( isActive );
             String[] pointVals = params[1].split(",");
             pointVal = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
         }
@@ -51,6 +60,10 @@ public class ReverbEffect extends Effect {
     }
 
 
+    /**
+     * This sets up the initial reverb effect
+     * @param audioSessionId
+     */
     public void setupReverbEffect(int audioSessionId) {
         Log.d(TAG, "Attaching reverb to track id [" + audioSessionId + "]");
         try {
@@ -64,32 +77,41 @@ public class ReverbEffect extends Effect {
         }
     }
 
+    /**
+     * Sets the current effect properties to be reflected by the current
+     * point value
+     */
     private void setEffectProperties() {
-        Log.d(TAG, "Setting reverb effect properties");
         EnvironmentalReverb.Settings revSettings = convertParamsToSettings();
         EnvironmentalReverb reverb = (EnvironmentalReverb) effect;
         reverb.setProperties(revSettings);
     }
 
+    /**
+     * This grabs the current point value stored for reverb, &
+     * does the weight conversions to create the actual settings to
+     * be used for the reverb effect.
+     * @return
+     */
     private EnvironmentalReverb.Settings convertParamsToSettings() {
         EnvironmentalReverb.Settings revSettings = new EnvironmentalReverb.Settings();
         // Constant settings
-        revSettings.reverbLevel = (short) 2000;
-        revSettings.density = (short) 500;
-        revSettings.diffusion = (short) 0;
-        revSettings.roomLevel = (short) 0; // master volume of reverb
-        revSettings.roomHFLevel = (short) 0; // controls a low-pass filter that will reduce the level of the high-frequency
-        revSettings.decayHFRatio =  1000; // The valid range is [100, 2000]. A ratio of 1000 indicates that all frequencies decay at the same rate.
+        revSettings.reverbLevel = DEFAULT_REVERB_LEVEL;
+        revSettings.density = DEFAULT_DENSITY;
+        revSettings.diffusion = DEFAULT_DIFFUSION;
+        revSettings.roomLevel = DEFAULT_ROOM_LEVEL; // master volume of reverb
+        revSettings.roomHFLevel = DEFAULT_ROOM_LEVEL; // controls a low-pass filter that will reduce the level of the high-frequency
+        revSettings.decayHFRatio =  DEFAULT_DECAY_HF; // The valid range is [100, 2000]. A ratio of 1000 indicates that all frequencies decay at the same rate.
 
         // Dynamic x settings
-        revSettings.reverbDelay =  (int) (pointVal.x * (float)100); // how long for reverb to kick in (ms) [0, 100]
-        revSettings.reflectionsDelay = (int) (pointVal.x * (float)300); // size of room (ms) int [0, 300]
-        revSettings.decayTime = (int) (pointVal.x * (float)20000); // time for reverb to die out (ms) int [100, 20000]
+        revSettings.reverbDelay =  (int) (pointVal.x * DEFAULT_REVERB_DELAY); // how long for reverb to kick in (ms) [0, 100]
+        revSettings.reflectionsDelay = (int) (pointVal.x * DEFAULT_REFLECTIONS_DELAY); // size of room (ms) int [0, 300]
+        revSettings.decayTime = (int) (pointVal.x * DEFEAULT_DECAY_TIME); // time for reverb to die out (ms) int [100, 20000]
+
         // Dynamic y settings
         float yVal = 1.0f - pointVal.y;
-        revSettings.reflectionsLevel = (short) (yVal * (float) 1000);// volume of early reflections short [-9000, 1000]
-        Log.d("Reverb", "rev x settings are set as " + revSettings.reverbDelay +","+revSettings.reflectionsDelay+","+revSettings.decayTime);
-        Log.d("Reverb", "rev y settings are set as " + revSettings.reflectionsLevel);
+        revSettings.reflectionsLevel = (short) (yVal * DEFAULT_REFLECTIONS_LEVEL);// volume of early reflections short [-9000, 1000]
+
         return revSettings;
     }
 
@@ -111,25 +133,22 @@ public class ReverbEffect extends Effect {
         retVal += ":";
         retVal += pointVal.x + ",";
         retVal += pointVal.y;
-        Log.d(TAG, "Reverb string is: " + retVal);
         return retVal;
     }
 
     /**
-     * Enables the effect
+     * Enables the actual Reverb effect
      */
     public void enable() {
         Log.d("Reverb", "Enabled Reverb effect");
         if (effect != null) {
             effect.setEnabled(true);
-            isActive = true;
         }
-
-        //TODO handle null effect case
+        isActive = true;
     }
 
     /**
-     * Disables the effect
+     * Disables the actual Reverb effect
      */
     public void disable() {
         Log.d("Reverb", "Disabled Reverb effect");
@@ -137,27 +156,25 @@ public class ReverbEffect extends Effect {
             effect.setEnabled(false);
         }
         isActive = false;
-
-        //TODO handle null case
     }
 
     /**
-     * Gets the title for the reverb effect
+     * Gets the title for the reverb effect for the UI
      * @return
      */
     public String getTitleString() {
-        return "Reverb";
+        return REVERB_TITLE;
     }
 
     /**
      * For getting the point value stored to be loaded into UI
      * @return
      */
-    public PointF[] getPointVal() {
+    public PointF getPointVal() {
         if (pointVal == null) {
             return null;
         }
-        return new PointF[]{pointVal};
+        return pointVal;
     }
 
     /**
@@ -183,6 +200,8 @@ public class ReverbEffect extends Effect {
      * holds the point value for a reverb effect.
      */
     private void repInvariant() {
-        if (pointVal == null) throw new AssertionError("Invalid point value");
+        if (pointVal == null) {
+            throw new AssertionError("Invalid point value");
+        }
     }
 }

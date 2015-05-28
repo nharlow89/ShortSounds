@@ -1,9 +1,6 @@
 package com.sloths.speedy.shortsounds.controller;
 
-import android.graphics.Point;
 import android.graphics.PointF;
-import android.media.audiofx.Equalizer;
-import android.util.Log;
 
 import com.sloths.speedy.shortsounds.model.EqEffect;
 
@@ -12,33 +9,18 @@ import com.sloths.speedy.shortsounds.model.EqEffect;
  * It will be attached to the EQ effect view and when the two
  * point values change a conversion will be made and sent to
  * the EQ model.
- * Created by shampson on 5/15/15.
  */
 public class EQEffectController extends EffectController {
     private EqEffect effect;
     private PointF[] cancelPoints;
 
-    public EQEffectController(EqEffect effect) {
-        this.effect = effect;
-        this.cancelPoints = null;
-    }
-
     /**
-     * This will be for changing the effect model that should
-     * have its values changed
+     * We need to store the EQ model & its previous values
      * @param effect
-     */
-    public void setEffect(EqEffect effect) {
-        this.effect = effect;
-    }
-
-    /**
-     * Sets the cancel values to update the model when
-     * cancel/back is pressed
      * @param values
      */
-    @Override
-    public void setCancel(PointF[] values) {
+    public EQEffectController(EqEffect effect, PointF[] values) {
+        this.effect = effect;
         if (values == null) {
             cancelPoints = null;
         } else {
@@ -46,7 +28,7 @@ public class EQEffectController extends EffectController {
             PointF hi = new PointF(values[1].x, values[1].y);
             cancelPoints = new PointF[]{low, hi};
         }
-//        Log.d("EQ-Controller", "Cancel values set to" + values[0].x + ", " + values[0].y + "),(" + values[1].x + ", " + values[1].y + ")");
+        repInvariant();
     }
 
     /**
@@ -54,25 +36,30 @@ public class EQEffectController extends EffectController {
      */
     @Override
     public void resetModel() {
-//        Log.d("EQ-Controller", "Resetting effect model vals");
         if (cancelPoints == null) {
-//            Log.d("EQ-Controller", "to default");
             effect.resetVals();
         } else {
-//            Log.d("EQ-Controller", "to points" + cancelPoints[0].x + ", " + cancelPoints[0].y + "),(" + cancelPoints[1].x + ", " + cancelPoints[1].y + ")");
             effect.setPointVals(cancelPoints);
         }
-        cancelPoints = null;
     }
 
     /**
      * Method for updating the parameter values held on the
      * eq effect model. It will run a conversion function to
-     * convert the point values //        Log.d("EQCONTROLLER", "Updating EQ effect model...");
-     to the actual effect params
+     * convert the point values to the actual effect params
      * @param points
      */
     public void updateEffectValues(PointF[] points) {
         effect.setPointVals(points);
+    }
+
+    /**
+     * A representation of an EQ controller, which essentially holds
+     * the eq model & the cancel points (which can be null)
+     */
+    private void repInvariant() {
+        if (effect == null) {
+            throw new AssertionError("Invalid eq effect value");
+        }
     }
 }

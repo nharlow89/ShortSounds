@@ -6,23 +6,23 @@ import android.util.Log;
 
 /**
  * Equalizer Effect. This class provides a wrapper around the existing Android Equalizer
- * effect class.
+ * effect class. It holds two main pieces: The point values for the UI, & the actual
+ * Equalizer AudioEffect.  It also holds the conversion function for converting
+ * between these point values and the Equalizer AudioEffect values.
  */
 public class EqEffect extends Effect {
-    // these INDEX constants are for accessing the values encoded in the string after
-    // it has been split by "."
-    private static final int INDEX_ACTIVE = 1;
-    private static final int INDEX_BAND_LEVELS = 2;
-    private static final int NUM_BANDS = 2;
     private static final String ON = "ON";
     public static final float DEFAULT_Y = 0;
     public static final float DEFAULT_X1 = 0.3f;
     public static final float DEFAULT_X2 = 0.7f;
     private static final String TAG = "EQ-EFFECT";
+    private static final String EQUALIZER = "Equalizer";
     private PointF[] eqPoints;
     private boolean isActive;
 
-    // Constructor used when loading a track from a recorded file
+    /**
+     *  Constructor used when loading a track from a recorded file
+     */
     public EqEffect() {
         // Sets up default equalizer until set by track player
         this.effect = new Equalizer( 0, 0 );
@@ -34,18 +34,17 @@ public class EqEffect extends Effect {
         repInvariant();
     }
 
-    // Constructor used when loading an effect from the database
+    /**
+     *  Constructor used when loading an effect from the database
+     *  Stored in DB as "ON/OFF:float,float,float,float" or "NULL" w/o values
+     * @param effectVals
+     */
     public EqEffect(String effectVals) {
         this();
         if ( !effectVals.equals( "NULL" ) ) {
             // Parse string from DB to get point vals & on/off
-            // Stored in DB as "ON/OFF:float,float,float,float"
             String[] params = effectVals.split(":");
             isActive = params[0].equals(ON);
-//            this.effect.setEnabled( isActive );
-//            Log.d(TAG, "Loaded eq from DB: " +effectVals);
-//            Log.d(TAG, "Is active? " + isActive);
-//            this.effect.setEnabled( isActive );
             String[] pointVals = params[1].split(",");
             eqPoints = new PointF[2];
             eqPoints[0] = new PointF(new Float(pointVals[0]), new Float(pointVals[1]));
@@ -73,10 +72,9 @@ public class EqEffect extends Effect {
     }
 
     /**
-     * Set the properties of the Equalizer effect class.
+     * Set the properties of the Equalizer effect
      */
     private void setEffectProperties() {
-        Log.d("EQEFFECT", "Setting eq params");
         Equalizer eq = (Equalizer) this.effect;
         short[] levelRange = eq.getBandLevelRange();
 
@@ -114,12 +112,13 @@ public class EqEffect extends Effect {
                 bandVal = (bandVal * width) + mid;
             }
             eq.setBandLevel(i, (short) (bandVal * eq.getNumberOfBands()));
-            Log.d("PARAMSETTING", "bandVal " + i + " = " + bandVal);
-            Log.d("PARAMSETTING", "band " + i + " set to level " + eq.getBandLevel(i));
         }
     }
 
-    // used for calculating band levels.
+    /**
+     * This is used for modeling the approximate area under the curve
+     * drawn by the EQ curve
+     */
     private class GraphShape {
         private float x1, y1, x2, y2, slope;
         public GraphShape(float x1, float y1, float x2, float y2) {
@@ -146,6 +145,12 @@ public class EqEffect extends Effect {
             }
         }
 
+        /**
+         * This is used for returning the area under the curve
+         * @param lowBound
+         * @param highBound
+         * @return
+         */
         public float getArea(float lowBound, float highBound) {
             if (lowBound > highBound) {
                 throw new IllegalArgumentException("lowBound cannot be greater than highBound.");
@@ -167,6 +172,14 @@ public class EqEffect extends Effect {
             return retVal;
         }
 
+        /**
+         * This is used for finding the area of intersection of the two shapes
+         * that represent the curve
+         * @param other
+         * @param lowBound
+         * @param highBound
+         * @return
+         */
         public float getIntersectArea(GraphShape other, float lowBound, float highBound) {
             if (this.x1 > other.x2 || this.x2 < other.x1
                     || this.getSign() != other.getSign()) {
@@ -204,9 +217,20 @@ public class EqEffect extends Effect {
             }
         }
 
+        /**
+         * Helper for finding the y value represented as the outer boundary
+         * of a shape, but extended.
+         * @param x
+         * @return
+         */
         private float getYatX(float x) {
             return this.y1 - (this.slope * (this.x1 - x));
         }
+
+        /**
+         * Gives the y pos/neg of a y value as 1 or -1
+         * @return
+         */
         private int getSign() {
             if (y1 > 0 || y2 > 0 || (y1 == 0 && y2 == 0)) {
                 return 1;
@@ -216,7 +240,11 @@ public class EqEffect extends Effect {
         }
     }
 
-    // Stored in Track table for effect params and on off
+    /**
+     * This encodes the EQ params for storage in the DB
+     * Stored in DB as "ON/OFF:float,float,float,float" or "NULL" w/o values
+     * @return
+     */
     public String encodeParameters() {
         if (eqPoints == null) {
             return "NULL";
@@ -232,13 +260,13 @@ public class EqEffect extends Effect {
         retVal += eqPoints[0].y + ",";
         retVal += eqPoints[1].x + ",";
         retVal += eqPoints[1].y;
-        Log.d(TAG, "EQ string is: " + retVal);
         return retVal;
     }
 
     /**
-     * Enable the effect.
+     * Enable the actual EQ effect
      */
+    @Override
     public void enable() {
         if ( this.effect == null ) {
             Log.e(TAG, "Error trying to enable EQ effect that is null");
@@ -250,7 +278,7 @@ public class EqEffect extends Effect {
     }
 
     /**
-     * Disable the effect.
+     * Disable the actual EQ effect
      */
     public void disable() {
         if ( this.effect == null ) {
@@ -262,16 +290,20 @@ public class EqEffect extends Effect {
         }
     }
 
+    /**
+     * This is used for the UI to get the correct representation title for
+     * the effect
+     * @return
+     */
     public String getTitleString() {
-        return "Equalizer";
+        return EQUALIZER;
     }
 
     /**
-     * For getting point values to be used in UI
+     * For getting point values to be used in UI for EQ band
      * @return
      */
     public PointF[] getPointVals() {
-//        Log.d("EqEfect", "Returning eq effect values...");
         return eqPoints;
     }
 
@@ -280,15 +312,13 @@ public class EqEffect extends Effect {
      * @param points
      */
     public void setPointVals(PointF[] points) {
-//        Log.d("EqEfect", "Setting eq effect values to...");
         if (eqPoints == null) {
             this.eqPoints = new PointF[2];
         }
         this.eqPoints[0] = points[0];
         this.eqPoints[1] = points[1];
-//        Log.d("EqEffect", eqPoints[0].x + ", " + eqPoints[0].y + "),(" + eqPoints[1].x + ", " + eqPoints[1].y + ")");
+        // This updates the actual effect's properties
         setEffectProperties();
-
     }
 
     /**
@@ -306,6 +336,8 @@ public class EqEffect extends Effect {
      * for the EQ UI and EQ effect.
      */
     private void repInvariant() {
-        //
+        if (eqPoints == null) {
+            throw new AssertionError("Invalid point value");
+        }
     }
 }
