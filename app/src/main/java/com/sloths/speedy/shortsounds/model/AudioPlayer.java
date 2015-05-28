@@ -39,6 +39,10 @@ public class AudioPlayer {
     private TrackPlayer mLongestTrackPlayer;
     private ModelControl mModelControl;
 
+    /**
+     * Create a new Audio Player
+     * @param ss The ShortSound to create the audio player for
+     */
     public AudioPlayer( ShortSound ss ) {
         Log.d(TAG, "Creating new AudioPlayer");
         trackPlayers = new HashMap<>();
@@ -106,6 +110,11 @@ public class AudioPlayer {
     }
 
 
+    /**
+     * Notifies the model control of the track position
+     * @param notifier the TrackPlayer that will notify  the model
+     * @param position the position to notify the model of
+     */
     public void notifyModelControlOfTrackPosition(TrackPlayer notifier, int position) {
         if (notifier == mLongestTrackPlayer) {
             mModelControl.notifySeekBarOfChangeInPos(position);
@@ -136,6 +145,7 @@ public class AudioPlayer {
     }
 
     /**
+     * Determines whether or not all the tracks are being played
      * @return Boolean value for whether All tracks are being played.
      */
     public boolean isPlayingAll() {
@@ -143,8 +153,8 @@ public class AudioPlayer {
     }
 
     /**
-     *
-     * @param track position
+     * Determines whether solo is enabled
+     * @param track to specify which track in the ShortSound
      * @return true is solo enabled false otherwise
      */
     public boolean isTrackSolo(int track) {
@@ -155,7 +165,7 @@ public class AudioPlayer {
     /**
      * Solo's the track at the given position.  Solo by definition sets all track volumes to
      * zero for which solo is not enabled.
-     * @param track position
+     * @param track to specifiy which track in the ShortSound
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void soloTrack(int track) {
@@ -175,8 +185,8 @@ public class AudioPlayer {
 
     /**
      * changes the volume of a short sound on the given track.
-     * @param track position
-     * @param volume level
+     * @param track To specify which track in the ShortSound
+     * @param volume desired volume level
      */
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -191,7 +201,8 @@ public class AudioPlayer {
 
     /**
      * Play a single track within this AudioPlayer.
-     * @param track
+     * @param track to specify the desired track in the ShortSound
+     * @param position the position at which to start playing
      */
     public void playTrack( ShortSoundTrack track, int position ) {
         pauseAll();
@@ -201,7 +212,7 @@ public class AudioPlayer {
 
     /**
      * Pause a single track.
-     * @param track
+     * @param track The track to pause
      */
     public void pauseTrack( ShortSoundTrack track ) {
         TrackPlayer targetPlayer = trackPlayers.get( track );
@@ -210,7 +221,7 @@ public class AudioPlayer {
 
     /**
      * Stop a single track.
-     * @param track
+     * @param track The track to stop
      */
     public void stopTrack( ShortSoundTrack track ) {
         TrackPlayer targetPlayer = trackPlayers.get( track );
@@ -229,7 +240,7 @@ public class AudioPlayer {
 
     /**
      * Add an additional ShortSoundTrack to this AudioPlayer.
-     * @param track
+     * @param track The track to add
      */
     public void addTrack( ShortSoundTrack track ) {
         tracks.add(track);
@@ -293,6 +304,12 @@ public class AudioPlayer {
         private long currentTrackPosition;
         private AudioPlayer mAudioPlayerListener;
 
+        /**
+         * Creates a track player
+         * @param track The track to create a track player on
+         * @param parent The AudioPlayer that plays the ShortSound the track
+         *               is associated with
+         */
         public TrackPlayer( ShortSoundTrack track, AudioPlayer parent) {
             this.track = track;
             this.mAudioPlayerListener = parent;
@@ -379,6 +396,10 @@ public class AudioPlayer {
                 Log.e(TAG, "ERROR: unable to set the effect volume");
         }
 
+        /**
+         * Sets the input stream
+         * @param position The position currently seeked to in the track
+         */
         private void setInputStream( int position ) {
             if ( audioInputStream != null ) {
                 try {
@@ -406,6 +427,7 @@ public class AudioPlayer {
 
         /**
          * Play the audio track associated with this ShortSound.
+         * @param position The posision currently seeked to in the track
          */
         public void play( int position ) {
             Log.d("AudioPlayer", "Playing track-" + audioTrack.getAudioSessionId());
@@ -469,13 +491,20 @@ public class AudioPlayer {
 
         /**
          * Whether or not this ShortSoundTrack is currently playing.
-         * @return
+         * @return true if playing, false otherwise
          */
         public boolean isPlaying() {
             return trackState == TrackState.PLAYING;
         }
 
+        /**
+         * This class represents an audio task
+         */
         private class AudioTask implements Runnable {
+
+            /**
+             * Runs a thread to play an audio track
+             */
             @Override
             public void run() {
                 try {
@@ -500,16 +529,30 @@ public class AudioPlayer {
             }
         }
 
+        /**
+         * Notifies the audio player of the current position in the track
+         */
         private void notifyAudioPlayerOfPosition() {
             int currentPos = getCurrentTrackPosition();
             mAudioPlayerListener.notifyModelControlOfTrackPosition(this,currentPos);
         }
     }
 
+    /**
+     * This interface is a listener for whether or not the playback is complete
+     */
     public interface PlaybackCompleteListener {
+        /**
+         * Stops playback
+         */
         void playbackComplete();
     }
 
+    /**
+     * Gets a track
+     * @param pos The position of the track in the ShortSound
+     * @return The track associated with the position
+     */
     public ShortSoundTrack getTrack(int pos) {
         return tracks.get( pos );
     }

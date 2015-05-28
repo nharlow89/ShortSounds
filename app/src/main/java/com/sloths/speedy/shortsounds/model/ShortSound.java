@@ -17,11 +17,11 @@ import java.util.List;
  */
 public class ShortSound {
     public static final String DEBUG_TAG = "SHORT_SOUNDS";
-    private static final String DEFAULT_TITLE = "Untitled";
     private List<ShortSoundTrack> tracks;
     private String title;
     private long id;
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
+    private int nextTrackNumber;
 
     /**
      * Create a new empty ShortSound.
@@ -29,10 +29,12 @@ public class ShortSound {
      */
     public ShortSound() {
         Log.d("DB_TEST", "ShortSound:constructor()");
-        this.title = DEFAULT_TITLE;  // Default
+        nextTrackNumber = 1;
         this.tracks = new ArrayList<ShortSoundTrack>();  // Initially no tracks
         this.id = sqlHelper.insertShortSound(this);  // Add ShortSound to the DB
-        Log.d("DB_TEST", "Inserted ShortSound: " + this.toString() );
+        this.title = "Project " + this.id;
+        sqlHelper.updateShortSound(this);
+        Log.d("DB_TEST", "Inserted ShortSound: " + this.toString());
         repInvariant();
     }
 
@@ -45,7 +47,9 @@ public class ShortSound {
     public ShortSound( HashMap<String, String> map ) {
         if ( !map.containsKey( sqlHelper.KEY_ID ) ) throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.KEY_ID + " field.");
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.KEY_TITLE + " field.");
+        if ( !map.containsKey( sqlHelper.NEXT_TRACK_NUM ) ) throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.NEXT_TRACK_NUM + " field.");
         this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
+        this.nextTrackNumber = Integer.parseInt( map.get(sqlHelper.NEXT_TRACK_NUM ) );
         this.title = map.get(sqlHelper.KEY_TITLE);
         this.tracks = new ArrayList<ShortSoundTrack>();
         repInvariant();
@@ -107,6 +111,8 @@ public class ShortSound {
      */
     public void addTrack( ShortSoundTrack track ) {
         this.tracks.add(track);  // Add track to list
+        nextTrackNumber++;
+        this.sqlHelper.updateShortSound(this);
     }
 
     /**
@@ -119,20 +125,35 @@ public class ShortSound {
         repInvariant();
     }
 
+    /**
+     * Returns the next track number for this ShortSound
+     * @return int the nex track number for this ShortSound
+     */
+    public int getNextTrackNumber() { return this.nextTrackNumber; }
+
+    /**
+     * Returns the track title
+     * @param track to specify which track in the ShortSound
+     * @return the title of the specified track
+     */
     public String getTrackName(int track) {
         return tracks.get(track).getTitle();
     }
 
     /**
-     *
-     * @param effect
-     * @param position
-     * @return
+     * Determines whether or not the effect is on in a specified track
+     * @param effect Effect type
+     * @param position to determine which track in the ShortSound
+     * @return true if effect is on, false otherwise
      */
     public boolean isEffectOn(Effect.Type effect, int position) {
         return tracks.get(position).isEffectChecked(effect);
     }
 
+    /**
+     * Gets the amount of tracks
+     * @return the number of tracks
+     */
     public int getSize() {
         return tracks.size();
     }
@@ -153,7 +174,7 @@ public class ShortSound {
     /**
      * Specifically set the list of tracks associated with this ShortSound.
      * Should <b>only</b> be used when populating a ShortSound from the DB.
-     * @param tracks
+     * @param tracks The list of tracks to set with the ShortSound
      */
     public void setTracks( List<ShortSoundTrack> tracks ) {
         this.tracks = tracks;

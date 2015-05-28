@@ -23,7 +23,8 @@ package com.sloths.speedy.shortsounds.view;
 
 
 /**
- * Created by nj on 5/24/15.
+ * This class enables the cross view to enable an app.
+ * @author Nick Jones
  */
 
 
@@ -87,22 +88,41 @@ public class CrossView extends View {
      */
     private float mPercent = 1f;
 
-
+    /**
+     * Creates a new CrossView
+     * @param context the context of the app
+     */
     public CrossView(Context context) {
         super(context);
     }
 
+    /**
+     * Creates a new CrossView
+     * @param context the context of the app
+     * @param attrs the attributes of the crossview
+     */
     public CrossView(Context context, AttributeSet attrs) {
         super(context, attrs);
 //        readXmlAttributes(context, attrs);
     }
 
+    /**
+     * Creates a new CrossView
+     * @param context The context of the app
+     * @param attrs the attributes of the CrossView
+     * @param defStyleAttr The style attirbutes of the CrossView
+     */
     public CrossView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         String s = "color";
 //        readXmlAttributes(context, attrs);
     }
 
+    /**
+     * Reads the XML attributes for the CrossView
+     * @param context the context of the app
+     * @param attrs the desired attributes
+     */
     private void readXmlAttributes(Context context, AttributeSet attrs) {
         // Size will be used for width and height of the icon, plus the space in between
         TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CrossView, 0, 0);
@@ -113,6 +133,10 @@ public class CrossView extends View {
         }
     }
 
+    /**
+     * Draws the CrossView
+     * @param canvas the canvas on which to draw
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -130,6 +154,9 @@ public class CrossView extends View {
         canvas.drawLine(mFromXY[0], mFromXY[1], mToXY[0], mToXY[1], mPaint);
     }
 
+    /**
+     * Determines the color of the CrossView
+     */
     private void determineColor() {
         int red;
         int green;
@@ -143,7 +170,14 @@ public class CrossView extends View {
         setColor(Color.rgb(red, green, 100));
     }
 
-
+    /**
+     * Changes the layout
+     * @param changed Whether or not the view changed
+     * @param left left point
+     * @param top top point
+     * @param right right point
+     * @param bottom bottom point
+     */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (changed) {
@@ -152,6 +186,10 @@ public class CrossView extends View {
         }
     }
 
+    /**
+     * Saves the state
+     * @return the saved state
+     */
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable parcelable = super.onSaveInstanceState();
@@ -164,6 +202,10 @@ public class CrossView extends View {
         return savedState;
     }
 
+    /**
+     * Restores the state
+     * @param state the state to restore the CrossView to
+     */
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         if(!(state instanceof CrossViewState)) {
@@ -180,12 +222,26 @@ public class CrossView extends View {
         super.onRestoreInstanceState(ss.getSuperState());
     }
 
+    /**
+     * Sets the padding
+     * @param left left point
+     * @param top top point
+     * @param right right point
+     * @param bottom bottom point
+     */
     @Override
     public void setPadding(int left, int top, int right, int bottom) {
         super.setPadding(left, top, right, bottom);
         init();
     }
 
+    /**
+     * Sets the relative padding
+     * @param start start point
+     * @param top top point
+     * @param end end point
+     * @param bottom bottom point
+     */
     @Override
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public void setPaddingRelative(int start, int top, int end, int bottom) {
@@ -193,6 +249,10 @@ public class CrossView extends View {
         init();
     }
 
+    /**
+     * Sets the color
+     * @param argb the color to set to in RGB scale
+     */
     public void setColor(int argb) {
         mColor = argb;
         if (mPaint == null) {
@@ -202,6 +262,10 @@ public class CrossView extends View {
         invalidate();
     }
 
+    /**
+     * Sets the initial state
+     * @param isChecked Whether or not the CrossView is checked
+     */
     public void setInitialState(boolean isChecked) {
         if (isChecked)
             mState = FLAG_STATE_PLUS;
@@ -278,6 +342,10 @@ public class CrossView extends View {
         toggle(animationDurationMS);
     }
 
+    /**
+     * Sets the percent
+     * @param percent Desired percent
+     */
     private void setPercent(float percent) {
         mPercent = percent;
         invalidate();
@@ -350,6 +418,10 @@ public class CrossView extends View {
 
     }
 
+    /**
+     * Determines whether or not the CrossView is on
+     * @return true if on, false otherwise
+     */
     public boolean isOn() { return mState == FLAG_STATE_CROSS; }
 
     /**
@@ -362,17 +434,29 @@ public class CrossView extends View {
             super(superState);
         }
 
+        /**
+         * Creates a CrossViewState
+         * @param in The state of the CrossView
+         */
         private CrossViewState(Parcel in) {
             super(in);
             this.flagState = in.readInt();
         }
 
+        /**
+         * Writes to the CrossView state
+         * @param out the parcel being written to
+         * @param flags Flags for inherited method
+         */
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
             out.writeInt(this.flagState);
         }
 
+        /**
+         * Parcelable Creator
+         */
         public static final Parcelable.Creator<CrossViewState> CREATOR =
                 new Parcelable.Creator<CrossViewState>() {
                     public CrossViewState createFromParcel(Parcel in) {

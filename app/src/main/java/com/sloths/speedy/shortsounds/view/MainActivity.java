@@ -298,7 +298,7 @@ public class MainActivity extends FragmentActivity
     }
 
     /**
-     * Provides logic for setting up the library drawer.
+     * Provides logic for setting up the library draweFr.
      */
     private void setUpLibraryDrawer() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
