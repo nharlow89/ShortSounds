@@ -36,6 +36,10 @@ public abstract class Effect {
         }
         return effect.getEnabled(); }
 
+    /**
+     * Gets the title string
+     * @return the title
+     */
     public abstract String getTitleString();
 
     /**

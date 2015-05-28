@@ -119,20 +119,29 @@ public class ShortSound {
         repInvariant();
     }
 
+    /**
+     * Returns the track title
+     * @param track to specify which track in the ShortSound
+     * @return the title of the specified track
+     */
     public String getTrackName(int track) {
         return tracks.get(track).getTitle();
     }
 
     /**
-     *
-     * @param effect
-     * @param position
-     * @return
+     * Determines whether or not the effect is on in a specified track
+     * @param effect Effect type
+     * @param position to determine which track in the ShortSound
+     * @return true if effect is on, false otherwise
      */
     public boolean isEffectOn(Effect.Type effect, int position) {
         return tracks.get(position).isEffectChecked(effect);
     }
 
+    /**
+     * Gets the amount of tracks
+     * @return the number of tracks
+     */
     public int getSize() {
         return tracks.size();
     }
@@ -153,7 +162,7 @@ public class ShortSound {
     /**
      * Specifically set the list of tracks associated with this ShortSound.
      * Should <b>only</b> be used when populating a ShortSound from the DB.
-     * @param tracks
+     * @param tracks The list of tracks to set with the ShortSound
      */
     public void setTracks( List<ShortSoundTrack> tracks ) {
         this.tracks = tracks;

@@ -32,7 +32,7 @@ public class ReverbEffect extends Effect {
 
 
     /**
-     *
+     * Creates a ReverbEffect
      */
     public ReverbEffect() {
         // Sets up default reverb until track player sets it
@@ -91,7 +91,7 @@ public class ReverbEffect extends Effect {
      * This grabs the current point value stored for reverb, &
      * does the weight conversions to create the actual settings to
      * be used for the reverb effect.
-     * @return
+     * @return The reverb settings
      */
     private EnvironmentalReverb.Settings convertParamsToSettings() {
         EnvironmentalReverb.Settings revSettings = new EnvironmentalReverb.Settings();
@@ -118,7 +118,10 @@ public class ReverbEffect extends Effect {
     /**
      * This encodes the paramaters according to "ON/OFF:x,y" or "NULL"
      * It is used when storing the reverb effect parameters in the databse
-     * @return
+     * @return "ON:x,y" or "OFF:x,y" or "NULL" where the x and y are the x and y
+     * values of the pointVal.  "NULL" indicates that pointVal is null
+     * "ON:x,y" indicates the the effect is not null and the effects
+     * are enabled.  "OFF:x,y" is anything else.
      */
     public String encodeParameters() {
         if (pointVal == null) {

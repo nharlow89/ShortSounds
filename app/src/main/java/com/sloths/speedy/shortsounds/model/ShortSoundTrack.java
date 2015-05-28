@@ -99,6 +99,10 @@ public class ShortSoundTrack {
         repInvariant();
     }
 
+    /**
+     * Addes effects to a track
+     * @param e Effect to add
+     */
     public void addEffect(Effect.Type e) {
         Log.d("effects", "turnOnEffect called");
         switch (e) {
@@ -115,9 +119,10 @@ public class ShortSoundTrack {
     }
 
     /***
-     *
-     * @param effect
-     * @return
+     * Gets the effect values
+     * @param effect The track type to get the value for -
+     *               either MainActivity.EQ or MainActivity.REVERB
+     * @return An array of the values
      */
     public PointF[] getEffectVals(String effect) {
         if (effect.equals(MainActivity.EQ)) {
@@ -133,6 +138,10 @@ public class ShortSoundTrack {
         }
     }
 
+    /**
+     * Removes an effect
+     * @param e The effect type to remove
+     */
     public void removeEffect(Effect.Type e) {
         switch (e) {
             case EQ:
@@ -160,7 +169,7 @@ public class ShortSoundTrack {
 
     /**
      * Initialize the files for a new ShortSoundTrack.
-     * @param audioFile
+     * @param audioFile the file to initialize for the track
      */
     private void initFiles( File audioFile ) {
         File file = new File( STORAGE_PATH , this.fileName);
@@ -183,6 +192,12 @@ public class ShortSoundTrack {
         }
     }
 
+    /**
+     * Copies a file from source to destination
+     * @param src the source file
+     * @param dst the destination file
+     * @throws IOException
+     */
     private void copyFile(File src, File dst) throws IOException {
         Log.d("DEBUG", "Copy file [" + src.getPath() + "] to ["+ dst.getPath() +"]");
         FileChannel inChannel = new FileInputStream(src).getChannel();
@@ -199,7 +214,7 @@ public class ShortSoundTrack {
 
     /**
      * Get the title of this ShortSoundTrack.
-     * @return String
+     * @return The title of the track
      */
     public String getTitle() {
         return title;
@@ -208,7 +223,7 @@ public class ShortSoundTrack {
 
     /**
      * Changes the current track name to the given string and updates the database.
-     * @param name
+     * @param name The name to change the track name to
      */
     public void saveTrackName(String name) {
         title = name;
@@ -217,7 +232,7 @@ public class ShortSoundTrack {
 
     /**
      * Returns the title of this ShortSoundTrack
-     * @return String
+     * @return the title of the ShortSoundTrack
      */
     @Override
     public String toString() {
@@ -226,7 +241,7 @@ public class ShortSoundTrack {
 
     /**
      * Get the parentId (ShortSound id) that this track is associated with.
-     * @return long
+     * @return The ShortSound id of the ShortSound that the track is associated with
      */
     public long getParentId() {
         return this.parentId;
@@ -234,7 +249,7 @@ public class ShortSoundTrack {
 
     /**
      * Get the filename associated with this track.
-     * @return filename
+     * @return the name of the track's file name
      */
     public String getFileName() { return this.fileName; }
 
@@ -246,7 +261,7 @@ public class ShortSoundTrack {
 
     /**
      * Get this tracks id.
-     * @return id
+     * @return the id of the track
      */
     public long getId() { return this.id; }
 
@@ -267,34 +282,102 @@ public class ShortSoundTrack {
 //        if ( !file.exists() ) throw new AssertionError("File does not exist: " + file);
     }
 
+    /**
+     * Gets the encoded parameters of the EQ Effect
+     * @return a string with "NULL" if there is no EQEffect,
+     * "ON:x,y" or "OFF:x,y" where ON or OFF indicates whether
+     * the effect is turned on and the x and y refer to the values of the
+     * two points.
+     */
     public String getEQEffectString() {
         return mEqEffect.encodeParameters();
     }
 
+    /**
+     * Gets the encode parameters of the Reverb Effect
+     * @return a string with "NULL" if there is no EQEffect,
+     * "ON:x" or "OFF:x" where ON or OFF indicates whether
+     * the effect is turned on and the x refers to the value of the
+     * point.
+     */
     public String getReverbEffectString() {
         return mReverbEffect.encodeParameters();
     }
 
+    /**
+     * Gets the EQ effect for the track
+     * @return The EQ effect
+     */
     public EqEffect getmEqEffect() {
         return mEqEffect;
     }
 
-    public ReverbEffect getmReverbEffect() { return mReverbEffect; }
+    /**
+     * Gets the Reverb effect for the track
+     * @return the Reverb effect
+     */
+    public ReverbEffect getmReverbEffect() {
+        return mReverbEffect;
+    }
 
-    public float getVolume() { return volume; }
+    /**
+     * Gets the volume of the track
+     * @return the volume level
+     */
+    public float getVolume() {
+        return volume;
+    }
+
+    /**
+     * Sets the track volume
+     * @param volume desired volume level
+     */
     public void setTrackVolume(float volume) {
         if (volume >= 0.0f && volume <= 1.0f)
             this.volume = volume;
     }
 
+    /**
+     * Saves a short sound track
+     */
     public void saveShortSoundTrack() {
         Log.d(TAG, "Saving ShortSoundTrack to DB");
         sqlHelper.updateShortSoundTrack(this);
     }
-    public String getSQLSolo() { if (isSolo) return "t"; return "f";}
-    public boolean isSolo() { return isSolo; }
-    public void toggleSolo() { isSolo = !isSolo; }
 
+    /**
+     * Determines whether or not a track is a solo
+     * @return "t" for track is solo, "f" otherwise
+     */
+    public String getSQLSolo() {
+        if (isSolo) {
+            return "t";
+        } else {
+            return "f";
+        }
+    }
+
+    /**
+     * Determines whether or not a track is a solo
+     * @return true if is solo, false otherwise
+     */
+    public boolean isSolo() {
+        return isSolo;
+    }
+
+    /**
+     * If a track is solo, switches to not solo.
+     * If a track is not solo, switches to solo.
+     */
+    public void toggleSolo() {
+        isSolo = !isSolo;
+    }
+
+    /**
+     * Sets the effect toggle
+     * @param effect The type of effect
+     * @param enable Whether or not the effect is enabled
+     */
     public void setEffectToggle(Effect.Type effect, boolean enable) {
         if (effect.equals(Effect.Type.EQ)) {
             // EQ
@@ -314,6 +397,11 @@ public class ShortSoundTrack {
         sqlHelper.updateShortSoundTrack( this );
     }
 
+    /**
+     * Checks to see if the effect is checked
+     * @param effect The type of effect
+     * @return true if the effect is on, false otherwise
+     */
     public boolean isEffectChecked(Effect.Type effect) {
         if (effect.equals(Effect.Type.EQ)) {
             return mEqEffect.getEnabled();
@@ -326,6 +414,9 @@ public class ShortSoundTrack {
         }
     }
 
+    /**
+     * Releases the effects associated with the track
+     */
     public void releaseEffects() {
         Log.d(DEBUG_TAG, "Release effects associated with track["+this.id+"]");
         mReverbEffect.release();

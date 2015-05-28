@@ -173,6 +173,9 @@ public class AudioRecorder {
         setup();
     }
 
+    /**
+     * Represenation invaraiant for AudioRecorder
+     */
     private void repInvariant() {
         int current_state = mTrackRecorder.getState();
         assert(current_state == AudioRecord.STATE_INITIALIZED);

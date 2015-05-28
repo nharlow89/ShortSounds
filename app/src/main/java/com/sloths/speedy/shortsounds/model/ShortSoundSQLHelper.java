@@ -74,11 +74,20 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
                     TRACK_LENGTH + " INTEGER, " +
                     REVERB_EFFECT_PARAMS + " TEXT DEFAULT 'NULL');";
 
+    /**
+     * Private constructo to create the database
+     * @param context The app context
+     */
     private ShortSoundSQLHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         db = getWritableDatabase();
     }
 
+    /**
+     * Returns an instance of the database
+     * If no database exists, creates the database.
+     * @return The instance of the database
+     */
     public static ShortSoundSQLHelper getInstance() {
         if ( instance == null ) {
             instance = new ShortSoundSQLHelper( ShortSoundsApplication.getAppContext() );
@@ -91,6 +100,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     /**
      * Might be frowned upon, but had to make this to get around singleton for testing.
      * Basically, the singleton prevented the tests from recreating a new db each test.
+     * @return an instance of a new database
      */
     public static ShortSoundSQLHelper getTestInstance( Context context ) {
         instance = new ShortSoundSQLHelper( context );
@@ -130,7 +140,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     /**
      * Get A single ShortSound by id.
-     * @param id
+     * @param id The id of the ShortSound to find
      * @return ShortSound if one exists with given id, otherwise null
      */
     public ShortSound queryShortSoundById(long id) {
@@ -155,7 +165,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     /**
      * Insert a ShortSound into the DB
-     * @param ss
+     * @param ss The ShortSound to insert into the database
      * @return {long} The id of the new ShortSound
      */
     public long insertShortSound( ShortSound ss ) {
@@ -168,7 +178,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     /**
      * Update an existing ShortSound.
-     * @param ss
+     * @param ss The ShortSound to update
      */
     public void updateShortSound( ShortSound ss ) {
         if ( !db.isOpen() ) db = getWritableDatabase();
@@ -182,7 +192,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     /**
      * Remove a ShortSound from the database and removes any associated ShortSoundTracks.
-     * @param ss
+     * @param ss The ShortSound to remove
      */
     public boolean removeShortSound( ShortSound ss ) {
         return db.delete(TABLE_NAME, KEY_ID + "=" + ss.getId(), null) > 0;
@@ -190,7 +200,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     /**
      * Get a list of ShortSoundTracks associated with a given ShortSound.
-     * @param shortSoundId
+     * @param shortSoundId The ShortSound to get a list of tracks for
      * @return a list of tracks
      */
     public List<ShortSoundTrack> getShortSoundTracks( long shortSoundId ) {
@@ -216,10 +226,10 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     /**
      * Inserts a ShortSoundTrack into the short_sound_track table with the associated
      * ShortSound (so we know which ShortSound it belongs to).
-     * @pre Assumes a new ShortSoundTrack which has no Effects yet.
-     * @param track
+     * @precondition Assumes a new ShortSoundTrack which has no Effects yet.
+     * @param track The track to enter
      * @param id ShortSound id that this track belongs to
-     * @return The
+     * @return The new entry id
      */
     public long insertShortSoundTrack(ShortSoundTrack track, long id) {
         if ( !db.isOpen() ) db = getWritableDatabase();
@@ -238,7 +248,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     /**
      * Update an existing ShortSoundTrack.
-     * @param track
+     * @param track The track to update
      */
     public void updateShortSoundTrack( ShortSoundTrack track ) {
         if ( !db.isOpen() ) db = getWritableDatabase();
@@ -256,13 +266,17 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
 
     /**
      * Remove an entry for the given ShortSoundTrack in the database.
-     * @param track
+     * @param track The track to remove
      * @return Boolean, whether a row was deleted.
      */
     public boolean removeShortSoundTrack( ShortSoundTrack track ) {
         return db.delete(TRACK_TABLE_NAME, KEY_ID + "=" + track.getId(), null) > 0;
     }
 
+    /**
+     * Gets the time
+     * @return A formatted string of the time
+     */
     public String getCurrentTimestamp() {
         Date now = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  // 2015-04-20 22:27:19
@@ -272,7 +286,7 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
     /**
      * This method is called on the VERY first time our DB is created (and never again).
      * Here we setup the tables and seed the database.
-     * @param db
+     * @param db The database to create tables for
      */
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -282,13 +296,17 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         db.execSQL(SHORT_SOUND_TRACK_TABLE_CREATE);
     }
 
+    /**
+     * Seeds a sample audio file for testing
+     * @param rawId id of the seeded file
+     * @param outputFileName name of file
+     */
     private void seedSampleAudioFile( int rawId, String outputFileName ) {
         Context context = ShortSoundsApplication.getAppContext();
         InputStream inputStream = context.getResources().openRawResource( rawId );
         try {
             File outputFile = new File( context.getFilesDir(), outputFileName );
             OutputStream outputStream = new FileOutputStream( outputFile );
-            int i;
             try {
                 byte[] buf = new byte[4096];
                 int len;
@@ -306,6 +324,12 @@ public class ShortSoundSQLHelper extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * Updates the database on upgrade.  This was not necessary to implement
+     * @param db The database
+     * @param oldVersion Old version number
+     * @param newVersion New version number
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Not necessary

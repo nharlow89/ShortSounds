@@ -18,10 +18,20 @@ import java.util.List;
 public class AudioMixer {
     private ShortSound shortSound;
 
+    /**
+     * Creates a new Audio Mixer
+     * @param shortSound The ShortSound to mix with the AudioMixer
+     */
     public AudioMixer( ShortSound shortSound ) {
         this.shortSound = shortSound;
     }
 
+    /**
+     * Generates a single audio file from all of the track files
+     * in the ShortSound
+     * @return A single wav file of the compiled ShortSound
+     * @throws IOException
+     */
     public File generateAudioFile() throws IOException {
         File mixedFile = new File( ShortSoundTrack.STORAGE_PATH, shortSound.getTitle() + ".raw" );
         OutputStream master = new DataOutputStream( new FileOutputStream( mixedFile ) );
@@ -62,8 +72,8 @@ public class AudioMixer {
 
     /**
      * Mix byte arrays simply by adding bytes and taking their average.
-     * @param chunksToMix
-     * @return
+     * @param chunksToMix A list of the byte arrays to mix
+     * @return a single byte array of the averages from the list of byte arrays passed in
      */
     private byte[] mixByteArrays(List<byte[]> chunksToMix) {
         byte mixedBuf[] = new byte[1024];
@@ -85,13 +95,19 @@ public class AudioMixer {
 
     /**
      * Method for testing purposes.
-     * Getter for shorsound
+     * Getter for shortsound
      * @return ShortSound this.shortsound
      */
     public ShortSound getShortSound() {
         return this.shortSound;
     }
 
+    /**
+     * Writes the header of the wav file
+     * @param fileToConvert the file to convert from raw to wav by adding a header
+     * @return a wav file - the raw file passed in as a parameter with a header added
+     * @throws IOException
+     */
     private File writeWavHeader( File fileToConvert ) throws IOException {
         // Constants used in the .wav header
         long mySubChunk1Size = 16;  // 16bit PCM
@@ -144,8 +160,8 @@ public class AudioMixer {
 
     /**
      * Helper for writing the .wav header by converting an int to a byte[].
-     * @param i
-     * @return
+     * @param i integer to convert to a byte array
+     * @return the byte array conversion of the integer
      */
     private static byte[] intToByteArray (int i) {
         byte[] b = new byte[4];
@@ -158,8 +174,8 @@ public class AudioMixer {
 
     /**
      * Helper for writing the .wav header by converting a short to a byte[].
-     * @param data
-     * @return
+     * @param data short to convert to a byte array
+     * @return the byte array converted from the short
      */
     public static byte[] shortToByteArray(short data) {
         return new byte[]{(byte)(data & 0xff),(byte)((data >>> 8) & 0xff)};
