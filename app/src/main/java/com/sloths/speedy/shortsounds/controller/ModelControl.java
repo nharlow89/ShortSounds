@@ -11,9 +11,6 @@ import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
 
 import java.io.File;
 
-/**
- * Created by nj on 5/15/15.
- */
 
 /**
  * A ModelControl is a controller that ties the backend to the front end. A
@@ -45,7 +42,10 @@ public class ModelControl implements PlaybackListener {
         return instance;
     }
 
-    //returns true ifPlaying and non null;
+    /**
+     * Determines whether or not it is currently playing
+     * @return true ifPlaying and audio player is non null, false otherwise
+     */
     @Override
     public boolean onPlayToggle() {
         boolean isPlaying = mAudioPlayer != null && mAudioPlayer.isPlayingAll();
@@ -57,6 +57,9 @@ public class ModelControl implements PlaybackListener {
         return isPlaying;
     }
 
+    /**
+     * Starts recording
+     */
     @Override
     public void onRecordStart() {
 //        main.onRecordStart();
@@ -68,6 +71,11 @@ public class ModelControl implements PlaybackListener {
         mAudioRecorder.start();
     }
 
+    /**
+     * Stops recording
+     * @param mActiveShortSound the current active ShortSound
+     * @return The active ShortSound is this is the first track recorded, else null
+     */
     @Override
     public void onRecordStop( ShortSound mActiveShortSound ) {
         File recordedFile = mAudioRecorder.end();
@@ -87,13 +95,17 @@ public class ModelControl implements PlaybackListener {
         // Create the new ShortSoundTrack (that this will record to)
         ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
         mActiveShortSound.addTrack(newTrack);
-        mAudioPlayer.addTrack(newTrack);
+        if (!isNewShortSound) mAudioPlayer.addTrack(newTrack);
         mAudioRecorder.reset();  // Have to reset for the next recording
 //        if ( isNewShortSound )
 //            return mActiveShortSound;
 //        return null;
     }
 
+    /**
+     * Updates the current position of the seek bar
+     * @param position the position of the seek bar
+     */
     @Override
     public void updateCurrentPosition(int position) {
         this.seekBarPosition = position;
@@ -101,34 +113,51 @@ public class ModelControl implements PlaybackListener {
             if (!mAudioRecorder.isRecording()) {
                 mAudioPlayer.stopAll();
             }
-//            boolean isOkToPlayAllWithNewPosition = mAudioPlayer.isPlayingAll() && !mAudioRecorder.isRecording();
-//            if (isOkToPlayAllWithNewPosition) {
-//                // TODO: This scenario is super buggy
-//                mAudioPlayer.stopAll();
-//                mAudioPlayer.playAll(this.seekBarPosition);
-//            }
         }
     }
 
+    /**
+     * Stops all of the tracks from playing
+     */
     public void stopAllFromPlaying() {
-        if (mAudioPlayer != null) mAudioPlayer.stopAll();
+        if (mAudioPlayer != null) {
+            mAudioPlayer.stopAll();
+        }
     }
 
+    /**
+     * Notifies the seek bar of a change in position
+     * @param position the new position
+     */
     public void notifySeekBarOfChangeInPos(int position) {
         this.seekBarPosition = position;
         mGlobalSeekBar.setProgress(position);
     }
 
+    /**
+     * Sets the global seek bar
+     * @param sb a seek bar to set the global seek bar to
+     */
     public void setGlobalSeekBar(SeekBar sb) {
         mGlobalSeekBar = sb;
     }
 
+    /**
+     * Mutes the effects
+     * @param effect The type of effect to mute
+     * @param track the track the effect is being muted on
+     */
     @Override
     public void muteEffect(Effect.Type effect, int track) {
         mAudioPlayer.getTrack( track ).setEffectToggle(effect, false);
         Log.i(TAG, "mute " + effect.toString() +" on track " + track);
     }
 
+    /**
+     * Turns on an effect
+     * @param effect The type of effect to turn on
+     * @param track The track where the effect is being turned on
+     */
     @Override
     public void turnOnEffect(Effect.Type effect, int track) {
         mAudioPlayer.getTrack( track ).setEffectToggle(effect, true);
@@ -138,7 +167,7 @@ public class ModelControl implements PlaybackListener {
 
     /**
      * Set the AudioPlayer that this controller will interact with.
-     * @param mAudioPlayer
+     * @param mAudioPlayer the audio player to interact with the controller
      */
     public void setmAudioPlayer(AudioPlayer mAudioPlayer) {
         // Whenever setting the AudioPlayer, we should check if there is already an existing one.
@@ -148,47 +177,72 @@ public class ModelControl implements PlaybackListener {
         this.mAudioPlayer = mAudioPlayer;
     }
 
+    /**
+     * Sets the audio recorder to the given audio recorder
+     * @param mAudioRecorder the audio recorder to set the recorder to
+     */
     public void setmAudioRecorder(AudioRecorder mAudioRecorder) {
         this.mAudioRecorder = mAudioRecorder;
     }
 
+    /**
+     * Returns whether or not the app is currently recording
+     * @return true if currently recording, false otherwise
+     */
     public boolean isRecording() {
         return mAudioRecorder.isRecording();
     }
 
+    /**
+     * Checks for track solo
+     * @param track the current track
+     * @return true if track solo, false otherwise
+     */
     //TODO check for track solo
     public boolean isTrackSolo(int track) {
         return mAudioPlayer.isTrackSolo(track);
     }
 
+    /**
+     * Solo Track
+     * @param track the track to solo
+     */
     //TODO implement solo track
     public void soloTrack(int track) {
         mAudioPlayer.soloTrack(track);
     }
 
-    public void volumeChanged(int track, float volume) { mAudioPlayer.volumeChanged(track, volume); }
-
-//    public void endOfTrack() {
-//        seekBarPosition = 0;
-//
-////        mGlobalSeekBar.setProgress(0);
-////        onPlayToggle();
-//        // TODO: Update Play Button
-//    }
+    /**
+     * Changes the volume of a track
+     * @param track the track to change the volume on
+     * @param volume the desired volume
+     */
+    public void volumeChanged(int track, float volume) {
+        mAudioPlayer.volumeChanged(track, volume);
+    }
 
     /**
-     * This method does what it says, it goes through and cleans up any resources that were
-     * in use by the previously active shortsound. This includes AudioTracks, AudioRecorders,
+     * Goes through and cleans up any resources that were
+     * in use by the previously active shortsound.
+     * This includes AudioTracks, AudioRecorders,
      * and Effect objects.
      */
     private void cleanUpTheDirty() {
         mAudioPlayer.destroy();
     }
 
+    /**
+     * Determines whether or not the audio player is playing
+     * @return true if playing, false otherwise
+     */
     public boolean isPlaying() {
         return mAudioPlayer.isPlayingAll();
     }
 
+    /**
+     * Removes a track
+     * @param track track to remove
+     */
     public void removeTrack(int track) {
         ShortSoundTrack sst = mAudioPlayer.getTrack(track);
         mAudioPlayer.removeTrack(sst);

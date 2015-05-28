@@ -73,7 +73,6 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
      */
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        Log.i(TAG, "new ViewHolder created");
         // Create a new view.
         View v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.track_view, viewGroup, false);
@@ -128,6 +127,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         public static final int REVERB_INDEX = 1;
         private final TextView vTitle;
         private final LinearLayout vTrackChild;
+        private final ImageButton vToggle;
         private View vView;
         private Integer mPrimaryColor = null;
         private Integer mSecondaryColor = null;
@@ -259,7 +259,6 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             trackAnimator.deleteTrackView();
-
                             ((ShortSoundsApplication) mContext.getApplicationContext())
                                     .showToast(name + " deleted");
                             dialog.dismiss();
@@ -338,6 +337,16 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                     return true;
                 }
             });
+//            vTitle.setOnTouchListener(new TrackSwipeListener(vView, new SwipeToDeleteListener() {
+//                @Override
+//                public void onTrackDelete() {
+//                    trackAnimator.deleteTrackView();
+//                }
+//                @Override
+//                public void onEditTrackTitle() {
+//                    main.renameTrack(getPosition());
+//                }
+//            }));
         }
 
         /**
@@ -362,11 +371,9 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                         // Expand a track
                         collapseAllOtherTracks();
                         expandTrackChildView(vTrackChild);
-                        Log.i(TAG, "track " + getPosition() + " expanded");
                     } else {
                         // Close the current open track
-                        collapseTrackChildView(vTrackChild);
-                        Log.i(TAG, "track " + getPosition() + " collapsed");
+                        collapseTrackChildView(vTrackChild);// vToggle);
                     }
                 }
             }
@@ -376,7 +383,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
             public void collapseAllOtherTracks() {
                 for(ViewHolder vh: mViews) {
                     if ( vh.vTrackChild.getVisibility() == View.VISIBLE) {
-                        collapseTrackChildView(vh.vTrackChild);
+                        collapseTrackChildView(vh.vTrackChild);//, vh.vToggle);
                     }
                 }
             }
@@ -413,15 +420,17 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                 // 1 dp/ms
                 a.setDuration((int) (targetHeight / (v.getContext().getResources().getDisplayMetrics().density)));
                 v.startAnimation(a);
+//                vToggle.setImageDrawable( mContext.getResources().getDrawable(R.drawable.ic_action_collapse));
             }
 
             /**
              * Uses animation to collapse the child view of a track
              * @param v The view to collapse
              */
-            public void collapseTrackChildView(final View v) {
+            public void collapseTrackChildView(final View v) { //, final ImageButton toggle) {
                 Animation a = getCollapseAnimation(v);
-                v.startAnimation(a);
+                v.startAnimation(a);//TODO
+//                toggle.setImageDrawable( mContext.getResources().getDrawable(R.drawable.ic_action_expand));
             }
 
             /**
@@ -457,6 +466,20 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
 
 
             }
+
+//            /**
+//             * Deletes a track from the view and notifies the appropriate model classes
+//             */
+//            public void deleteTrackView() {
+//                final int position = getPosition();
+//                main.removeShortSoundTrack(position);
+//                // Note: this was the only way I could get the recycler view to play with the
+//                // "swipe to delete". Just had to delete view so recycler wouldn't reuse it again =(
+//                // This kinda defeats the purpose of the RecyclerView but we probably did not need it
+//                // to begin with.
+//                ((RecyclerView)vView.getParent()).removeView( vView );
+//                notifyItemRemoved(position);
+//            }
 
             /**
              * Initializes a collapse track animation

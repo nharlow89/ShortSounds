@@ -250,8 +250,14 @@ public class AudioPlayer {
     public void removeTrack( ShortSoundTrack track ) {
         trackPlayers.remove(track);
         tracks.remove(track);
-        if(mLongestTrack == track )
+        if(mLongestTrack.getLengthInBytes() == track.getLengthInBytes()) {
             mLongestTrack = mCurrentShortSound.getLongestTrack();
+            for(ShortSoundTrack sst : trackPlayers.keySet()) {
+                if(sst.getLengthInBytes() == mLongestTrack.getLengthInBytes()) {
+                    mLongestTrackPlayer = trackPlayers.get(sst);
+                }
+            }
+        }
     }
 
     /**

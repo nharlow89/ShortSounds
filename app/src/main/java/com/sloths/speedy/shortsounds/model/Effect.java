@@ -1,11 +1,13 @@
 package com.sloths.speedy.shortsounds.model;
 
 /**
- * Created by caseympfischer on 4/28/15.
+ * The abstract class that represents how the backend models for
+ * the effects should be.  It also has a method for getting
+ * if the effect is enabled.
  */
 public abstract class Effect {
 
-    public enum Type { EQ, REVERB, DISTORTION, BITCRUSH }
+    public enum Type { EQ, REVERB }
 
     protected android.media.audiofx.AudioEffect effect;
 
@@ -37,17 +39,6 @@ public abstract class Effect {
     public abstract String getTitleString();
 
     /**
-     * This method is used for loading an effect from the string encoded in the
-     * database. It parses the given string and returns the Effect
-     * object that the string represents.
-     * @param parameters The String as taken from the database
-     * @return An instance of a subclass of Effect, representing a saved effect state
-     */
-    public static Effect parseParameters(String parameters) {
-        return null;
-    }
-
-    /**
      * This method is used for creating a String encoding of an effect object that
      * can then be inserted into the database to save the effect state.
      * @return A String-encoded representation of the callee effect.
@@ -55,7 +46,7 @@ public abstract class Effect {
     public abstract String encodeParameters();
 
     /**
-     * Release the effect.
+     * Release the effect for cleanup.
      */
     public void release() {
         if (this.effect != null) {

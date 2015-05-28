@@ -8,51 +8,43 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
 import com.sloths.speedy.shortsounds.controller.ReverbEffectController;
-
 import java.util.Random;
 
 /**
- * Created by shampson on 5/7/15.
+ * This class is for displaying a canvas view for the reverb effect
  */
 public class Fx_ReverbCanvas extends View {
-
 
     private static final String TAG = "EffectCanvas";
     private Path xAxis;
     private Path yAxis;
     private Path linePath;
-    private EchoGraphics echoG;
+    private EchoGraphics echoLines;
     private Paint linePaint;
     private Paint pointPaint;
     private PointF left;
     private PointF right;
-
     private ControlPoint point;
-    private int YMIN, YMAX, XMIN,XMAX;
-
+    private int Y_MIN, Y_MAX, X_MIN, X_MAX;
     private final int MARGIN = 10;
     private final int NONE = -1, TOUCH_POINT = 0;
     private int currentTouch;
     private RectF pointTouch;
     private boolean firstDraw;
-
-    // Debug
-//    private Paint debugPaint;
-//    private List<PointF> debugPoints;
-
-    private float mX, mY;
     private ReverbEffectController controller;
 
+    /**
+     * Constructor for setting up the canvas
+     * @param c
+     * @param attrs
+     */
     public Fx_ReverbCanvas(Context c, AttributeSet attrs) {
         super(c, attrs);
         firstDraw = true;
 
-        // Path for y & x axis
         xAxis = new Path();
         yAxis = new Path();
         linePath = new Path();
@@ -65,7 +57,7 @@ public class Fx_ReverbCanvas extends View {
         left = new PointF();
         right = new PointF();
 
-
+        repInvariant();
     }
 
     /**
@@ -88,7 +80,11 @@ public class Fx_ReverbCanvas extends View {
     }
 
 
-    // override onDraw
+    /**
+     * On draw is used to actually draw on the canvas
+     * It's main purpose is to draw the updated point, line &
+     * the echo lines.
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -98,34 +94,35 @@ public class Fx_ReverbCanvas extends View {
             firstDraw = false;
         }
 
-        echoG.draw(canvas);
+        echoLines.draw(canvas);
         linePaint.setColor(Color.BLUE);
         canvas.drawPath(linePath, linePaint);
-        linePaint.setColor(Color.BLUE);
         canvas.drawPath(xAxis, linePaint);
         canvas.drawPath(yAxis, linePaint);
         canvas.drawPoint(point.x, point.y, pointPaint);
     }
 
-    // Helper method for intially drawing out the y & x axis
+    /**
+     * Helper method for intially drawing out the y & x axis
+     */
     private void setUpGraph() {
-        YMAX = MARGIN;
-        YMIN = getMeasuredHeight() - MARGIN;
-        XMIN = MARGIN;
-        XMAX = getMeasuredWidth() - MARGIN;
+        Y_MAX = MARGIN;
+        Y_MIN = getMeasuredHeight() - MARGIN;
+        X_MIN = MARGIN;
+        X_MAX = getMeasuredWidth() - MARGIN;
 
-        xAxis.moveTo(MARGIN, YMIN);
-        yAxis.moveTo(MARGIN, YMIN);
-        xAxis.lineTo(XMAX, YMIN);
-        yAxis.lineTo(MARGIN, YMAX);
+        xAxis.moveTo(MARGIN, Y_MIN);
+        yAxis.moveTo(MARGIN, Y_MIN);
+        xAxis.lineTo(X_MAX, Y_MIN);
+        yAxis.lineTo(MARGIN, Y_MAX);
 
-        left.x = XMIN;
-        right.x = XMAX;
+        left.x = X_MIN;
+        right.x = X_MAX;
 
         point = new ControlPoint();
         setLine();
-        echoG = new EchoGraphics();
-        echoG.setEchos();
+        echoLines = new EchoGraphics();
+        echoLines.setEchos();
     }
 
     /**
@@ -134,26 +131,30 @@ public class Fx_ReverbCanvas extends View {
      * mostly depends on the location of the controlled point.
      */
     private void setLine() {
-        float h0 = YMIN - (Math.abs(point.y - YMIN) * 3f  / 4);
-        float deltaH = 16f * XMIN / point.x;
-        float h1 = h0 + (XMAX - XMIN) * deltaH;
+        float height0 = Y_MIN - (Math.abs(point.y - Y_MIN) * 3f  / 4);
+        float deltaHeight = 16f * X_MIN / point.x;
+        float height1 = height0 + (X_MAX - X_MIN) * deltaHeight;
 
-        if (h1 > YMIN) {
-            h1 = YMIN;
-            right.x = (YMIN - h0) / deltaH;
+        if (height1 > Y_MIN) {
+            height1 = Y_MIN;
+            right.x = (Y_MIN - height0) / deltaHeight;
         } else {
-            right.x = XMAX;
+            right.x = X_MAX;
         }
 
-        left.y = h0;
-        right.y = h1;
+        left.y = height0;
+        right.y = height1;
 
         linePath.reset();
         linePath.moveTo(left.x, left.y);
         linePath.quadTo(right.x / 2, point.y, right.x, right.y);
     }
 
-    // This is where we will handle controlling points
+    /**
+     * This handles touching and controlling points
+     * @param event
+     * @return
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
@@ -168,20 +169,14 @@ public class Fx_ReverbCanvas extends View {
             // Drag points
             case MotionEvent.ACTION_MOVE:
                 if (currentTouch == TOUCH_POINT) {
-                    point.set(x, y);
-                    setLine();
-                    echoG.setEchos();
-                    invalidate();
-                    controlEffect();
+                    controlGraphicsAndEffect(x, y);
                 }
                 break;
             // If user lifts up --> set new touch area & draw line & point
             case MotionEvent.ACTION_UP:
                 if (currentTouch == TOUCH_POINT) {
-                    point.set(x, y);
-                    invalidate();
+                    controlGraphicsAndEffect(x, y);
                     currentTouch = NONE;
-                    controlEffect();
                 }
                 break;
         }
@@ -189,15 +184,23 @@ public class Fx_ReverbCanvas extends View {
     }
 
     /**
+     * Updates the point & line graphics.
      * Uses the controller to update the backend model
      * This will let the backend change its parameters for controlling
      * the effect
      */
-    private void controlEffect() {
+    private void controlGraphicsAndEffect(float x, float y) {
+        controlGraphics(x, y);
         if (controller != null) {
-//            Log.d("REVERBCANVAS", "Updating rev controller to point: ("+getValue().x+", "+getValue().y+")");
             controller.updateEffectValues(getValue());
         }
+    }
+
+    private void controlGraphics(float x, float y) {
+        point.set(x, y);
+        setLine();
+        echoLines.setEchos();
+        invalidate();
     }
 
     /**
@@ -218,7 +221,7 @@ public class Fx_ReverbCanvas extends View {
 
     /**
      * Gets the value of the point that controls the UI
-     * @return
+     * @return PointF
      */
     public PointF getValue() {
         float percentX = point.x / (float) getMeasuredWidth();
@@ -228,20 +231,17 @@ public class Fx_ReverbCanvas extends View {
 
     /**
      * Sets the value for the point that controls the UI
-     * @param values
+     * @param value
      */
-    public void setValue(PointF[] values) {
+    public void setValue(PointF value) {
         // Data coming from database
         if (point == null) {
             // View being setup for the first time
             setUpGraph();
         }
-        float x = values[0].x * getMeasuredWidth();
-        float y = values[0].y * getMeasuredHeight();
-        point.set(x, y);
-        setLine();
-        echoG.setEchos();
-        invalidate();
+        float x = value.x * getMeasuredWidth();
+        float y = value.y * getMeasuredHeight();
+        controlGraphics(x, y);
     }
 
     /**
@@ -271,9 +271,9 @@ public class Fx_ReverbCanvas extends View {
          * @param y
          */
         void set(float x, float y) {
-            if (x > XMIN + 4 * MARGIN && x < XMAX - 4 * MARGIN)
+            if (x > X_MIN + 4 * MARGIN && x < X_MAX - 4 * MARGIN)
                 this.x = x;
-            if (y  < YMIN - 4 * MARGIN && y  > YMAX + 4 * MARGIN)
+            if (y  < Y_MIN - 4 * MARGIN && y  > Y_MAX + 4 * MARGIN)
                 this.y = y;
 
             // Initialize touch locations for points
@@ -301,17 +301,17 @@ public class Fx_ReverbCanvas extends View {
                 arr[i] = new Path();
             }
 
-            final int H = YMIN - YMAX;
-            final int W =  XMAX - XMIN;
+            final int height = Y_MIN - Y_MAX;
+            final int width =  X_MAX - X_MIN;
             double heightScalar = 1.0 / ECHO_SIZE;
 
-            int x = (XMIN + r.nextInt(W / ECHO_SIZE));
+            int x = (X_MIN + r.nextInt(width / ECHO_SIZE));
             int y;
             for (int i = 0; i < ECHO_SIZE; i++) {
-                y = (int) (YMAX + (heightScalar * H) + (H / 6 - r.nextInt(H / 3)));
+                y = (int) (Y_MAX + (heightScalar * height) + (height / 6 - r.nextInt(height / 3)));
                 heightScalar += (1.0 / ECHO_SIZE);
                 echos[i] = new PointF(x, y);
-                x += 1.5 * W / ECHO_SIZE - r.nextInt(W / ECHO_SIZE);
+                x += 1.5 * width / ECHO_SIZE - r.nextInt(width / ECHO_SIZE);
             }
 
             setUpPaint();
@@ -334,13 +334,13 @@ public class Fx_ReverbCanvas extends View {
          * Sets the echos according to the point location
          */
         void setEchos() {
-            float xScal = point.x / XMAX;
-            float yScal = Math.abs(point.y - YMIN) / (YMIN - YMAX);
+            float xScal = point.x / X_MAX;
+            float yScal = Math.abs(point.y - Y_MIN) / (Y_MIN - Y_MAX);
 
             for (int i = 0; i < ECHO_SIZE; i++) {
                 arr[i].reset();
-                arr[i].moveTo(XMIN + xScal * echos[i].x, YMIN);
-                arr[i].lineTo(XMIN + xScal * echos[i].x, YMIN - yScal * Math.abs(echos[i].y - YMIN));
+                arr[i].moveTo(X_MIN + xScal * echos[i].x, Y_MIN);
+                arr[i].lineTo(X_MIN + xScal * echos[i].x, Y_MIN - yScal * Math.abs(echos[i].y - Y_MIN));
             }
         }
 
@@ -352,6 +352,22 @@ public class Fx_ReverbCanvas extends View {
             for (int i = 0; i < ECHO_SIZE; i++) {
                 canvas.drawPath(arr[i], p);
             }
+        }
+    }
+
+    /**
+     * A representation of the reverb canvas that holds points
+     * axis and paint
+     */
+    private void repInvariant() {
+        if (left == null || right == null) {
+            throw new AssertionError("Invalid left point value");
+        }
+        if (xAxis == null || yAxis == null) {
+            throw new AssertionError("Invalid axis value");
+        }
+        if (linePaint == null || pointPaint == null) {
+            throw new AssertionError("Invalid paint value");
         }
     }
 }

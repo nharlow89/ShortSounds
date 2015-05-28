@@ -44,7 +44,11 @@ public class Fx_EQCanvas extends View {
     private PointInit currentGroup;
     private boolean firstDraw;
 
-
+    /**
+     * Constructor for setting up the canvas
+     * @param c
+     * @param attrs
+     */
     public Fx_EQCanvas(Context c, AttributeSet attrs) {
         super(c, attrs);
         firstDraw = true;
@@ -56,8 +60,14 @@ public class Fx_EQCanvas extends View {
 
         // Initialize touch locations for points
         currentGroup = PointInit.NONE;
+
+        repInvariant();
     }
 
+    /**
+     * This resets the points to their initial states
+     * for the view to be reset
+     */
     private void resetPoints() {
         left = new EQPointF(0, getMeasuredHeight() / 2);
         right = new EQPointF(getMeasuredWidth(), getMeasuredHeight() / 2);
@@ -67,6 +77,9 @@ public class Fx_EQCanvas extends View {
         invalidate();
     }
 
+    /**
+     * Sets the paint styles for the line & points
+     */
     private void setStyles() {
         // Paint specs for line
         linePaint.setAntiAlias(true);
@@ -83,7 +96,9 @@ public class Fx_EQCanvas extends View {
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
     }
 
-    // override onDraw
+    /** On draw is used to actually draw on the canvas
+    * It's main purpose is to draw the new two points and line
+    */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -107,10 +122,13 @@ public class Fx_EQCanvas extends View {
         }
     }
 
-    // Private helper for drawing the line between all the points
+    /**
+     * This sets the path to be a curved line ready to be drawn
+     */
     private void setPath() {
         updatePath();
         linePath.reset();
+        // Set dx/dy values for help w/ curve
         for (int i = 0; i < path.size(); i++){
             if (i >= 0){
                 EQPointF point = path.get(i);
@@ -130,10 +148,11 @@ public class Fx_EQCanvas extends View {
                 }
             }
         }
-
+        // Set starter point of line
         EQPointF prev = path.get(0);
         EQPointF point;
         linePath.moveTo(prev.x, prev.y);
+        // Draws curved line w/ cubic function
         for(int i = 1; i < path.size(); i++){
             point = path.get(i);
             linePath.cubicTo(prev.x + prev.dx, prev.y + prev.dy,
@@ -142,20 +161,26 @@ public class Fx_EQCanvas extends View {
         }
     }
 
+    /**
+     * This updates the main points held in the path
+     */
     private void updatePath() {
-        PointGroup lg = lo;
-        PointGroup rg = hi;
+        PointGroup leftGroup = lo;
+        PointGroup rightGroup = hi;
 
-        if (lo.cp.x > hi.cp.x) {
-            lg = hi;
-            rg = lo;
+        // Used for if the lo & hi points cross
+        if (lo.centerPoint.x > hi.centerPoint.x) {
+            leftGroup = hi;
+            rightGroup = lo;
         }
-        EQPointF p = new EQPointF((int) ((lg.rp.x + rg.lp.x) / 2), (int) lg.rp.y);
-        path = Arrays.asList(left, lg.lp, lg.cp, p, rg.cp, rg.rp, right);
+        EQPointF p = new EQPointF((int) ((leftGroup.rightPoint.x + rightGroup.leftPoint.x) / 2), (int) leftGroup.rightPoint.y);
+        path = Arrays.asList(left, leftGroup.leftPoint, leftGroup.centerPoint, p, rightGroup.centerPoint, rightGroup.rightPoint, right);
     }
 
 
-    // This is where we will handle controlling points
+    /**
+     * This is where we will handle controlling points
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getAction();
@@ -179,11 +204,10 @@ public class Fx_EQCanvas extends View {
             case MotionEvent.ACTION_MOVE:
                 if (currentGroup == PointInit.LO) {
                     lo.set(x, y);
-                    setPath();
-                    invalidate();
-                    controlEffect();
                 } else if (currentGroup == PointInit.HI) {
                     hi.set(x, y);
+                }
+                if (currentGroup == PointInit.LO || currentGroup == PointInit.HI) {
                     setPath();
                     invalidate();
                     controlEffect();
@@ -208,19 +232,31 @@ public class Fx_EQCanvas extends View {
      */
     private void controlEffect() {
         if (controller != null) {
-            Log.d("EQCANVAS", "Updating eq controller to points: (" + getBandA().x +", "+getBandA().y+") ("+getBandB().x+", "+getBandB().y+")");
-            controller.updateEffectValues(new PointF[]{getBandA(), getBandB()});
+            controller.updateEffectValues(new PointF[]{getPointA(), getPointB()});
         }
     }
 
-    public PointF getBandA() {
-        return getBand(lo.cp);
+    /**
+     * Gives the lo center point
+     * @return
+     */
+    public PointF getPointA() {
+        return getBand(lo.centerPoint);
     }
 
-    public PointF getBandB() {
-        return getBand(hi.cp);
+    /**
+     * Gives the high center point
+     * @return
+     */
+    public PointF getPointB() {
+        return getBand(hi.centerPoint);
     }
 
+    /**
+     * Helper method for turning the points values in terms of percentages
+     * @param point
+     * @return
+     */
     private PointF getBand(EQPointF point) {
         float midY = (float) getMeasuredHeight() / (float) 2;
 
@@ -230,20 +266,25 @@ public class Fx_EQCanvas extends View {
         return new PointF(loXPercent, loYPercent);
     }
 
+    /**
+     * Sets the new values for the points
+     * @param points
+     */
     public void setValues(PointF[] points) {
+        // Nothing pulled from model --> Set to default
         if (points == null || points.length == 0 ||
                 (points[0].x == EqEffect.DEFAULT_X1 && points[1].x == EqEffect.DEFAULT_X2)) {
-            // Nothing pulled from model --> Set to default
             resetPoints();
             return;
         }
+        // View being pulled for the first time -- Asign values from DB
         if (lo == null || hi == null) {
-            // View being pulled for the first time -- Asign values from DB
             left = new EQPointF(0, getMeasuredHeight() / 2);
             right = new EQPointF(getMeasuredWidth(), getMeasuredHeight() / 2);
             lo = new PointGroup(PointInit.LO);
             hi = new PointGroup(PointInit.HI);
         }
+
         float width = getMeasuredWidth();
         float height = getMeasuredHeight() / (float) 2;
         lo.set(points[0].x * width, height - points[0].y * height);
@@ -253,67 +294,104 @@ public class Fx_EQCanvas extends View {
         invalidate();
     }
 
+    /**
+     * Sets the controller to be used for changing backend model values
+     * @param controller
+     */
     public void setController(EQEffectController controller) {
         this.controller = controller;
     }
 
-
+    /**
+     * An eq point class used for comparing the two lo/hi points
+     */
     private class EQPointF implements Comparable<EQPointF> {
         float x, y;
         float dx, dy;
-
 
         public EQPointF(int x, int y) {
             this.x = x;
             this.y = y;
         }
 
+        /**
+         * Comparing function to see which point has a higher x value
+         * @param value
+         * @return
+         */
         @Override
-        public int compareTo(EQPointF o) {
-            return (int) (x - o.x);
+        public int compareTo(EQPointF value) {
+            return (int) (x - value.x);
         }
     }
 
+    /**
+     * This Point Group class encompasses the two main points used (lo / hi)
+     * It contains the point, its two points that it holds to help w/ drawing
+     * the curve & the rectangle around the point for touching/dragging the point
+     */
     class PointGroup {
 
+        private static final int RECT_DIVIDER = 2;
         public final int BANDWIDTH;
+        public final int BANDWIDTH_DIVIDER = 8;
+        public final int WIDTH_DIVIDER = 4;
         public final float RECTSIZE;
         private PointInit init;
         boolean enabled;
         RectF rect;
-        private EQPointF lp;
-        private EQPointF cp;
-        private EQPointF rp;
+        private EQPointF leftPoint;
+        private EQPointF centerPoint;
+        private EQPointF rightPoint;
 
         PointGroup(PointInit init) {
-            BANDWIDTH = getMeasuredWidth() / 8;
-            RECTSIZE = BANDWIDTH / 2;
+            BANDWIDTH = getMeasuredWidth() / BANDWIDTH_DIVIDER;
+            RECTSIZE = BANDWIDTH / RECT_DIVIDER;
             this.init = init;
-            int x = getMeasuredWidth() / 4;
-            int y = getMeasuredHeight() / 2;
+            int x = getMeasuredWidth() / WIDTH_DIVIDER;
+            int y = getMeasuredHeight() / RECT_DIVIDER;
             if (init == PointInit.HI)
                 x *= 3;
-            lp = new EQPointF(x - BANDWIDTH, y);
-            cp = new EQPointF(x, y);
-            rp = new EQPointF(x + BANDWIDTH, y);
+            leftPoint = new EQPointF(x - BANDWIDTH, y);
+            centerPoint = new EQPointF(x, y);
+            rightPoint = new EQPointF(x + BANDWIDTH, y);
 
-            rect = new RectF(cp.x - RECTSIZE, cp.y - RECTSIZE,
-                    cp.x + RECTSIZE, cp.y + RECTSIZE);
+            rect = new RectF(centerPoint.x - RECTSIZE, centerPoint.y - RECTSIZE,
+                    centerPoint.x + RECTSIZE, centerPoint.y + RECTSIZE);
             enabled = true;
         }
 
+        /**
+         * Sets the points to new values
+         * @param x
+         * @param y
+         */
         void set(float x, float y) {
-            if (x > BANDWIDTH / 2 && x < getMeasuredWidth() - BANDWIDTH / 2) {
-                lp.x = x - BANDWIDTH;
-                cp.x = x;
-                rp.x = x + BANDWIDTH;
+            if (x > BANDWIDTH / RECT_DIVIDER && x < getMeasuredWidth() - BANDWIDTH / RECT_DIVIDER) {
+                leftPoint.x = x - BANDWIDTH;
+                centerPoint.x = x;
+                rightPoint.x = x + BANDWIDTH;
             }
 
-            if (y < getMeasuredHeight() - RECTSIZE / 2 && y > RECTSIZE / 2)
-                cp.y = y;
+            if (y < getMeasuredHeight() - RECTSIZE / RECT_DIVIDER && y > RECTSIZE / RECT_DIVIDER) {
+                centerPoint.y = y;
+            }
 
-            rect.set(cp.x - RECTSIZE, cp.y - RECTSIZE,
-                    cp.x + RECTSIZE, cp.y + RECTSIZE);;
+            rect.set(centerPoint.x - RECTSIZE, centerPoint.y - RECTSIZE,
+                    centerPoint.x + RECTSIZE, centerPoint.y + RECTSIZE);;
+        }
+    }
+
+    /**
+     * A representation of an EQ canvas, which holds  a path
+     * and paint
+     */
+    private void repInvariant() {
+        if (linePath == null) {
+            throw new AssertionError("Invalid path value");
+        }
+        if (linePaint == null || pointPaint == null) {
+            throw new AssertionError("Invalid paint value");
         }
     }
 }

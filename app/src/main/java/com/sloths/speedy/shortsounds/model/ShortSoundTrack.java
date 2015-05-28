@@ -109,14 +109,6 @@ public class ShortSoundTrack {
                Log.d("effects", "REVERB toggle switch clicked");
                this.mReverbEffect.enable();
                break;
-           case DISTORTION:
-               Log.d("effects", "DISTORTION toggle switch clicked");
-               //throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
-               break;
-           case BITCRUSH:
-               Log.d("effects", "BITCRUSH toggle switch clicked");
-               //throw new UnsupportedOperationException("bitcrush and distortion have not been implemented yet");
-               break;
         }
         repInvariant();
     }
@@ -135,7 +127,7 @@ public class ShortSoundTrack {
             return points;
         } else {
             // Reverb point being returned
-            PointF[] points = mReverbEffect.getPointVal();
+            PointF[] points = new PointF[]{mReverbEffect.getPointVal()};
             return points;
         }
     }
