@@ -17,7 +17,6 @@ import java.util.List;
  */
 public class ShortSound {
     public static final String DEBUG_TAG = "SHORT_SOUNDS";
-    private static final String DEFAULT_TITLE = "Untitled";
     private List<ShortSoundTrack> tracks;
     private String title;
     private long id;
@@ -31,10 +30,11 @@ public class ShortSound {
     public ShortSound() {
         Log.d("DB_TEST", "ShortSound:constructor()");
         nextTrackNumber = 1;
-        this.title = DEFAULT_TITLE;  // Default
         this.tracks = new ArrayList<ShortSoundTrack>();  // Initially no tracks
         this.id = sqlHelper.insertShortSound(this);  // Add ShortSound to the DB
-        Log.d("DB_TEST", "Inserted ShortSound: " + this.toString() );
+        this.title = "Project " + this.id;
+        sqlHelper.updateShortSound(this);
+        Log.d("DB_TEST", "Inserted ShortSound: " + this.toString());
         repInvariant();
     }
 
