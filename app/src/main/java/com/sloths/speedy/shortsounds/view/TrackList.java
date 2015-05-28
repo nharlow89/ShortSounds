@@ -36,6 +36,9 @@ public class TrackList extends RecyclerView {
         assert recordSound != null;
     }
 
+    /**
+     * Notifies the RecyclerViewAdapter that the track name has changed.
+     */
     public void notifyTrackNameChanged() {
         mAdapter.notifyDataSetChanged();
     }
