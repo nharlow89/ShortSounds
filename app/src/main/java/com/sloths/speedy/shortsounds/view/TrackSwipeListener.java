@@ -32,6 +32,11 @@ public class TrackSwipeListener implements View.OnTouchListener {
     private boolean mDeleted;
     private SwipeToDeleteListener mListener;
 
+    /**
+     * Creates a TrackSwipeListener
+     * @param v The view
+     * @param listener The swiping listener
+     */
     public TrackSwipeListener( View v, SwipeToDeleteListener listener ) {
         mView = v;
         mListener = listener;
@@ -46,9 +51,9 @@ public class TrackSwipeListener implements View.OnTouchListener {
 
     /**
      * The onTouch is where we handle the click and swipe events for a track.
-     * @param v
-     * @param event
-     * @return
+     * @param v the view
+     * @param event motion event (i.e. up, down, cancel or move)
+     * @return true if successful, false otherwise
      */
     @Override
     public boolean onTouch(View v, MotionEvent event) {

@@ -1,9 +1,5 @@
 package com.sloths.speedy.shortsounds.view;
 
-/**
- * Created by joel on 4/25/2015.
- */
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -34,6 +30,8 @@ import java.util.List;
 /**
  * The RecyclerViewAdapter takes track data and uses it to populate the views associated
  * with the RecyclerView
+ *
+ * @author Joel Sigo
  */
 public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.ViewHolder> {
     public static final String TAG = "RecyclerViewAdapter";
@@ -69,7 +67,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
      * Create new views (invoked by the layout manager)
      * @param viewGroup The ViewGroup
      * @param viewType An int representation of the viewType
-     * @return
+     * @return the viewholder of the new view
      */
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {

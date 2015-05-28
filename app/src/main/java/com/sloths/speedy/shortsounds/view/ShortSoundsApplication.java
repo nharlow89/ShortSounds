@@ -1,15 +1,11 @@
 package com.sloths.speedy.shortsounds.view;
 
-import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.sloths.speedy.shortsounds.R;
 
 /**
  * ShortSoundsApplication allows other classes to get the overall
@@ -18,6 +14,9 @@ import com.sloths.speedy.shortsounds.R;
 public class ShortSoundsApplication extends Application {
     private static Context context;
 
+    /**
+     * Sets up the ShortSounds application when the app is created
+     */
     @Override
     public void onCreate(){
         super.onCreate();
