@@ -22,6 +22,7 @@ public class ShortSound {
     private String title;
     private long id;
     private static ShortSoundSQLHelper sqlHelper = ShortSoundSQLHelper.getInstance();
+    private int nextTrackNumber;
 
     /**
      * Create a new empty ShortSound.
@@ -29,6 +30,7 @@ public class ShortSound {
      */
     public ShortSound() {
         Log.d("DB_TEST", "ShortSound:constructor()");
+        nextTrackNumber = 1;
         this.title = DEFAULT_TITLE;  // Default
         this.tracks = new ArrayList<ShortSoundTrack>();  // Initially no tracks
         this.id = sqlHelper.insertShortSound(this);  // Add ShortSound to the DB
@@ -45,7 +47,9 @@ public class ShortSound {
     public ShortSound( HashMap<String, String> map ) {
         if ( !map.containsKey( sqlHelper.KEY_ID ) ) throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.KEY_ID + " field.");
         if ( !map.containsKey( sqlHelper.KEY_TITLE ) ) throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.KEY_TITLE + " field.");
+        if ( !map.containsKey( sqlHelper.NEXT_TRACK_NUM ) ) throw new AssertionError("Error decoding ShortSound, missing " + sqlHelper.NEXT_TRACK_NUM + " field.");
         this.id = Long.parseLong( map.get( sqlHelper.KEY_ID ) );
+        this.nextTrackNumber = Integer.parseInt( map.get(sqlHelper.NEXT_TRACK_NUM ) );
         this.title = map.get(sqlHelper.KEY_TITLE);
         this.tracks = new ArrayList<ShortSoundTrack>();
         repInvariant();
@@ -107,6 +111,8 @@ public class ShortSound {
      */
     public void addTrack( ShortSoundTrack track ) {
         this.tracks.add(track);  // Add track to list
+        nextTrackNumber++;
+        this.sqlHelper.updateShortSound(this);
     }
 
     /**
@@ -118,6 +124,12 @@ public class ShortSound {
         track.delete();
         repInvariant();
     }
+
+    /**
+     * Returns the next track number for this ShortSound
+     * @return int the nex track number for this ShortSound
+     */
+    public int getNextTrackNumber() { return this.nextTrackNumber; }
 
     public String getTrackName(int track) {
         return tracks.get(track).getTitle();
