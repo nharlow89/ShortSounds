@@ -2,16 +2,10 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.TextView;
-
-import com.sloths.speedy.shortsounds.R;
-import com.sloths.speedy.shortsounds.controller.ModelControl;
 
 /**
  * TrackSwipeListener is a helper class that takes care of the "swipe to delete" feature as well
@@ -41,7 +35,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
         mView = v;
         mListener = listener;
         ViewConfiguration vc = ViewConfiguration.get(v.getContext());
-        mSlop = vc.getScaledTouchSlop();
+        mSlop = vc.getScaledTouchSlop() / 2;
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity() * 4;
         mMaxFlingVelocity = vc.getScaledMaximumFlingVelocity();
         mDeleted = false;

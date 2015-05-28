@@ -904,11 +904,10 @@ public class MainActivity extends FragmentActivity
         updateViewStateBasedOnTrackCount();
     }
 
-    public void updateViewStateBasedOnTrackCount() {
     /**
-     * Updates the record text
+     * Update the view state based on the track count.
      */
-    public void updateRecordText() {
+    public void updateViewStateBasedOnTrackCount() {
         TextView recordSound =
                 (TextView) animator.getChildAt(viewMap.get(TRACKS))
                         .findViewById(R.id.recordSoundText);
