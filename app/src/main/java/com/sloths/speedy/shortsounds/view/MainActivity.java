@@ -279,10 +279,9 @@ public class MainActivity extends FragmentActivity
 
     /**
      * Takes a list of short sounds and creates an String array of the titles
-     * @param sounds list of shortsounds
      * @return string[] of titles
      */
-    private String[] getShortSoundTitles(List<ShortSound> sounds) {
+    private String[] getShortSoundTitles() {
         String[] titles = new String[sounds.size()];
         for(int i = 0; i < sounds.size(); i++)
             titles[i] = sounds.get(i).getTitle();

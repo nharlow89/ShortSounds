@@ -147,7 +147,9 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
             super(v);
             // init instance variables
             vView = v;
+            vToggle = (ImageButton) v.findViewById(R.id.toggleTrackView);
             trackAnimator = new TrackAnimator();
+            vToggle.setOnClickListener(trackAnimator);
             vTitle = (TextView) v.findViewById(R.id.track_title);
             vTitle.setOnClickListener(trackAnimator);
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
@@ -161,13 +163,29 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                                         ((Button) v.findViewById(R.id.eq_button)),
                                         ((Button) v.findViewById(R.id.reverb_button))
                                     };
-
+            v.findViewById(R.id.track_list_parent);
             // perform setup
             setUpSolo();
             setUpButtons();
             setUpToggle();
-            setUpDelete();
-            setUpLongClick(); // set up track rename
+            setUpSwipeListener();
+        }
+
+        /**
+         * Sets up the "swipe to delete" and click handler for the track title.
+         */
+        private void setUpSwipeListener() {
+            vTitle.setOnClickListener(null);
+            vTitle.setOnTouchListener(new TrackSwipeListener(vView, new SwipeToDeleteListener() {
+                @Override
+                public void onTrackDelete() {
+                    trackAnimator.deleteTrackView();
+                }
+                @Override
+                public void onEditTrackTitle() {
+                    main.renameTrack(getPosition());
+                }
+            }));
         }
 
         /**
@@ -229,45 +247,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
             });
         }
 
-        /**
-         * sets up the delete track functionality for this view
-         */
-        private void setUpDelete() {
-            ImageButton button = (ImageButton) vView.findViewById(R.id.deleteTrack);
-            button.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return modelControl.isPlaying() || modelControl.isRecording();
-                }
-            });
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    final String name = main.getCurrentTrackNameAt(getPosition());
 
-                    new AlertDialog.Builder(mContext)
-                    .setTitle("\tDelete track?")
-                    .setIcon(R.drawable.ic_action_mic)
-                    .setMessage("Are you sure you want to delete track " + name + "?")
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            trackAnimator.deleteTrackView();
-                            ((ShortSoundsApplication) mContext.getApplicationContext())
-                                    .showToast(name + " deleted");
-                            dialog.dismiss();
-                        }
-                    }).create().show();
-
-                }
-            });
-        }
 
         /**
          * Sets the titles for tracks in RecyclerView
@@ -326,28 +306,6 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
             }
         }
 
-        /**
-         * Sets up track renaming if the user long clicks the track title
-         */
-        public void setUpLongClick() {
-            vTitle.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    main.renameTrack(getPosition());
-                    return true;
-                }
-            });
-//            vTitle.setOnTouchListener(new TrackSwipeListener(vView, new SwipeToDeleteListener() {
-//                @Override
-//                public void onTrackDelete() {
-//                    trackAnimator.deleteTrackView();
-//                }
-//                @Override
-//                public void onEditTrackTitle() {
-//                    main.renameTrack(getPosition());
-//                }
-//            }));
-        }
 
         /**
          * assigns a color to a ViewHolder if one has not been previously assigned
@@ -373,7 +331,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                         expandTrackChildView(vTrackChild);
                     } else {
                         // Close the current open track
-                        collapseTrackChildView(vTrackChild);// vToggle);
+                        collapseTrackChildView(vTrackChild, vToggle);
                     }
                 }
             }
@@ -383,7 +341,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
             public void collapseAllOtherTracks() {
                 for(ViewHolder vh: mViews) {
                     if ( vh.vTrackChild.getVisibility() == View.VISIBLE) {
-                        collapseTrackChildView(vh.vTrackChild);//, vh.vToggle);
+                        collapseTrackChildView(vh.vTrackChild, vh.vToggle);
                     }
                 }
             }
@@ -420,66 +378,66 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                 // 1 dp/ms
                 a.setDuration((int) (targetHeight / (v.getContext().getResources().getDisplayMetrics().density)));
                 v.startAnimation(a);
-//                vToggle.setImageDrawable( mContext.getResources().getDrawable(R.drawable.ic_action_collapse));
+                vToggle.setImageDrawable( mContext.getResources().getDrawable(R.drawable.ic_action_collapse));
             }
 
             /**
              * Uses animation to collapse the child view of a track
              * @param v The view to collapse
              */
-            public void collapseTrackChildView(final View v) { //, final ImageButton toggle) {
+            public void collapseTrackChildView(final View v, final ImageButton toggle) {
                 Animation a = getCollapseAnimation(v);
                 v.startAnimation(a);//TODO
-//                toggle.setImageDrawable( mContext.getResources().getDrawable(R.drawable.ic_action_expand));
-            }
-
-            /**
-             * Deletes a track from the view and notifies the appropriate model classes
-             */
-            public void deleteTrackView() {
-                final TrackList trackList =
-                        (TrackList) ((Activity)mContext).findViewById(R.id.track_list);
-                Animation a;
-                if (vTrackChild.getVisibility() == View.VISIBLE) {
-                    a = getCollapseAnimation(vTrackChild);
-                    a.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) { }
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            int position = getPosition();
-                            main.removeShortSoundTrack(position);
-                            Log.i(TAG, "track " + position + " deleted");
-                            notifyItemRemoved(position);
-                            main.updateRecordText();
-                        }
-                        @Override
-                        public void onAnimationRepeat(Animation animation) { }
-                    });
-                    vTrackChild.startAnimation(a);
-                } else {
-                    int position = getPosition();
-                    main.removeShortSoundTrack(position);
-                    notifyItemRemoved(position);
-                    main.updateRecordText();
-                }
-
-
+                vToggle.setImageDrawable( mContext.getResources().getDrawable(R.drawable.ic_action_expand));
             }
 
 //            /**
 //             * Deletes a track from the view and notifies the appropriate model classes
 //             */
 //            public void deleteTrackView() {
-//                final int position = getPosition();
-//                main.removeShortSoundTrack(position);
-//                // Note: this was the only way I could get the recycler view to play with the
-//                // "swipe to delete". Just had to delete view so recycler wouldn't reuse it again =(
-//                // This kinda defeats the purpose of the RecyclerView but we probably did not need it
-//                // to begin with.
-//                ((RecyclerView)vView.getParent()).removeView( vView );
-//                notifyItemRemoved(position);
+//                final TrackList trackList =
+//                        (TrackList) ((Activity)mContext).findViewById(R.id.track_list);
+//                Animation a;
+//                if (vTrackChild.getVisibility() == View.VISIBLE) {
+//                    a = getCollapseAnimation(vTrackChild);
+//                    a.setAnimationListener(new Animation.AnimationListener() {
+//                        @Override
+//                        public void onAnimationStart(Animation animation) { }
+//                        @Override
+//                        public void onAnimationEnd(Animation animation) {
+//                            int position = getPosition();
+//                            main.removeShortSoundTrack(position);
+//                            Log.i(TAG, "track " + position + " deleted");
+//                            notifyItemRemoved(position);
+//                            main.updateRecordText();
+//                        }
+//                        @Override
+//                        public void onAnimationRepeat(Animation animation) { }
+//                    });
+//                    vTrackChild.startAnimation(a);
+//                } else {
+//                    int position = getPosition();
+//                    main.removeShortSoundTrack(position);
+//                    notifyItemRemoved(position);
+//                    main.updateRecordText();
+//                }
+//
+//
 //            }
+
+            /**
+             * Deletes a track from the view and notifies the appropriate model classes
+             */
+            public void deleteTrackView() {
+                final int position = getPosition();
+                main.removeShortSoundTrack(position);
+                // Note: this was the only way I could get the recycler view to play with the
+                // "swipe to delete". Just had to delete view so recycler wouldn't reuse it again =(
+                // This kinda defeats the purpose of the RecyclerView but we probably did not need it
+                // to begin with.
+                ((RecyclerView)vView.getParent()).removeView( vView );
+                notifyItemRemoved(position);
+            }
 
             /**
              * Initializes a collapse track animation

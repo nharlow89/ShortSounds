@@ -79,27 +79,12 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void onRecordStop( ShortSound mActiveShortSound ) {
         File recordedFile = mAudioRecorder.end();
-        Log.d("DEBUG", "endRecording() recordedFile: " + recordedFile.getAbsolutePath());
-
-        boolean isNewShortSound = mActiveShortSound == null || mActiveShortSound.getSize() == 0;
-        if ( isNewShortSound ) {
-            // Case 1. There is no active ShortSound, create one and continue.
-            // Create the new ShortSound and add it the list.
-            if (mActiveShortSound == null)
-                mActiveShortSound = new ShortSound();
-            mAudioPlayer = new AudioPlayer(mActiveShortSound);
-        } else {
-            mAudioPlayer.stopAll();
-        }
-        Log.d("DEBUG", "Finished Recording new track to ShortSound[" + mActiveShortSound.getId() + "]");
+        mAudioPlayer.stopAll();
         // Create the new ShortSoundTrack (that this will record to)
         ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
         mActiveShortSound.addTrack(newTrack);
-        if (!isNewShortSound) mAudioPlayer.addTrack(newTrack);
+        mAudioPlayer.addTrack(newTrack);
         mAudioRecorder.reset();  // Have to reset for the next recording
-//        if ( isNewShortSound )
-//            return mActiveShortSound;
-//        return null;
     }
 
     /**

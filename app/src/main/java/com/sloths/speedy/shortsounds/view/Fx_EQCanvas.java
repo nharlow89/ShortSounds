@@ -114,11 +114,11 @@ public class Fx_EQCanvas extends View {
         // draw the two points
         if (lo.enabled) {
             pointPaint.setColor(Color.RED);
-            canvas.drawPoint(lo.cp.x, lo.cp.y, pointPaint);
+            canvas.drawPoint(lo.centerPoint.x, lo.centerPoint.y, pointPaint);
         }
         if (hi.enabled) {
             pointPaint.setColor(Color.BLUE);
-            canvas.drawPoint(hi.cp.x, hi.cp.y, pointPaint);
+            canvas.drawPoint(hi.centerPoint.x, hi.centerPoint.y, pointPaint);
         }
     }
 
