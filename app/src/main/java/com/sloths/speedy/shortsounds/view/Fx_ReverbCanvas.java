@@ -56,6 +56,7 @@ public class Fx_ReverbCanvas extends View {
 
         left = new PointF();
         right = new PointF();
+
         repInvariant();
     }
 
@@ -300,17 +301,17 @@ public class Fx_ReverbCanvas extends View {
                 arr[i] = new Path();
             }
 
-            final int H = Y_MIN - Y_MAX;
-            final int W =  X_MAX - X_MIN;
+            final int height = Y_MIN - Y_MAX;
+            final int width =  X_MAX - X_MIN;
             double heightScalar = 1.0 / ECHO_SIZE;
 
-            int x = (X_MIN + r.nextInt(W / ECHO_SIZE));
+            int x = (X_MIN + r.nextInt(width / ECHO_SIZE));
             int y;
             for (int i = 0; i < ECHO_SIZE; i++) {
-                y = (int) (Y_MAX + (heightScalar * H) + (H / 6 - r.nextInt(H / 3)));
+                y = (int) (Y_MAX + (heightScalar * height) + (height / 6 - r.nextInt(height / 3)));
                 heightScalar += (1.0 / ECHO_SIZE);
                 echos[i] = new PointF(x, y);
-                x += 1.5 * W / ECHO_SIZE - r.nextInt(W / ECHO_SIZE);
+                x += 1.5 * width / ECHO_SIZE - r.nextInt(width / ECHO_SIZE);
             }
 
             setUpPaint();
