@@ -299,7 +299,7 @@ public class ShortSoundTrack {
         if ( this.fileName == null || !(this.fileName instanceof String) ) throw new AssertionError("Invalid filename");
         if ( this.mEqEffect == null || !(this.mEqEffect instanceof EqEffect) ) throw new AssertionError("Missing EqEffect");
         if ( this.mReverbEffect == null || !(this.mReverbEffect instanceof ReverbEffect) ) throw new AssertionError("Missing ReverbEffect");
-        if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
+        if ( this.id < 0 ) throw new AssertionError("Invalid id: " + this.id);
 
         // Check that the files are on disk
 //        File file = new File( this.fileName);
