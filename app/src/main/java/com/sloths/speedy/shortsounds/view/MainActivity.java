@@ -460,6 +460,8 @@ public class MainActivity extends FragmentActivity
      */
     @Override
     public void onBackPressed() {
+        if ( modelControl.isRecording() ) endRecording();
+        if ( modelControl.isPlaying() ) modelControl.stopAllFromPlaying();
         if (currentView.equals(TRACKS)) {
             super.onBackPressed();
         } else {
