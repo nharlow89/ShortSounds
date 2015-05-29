@@ -1,15 +1,11 @@
 package com.sloths.speedy.shortsounds.view;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Point;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -20,8 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.sloths.speedy.shortsounds.controller.ModelControl;
 import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.controller.ModelControl;
 import com.sloths.speedy.shortsounds.model.Effect;
 
 import java.util.ArrayList;
@@ -386,43 +382,9 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
              */
             public void collapseTrackChildView(final View v, final ImageButton toggle) {
                 Animation a = getCollapseAnimation(v);
-                v.startAnimation(a);//TODO
-                vToggle.setImageDrawable( mContext.getResources().getDrawable(R.drawable.ic_action_expand));
+                v.startAnimation(a);
+                toggle.setImageDrawable( mContext.getResources().getDrawable(R.drawable.ic_action_expand));
             }
-
-//            /**
-//             * Deletes a track from the view and notifies the appropriate model classes
-//             */
-//            public void deleteTrackView() {
-//                final TrackList trackList =
-//                        (TrackList) ((Activity)mContext).findViewById(R.id.track_list);
-//                Animation a;
-//                if (vTrackChild.getVisibility() == View.VISIBLE) {
-//                    a = getCollapseAnimation(vTrackChild);
-//                    a.setAnimationListener(new Animation.AnimationListener() {
-//                        @Override
-//                        public void onAnimationStart(Animation animation) { }
-//                        @Override
-//                        public void onAnimationEnd(Animation animation) {
-//                            int position = getPosition();
-//                            main.removeShortSoundTrack(position);
-//                            Log.i(TAG, "track " + position + " deleted");
-//                            notifyItemRemoved(position);
-//                            main.updateViewStateBasedOnTrackCount();
-//                        }
-//                        @Override
-//                        public void onAnimationRepeat(Animation animation) { }
-//                    });
-//                    vTrackChild.startAnimation(a);
-//                } else {
-//                    int position = getPosition();
-//                    main.removeShortSoundTrack(position);
-//                    notifyItemRemoved(position);
-//                    main.updateViewStateBasedOnTrackCount();
-//                }
-//
-//
-//            }
 
             /**
              * Deletes a track from the view and notifies the appropriate model classes
