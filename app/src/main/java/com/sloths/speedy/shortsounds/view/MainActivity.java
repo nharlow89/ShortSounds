@@ -563,15 +563,6 @@ public class MainActivity extends FragmentActivity
         // Change the view to the effect
         animator.setDisplayedChild(viewMap.get(effect));
         currentView = effect;
-
-        //TODO make fun of whoever kept this here
-        //TODO what does the drawer have to do with effects?
-//        mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
-        // Highlight item, update title, close drawer
-//        mDrawerList.setItemChecked(position, true);
-//        mDrawerLayout.closeDrawer(mDrawerList);
-//        setTitle(mShortSoundsTitles[position]);
-//        invalidateOptionsMenu();
     }
 
     /**
