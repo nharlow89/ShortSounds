@@ -25,11 +25,9 @@ public class EqEffect extends Effect {
      */
     public EqEffect() {
         // Sets up default equalizer until set by track player
-        this.effect = new Equalizer( 0, 0 );
         PointF lo = new PointF(DEFAULT_X1, DEFAULT_Y);
         PointF hi = new PointF(DEFAULT_X2, DEFAULT_Y);
         this.eqPoints = new PointF[]{lo, hi};
-        effect.setEnabled( false );
         isActive = false;
         repInvariant();
     }
@@ -68,12 +66,15 @@ public class EqEffect extends Effect {
         } catch( Exception e ) {
             e.printStackTrace();
         }
+        Log.d( TAG, "Attached EQ: " + effect);
     }
 
     /**
      * Set the properties of the Equalizer effect
      */
     private void setEffectProperties() {
+
+
         Equalizer eq = (Equalizer) this.effect;
         short[] levelRange = eq.getBandLevelRange();
 

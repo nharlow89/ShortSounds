@@ -11,7 +11,4 @@ public abstract class EffectController {
      * or default values
      */
     public abstract void resetModel();
-
-
-
 }

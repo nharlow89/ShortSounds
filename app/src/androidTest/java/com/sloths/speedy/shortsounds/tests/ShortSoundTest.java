@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * Created by jbusc_000 on 5/15/2015.
+ * Tests ShortSounds
  */
 public class ShortSoundTest extends TestCase {
 

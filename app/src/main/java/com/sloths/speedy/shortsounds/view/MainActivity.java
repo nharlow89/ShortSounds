@@ -183,7 +183,6 @@ public class MainActivity extends FragmentActivity
                 }
             }
         });
-        setPlayerVisibility(View.INVISIBLE);
     }
 
     /**
@@ -433,19 +432,17 @@ public class MainActivity extends FragmentActivity
         mActiveShortSound = sounds.get(position);// Set the currently active ShortSound.
         Log.d("SHORT_SOUNDS", "Selected ShortSound ["+mActiveShortSound.getId()+"] from the sidebar.");
         //TODO double check this is not causing bugs
+        modelControl.release();
         modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
         currentView = TRACKS;
         // Highlight item, update title, close drawer
         mDrawerList.setItemChecked(position, true);
-
         setTitle(mActiveShortSound.getTitle());
 
         updateCurrentTrackView();
-        updateRecordText();
+        updateViewStateBasedOnTrackCount();
         invalidateOptionsMenu();
         resetSeekBarToZero();
-        setPlayerVisibility(View.VISIBLE);
-
         // selected mix is loaded so close the drawer
         mDrawerLayout.closeDrawer(mDrawerList);
     }
@@ -764,6 +761,7 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume");
         if (mActiveShortSound != null && sounds.contains(mActiveShortSound))
             selectShortSoundFromDrawer(sounds.indexOf(mActiveShortSound));
         else if (!sounds.isEmpty())
@@ -803,7 +801,7 @@ public class MainActivity extends FragmentActivity
     public void removeShortSoundTrack(int track) {
         modelControl.removeTrack(track);
         mActiveShortSound.removeTrack(mActiveShortSound.getTracks().get(track));
-        updateRecordText();
+        updateViewStateBasedOnTrackCount();
     }
 
 
@@ -816,7 +814,8 @@ public class MainActivity extends FragmentActivity
         ShortSound newSound = new ShortSound();
         setTitle(newSound.getTitle());
         sounds.add(newSound);
-        modelControl.setmAudioPlayer(new AudioPlayer(newSound));  // Clear the existing AudioPlayer
+        modelControl.release();
+        modelControl.setmAudioPlayer(new AudioPlayer(newSound));
         mActiveShortSound = newSound;
         mDrawerList.setAdapter(new ArrayAdapter<>(this,
                 R.layout.drawer_list_item, getShortSoundTitles()));
@@ -831,15 +830,11 @@ public class MainActivity extends FragmentActivity
      * Set the view when we have a populated ShortSound
      */
     private void updateCurrentTrackView() {
-        if (mActiveShortSound.getSize() != 0)
-            setPlayerVisibility(View.VISIBLE);
-        else
-            setPlayerVisibility(View.INVISIBLE);
         RelativeLayout tvp = (RelativeLayout) findViewById(R.id.track_list_parent);
         View add = getLayoutInflater().inflate(R.layout.empty_tracks, tvp, false);
         animator.addView(add, viewMap.get(TRACKS) + 1);
         animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
-        updateRecordText();
+        updateViewStateBasedOnTrackCount();
         animator.removeViewAt(viewMap.get(TRACKS));
         invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
     }
@@ -906,24 +901,26 @@ public class MainActivity extends FragmentActivity
         ((TrackList) animator.getChildAt(viewMap.get(TRACKS))
                 .findViewById(R.id.track_list))
                 .notifyTrackAdded(mActiveShortSound.getSize());
-        updateRecordText();
+        updateViewStateBasedOnTrackCount();
     }
 
     /**
-     * Updates the record text
+     * Update the view state based on the track count.
      */
-    public void updateRecordText() {
+    public void updateViewStateBasedOnTrackCount() {
         TextView recordSound =
                 (TextView) animator.getChildAt(viewMap.get(TRACKS))
                         .findViewById(R.id.recordSoundText);
         if (recordSound != null) {
-            if (mActiveShortSound == null || mActiveShortSound.getSize() == 0)
+            if (mActiveShortSound == null || mActiveShortSound.getSize() == 0) {
                 recordSound.setVisibility(View.VISIBLE);
-            else
+                setPlayerVisibility(View.INVISIBLE);
+            } else {
                 recordSound.setVisibility(View.INVISIBLE);
-        } else {
-            Log.i(TAG, "record sound textview null");
+                setPlayerVisibility(View.VISIBLE);
+            }
         }
+        resetSeekBarToZero();
     }
 
     /**

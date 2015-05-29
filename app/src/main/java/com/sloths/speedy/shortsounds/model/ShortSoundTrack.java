@@ -24,6 +24,7 @@ import java.util.HashMap;
  */
 public class ShortSoundTrack {
     public static final String TAG = "ShortSoundTrack";
+
     // AudioTrack Params
     public static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
     public static final int SAMPLE_RATE = 44100;  // NOTE: also used for buffer size
@@ -54,8 +55,8 @@ public class ShortSoundTrack {
      * @postcondition This ShortSoundTrack will be stored in the database and a
      *      copy of the file referenced by filename will be made.
      */
-    public ShortSoundTrack( File audioFile, long shortSoundId, int nextTrackNum ) {
-        this.title = "Track " + nextTrackNum;
+    public ShortSoundTrack( File audioFile, long shortSoundId ) {
+        this.title = DEFAULT_TITLE;
         this.parentId = shortSoundId;
         this.mEqEffect = new EqEffect();
         this.mReverbEffect = new ReverbEffect();
@@ -378,7 +379,7 @@ public class ShortSoundTrack {
      * @param enable Whether or not the effect is enabled
      */
     public void setEffectToggle(Effect.Type effect, boolean enable) {
-        if (effect.equals(Effect.Type.EQ)) {
+        if (effect == Effect.Type.EQ) {
             // EQ
             if (enable) {
                 mEqEffect.enable();
@@ -402,9 +403,9 @@ public class ShortSoundTrack {
      * @return true if the effect is on, false otherwise
      */
     public boolean isEffectChecked(Effect.Type effect) {
-        if (effect.equals(Effect.Type.EQ)) {
+        if (effect == Effect.Type.EQ) {
             return mEqEffect.getEnabled();
-        } else if (effect.equals(Effect.Type.REVERB)) {
+        } else if (effect == Effect.Type.REVERB) {
             //REVERB
             return mReverbEffect.getEnabled();
         } else {
@@ -441,4 +442,6 @@ public class ShortSoundTrack {
         mReverbEffect.release();
         mEqEffect.release();
     }
+
+
 }
