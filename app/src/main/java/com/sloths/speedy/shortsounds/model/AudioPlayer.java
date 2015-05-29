@@ -431,6 +431,7 @@ public class AudioPlayer {
         public void stop() {
             if ( trackState == TrackState.PLAYING || trackState == TrackState.PAUSED ) {
                 Log.d(TAG, "Stop track["+track.getId()+"].");
+                audioTrack.stop();
                 audioTrack.flush();  // Clear the playback buffer and set Playback position to 0
                 trackState = TrackState.STOPPED;
                 try {
