@@ -6,13 +6,13 @@ import com.sloths.speedy.shortsounds.model.EqEffect;
 import com.sloths.speedy.shortsounds.model.ReverbEffect;
 
 /**
- * Created by jbusc_000 on 5/15/2015.
  * Test for future implementation of effects.
+ * @author John Buscher
  */
 public class EffectTest extends TestCase {
 
     ///////////////////////////////////////////////////////////////////////////
-    //
+    // Tests the EQ Constructor
     ///////////////////////////////////////////////////////////////////////////
     public void testEQConstructor() {
         Effect e = new EqEffect();
@@ -20,7 +20,7 @@ public class EffectTest extends TestCase {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    //
+    // Tests the Reverb Constructor
     ///////////////////////////////////////////////////////////////////////////
     public void testReverbConstructor() {
         Effect e = new ReverbEffect();
@@ -28,7 +28,7 @@ public class EffectTest extends TestCase {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    //
+    // Tests the titles of the different effects
     ///////////////////////////////////////////////////////////////////////////
     public void testTitles() {
         Effect eq = new EqEffect();

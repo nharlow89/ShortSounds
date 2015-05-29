@@ -30,11 +30,7 @@ public abstract class Effect {
     /**
      * Whether or not the effect is enabled.
      */
-    public boolean getEnabled() {
-        if (effect == null) {
-            return false;
-        }
-        return effect.getEnabled(); }
+    public abstract boolean getEnabled();
 
     /**
      * Gets the title string

@@ -23,6 +23,7 @@ public class ModelControl implements PlaybackListener {
     private int seekBarPosition;
     private static ModelControl instance = null;
     private SeekBar mGlobalSeekBar;
+    private boolean isRecording;
 
 
     /**
@@ -30,6 +31,7 @@ public class ModelControl implements PlaybackListener {
      */
     private ModelControl() {
         seekBarPosition = 0;
+        isRecording = false;
     }
 
     /**
@@ -63,6 +65,7 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void onRecordStart() {
 //        main.onRecordStart();
+        isRecording = true;
         if (mAudioPlayer != null) {
             Log.d("Debug", "onRecordStart() playALL!!!");
             mAudioPlayer.playAll(0);  // Play from the beginning
@@ -86,6 +89,7 @@ public class ModelControl implements PlaybackListener {
         mActiveShortSound.addTrack(newTrack);
         mAudioPlayer.addTrack(newTrack);
         mAudioRecorder.reset();  // Have to reset for the next recording
+        isRecording = false;
     }
 
     /**
@@ -116,8 +120,11 @@ public class ModelControl implements PlaybackListener {
      * @param position the new position
      */
     public void notifySeekBarOfChangeInPos(int position) {
-        this.seekBarPosition = position;
-        mGlobalSeekBar.setProgress(position);
+        if (! isRecording ) {
+            this.seekBarPosition = position;
+            mGlobalSeekBar.setProgress(position);
+        }
+
     }
 
     /**

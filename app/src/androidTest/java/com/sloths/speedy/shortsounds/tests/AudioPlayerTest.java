@@ -18,8 +18,8 @@ public class AudioPlayerTest extends TestCase {
     private static final String TEST_TITLE = "TestTrack";
     private static final String TEST_FILE_NAME = "test-file-modified";
 
-    /*
-    Helper method, returns constructed player. Reduces redundent calls
+    /**
+     * Helper method, returns constructed player. Reduces redundent calls
      */
     private AudioPlayer constructEmptyPlayer() {
         ShortSound ss = new ShortSound();
@@ -27,6 +27,10 @@ public class AudioPlayerTest extends TestCase {
         return new AudioPlayer(ss);
     }
 
+    /**
+     * Constructs a player with tracks
+     * @return a player with tracks
+     */
     private AudioPlayer constructPlayerWithTracks() {
         ShortSound ss = new ShortSound();
         ShortSoundTrack sst = newSSTrack();
@@ -34,6 +38,10 @@ public class AudioPlayerTest extends TestCase {
         return new AudioPlayer(ss);
     }
 
+    /**
+     * cretaes a new short sound track
+     * @return the new shortsound track
+     */
     private ShortSoundTrack newSSTrack() {
 
         ShortSoundTrack sst = new ShortSoundTrack(ShortSoundTrackTest.makeTestValues());

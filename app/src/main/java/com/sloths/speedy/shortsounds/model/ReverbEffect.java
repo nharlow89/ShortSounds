@@ -72,7 +72,6 @@ public class ReverbEffect extends Effect {
             effect.setEnabled( isActive );
             Log.d(TAG, "Enabled [" + effect.getEnabled() + "]");
         } catch (Exception e) {
-            Log.e(TAG, "MAJOR PROBLEM LOADING REVERB LIBRARY");
             Log.e(TAG, e.toString());
         }
     }
@@ -130,7 +129,7 @@ public class ReverbEffect extends Effect {
             return "NULL";
         }
         String retVal = new String();
-        if ( effect != null && effect.getEnabled() ) {
+        if ( isActive ) {
             retVal += "ON";
         } else {
             retVal += "OFF";
@@ -145,26 +144,20 @@ public class ReverbEffect extends Effect {
      * Enables the actual Reverb effect
      */
     public void enable() {
-        Log.d("Reverb", "Enabled Reverb effect");
         if (effect != null) {
             effect.setEnabled(true);
         }
         isActive = true;
-        //TODO DO NOT ERASE
-        //TODO deal with null case
     }
 
     /**
      * Disables the actual Reverb effect
      */
     public void disable() {
-        Log.d("Reverb", "Disabled Reverb effect");
         if (effect != null) {
             effect.setEnabled(false);
         }
         isActive = false;
-        //TODO DO NOT ERASE
-        //TODO deal with null case
     }
 
     /**
@@ -192,7 +185,9 @@ public class ReverbEffect extends Effect {
      */
     public void setPointVal(PointF point) {
         this.pointVal = point;
-        setEffectProperties();  // Update the effect params.
+        if (effect != null) {
+            setEffectProperties();
+        }
     }
 
     /**
@@ -200,7 +195,9 @@ public class ReverbEffect extends Effect {
      */
     public void resetPointVal() {
         this.pointVal = new PointF(DEFAULT_X, DEFAULT_Y);
-        setEffectProperties();
+        if (effect != null) {
+            setEffectProperties();
+        }
     }
 
 
@@ -212,5 +209,12 @@ public class ReverbEffect extends Effect {
         if (pointVal == null) {
             throw new AssertionError("Invalid point value");
         }
+    }
+
+    /**
+     * Whether or not the EnvironmentalReverb effect is enabled.
+     */
+    public boolean getEnabled() {
+        return isActive;
     }
 }
