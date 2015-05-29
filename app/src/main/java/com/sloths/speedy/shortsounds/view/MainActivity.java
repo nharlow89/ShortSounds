@@ -480,6 +480,9 @@ public class MainActivity extends FragmentActivity
     private void animateToTrack() {
         Animation in = animator.getInAnimation();
         Animation out = animator.getOutAnimation();
+        if (currentView == EQ) {
+
+        }
         animator.setInAnimation(inFromLeftAnimation());
         animator.setOutAnimation(outToRightAnimation());
         animator.setDisplayedChild(viewMap.get(TRACKS));
@@ -556,7 +559,6 @@ public class MainActivity extends FragmentActivity
      * @param effect the effect to load on the track
      */
     public void effectEditSelected(int track, String effect) {
-
         // Setups the effect to be shown (connects model-controller-view)
         setupEffect(track, effect);
 

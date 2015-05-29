@@ -43,5 +43,4 @@ public class ShortSoundsApplication extends Application {
         textView.setGravity(Gravity.CENTER);
         toast.show();
     }
-
 }
