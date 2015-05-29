@@ -5,8 +5,6 @@ import android.content.Context;
 import com.sloths.speedy.shortsounds.R;
 
 /**
- * Created by nj on 5/26/15.
- * TODO get color by index 0 - 5 and create save color in SQL database
  * The ColorWheel distributes a primary and secondary color for the list of tracks
  * The ColorWheel is a singleton
  */
@@ -25,6 +23,32 @@ public class ColorWheel {
     private ColorWheel() {
         pCount = 0;
         sCount = 0;
+    }
+
+    /**
+     * Returns the PrimaryColor in this ColorWheel at position i
+     * @param i int the PrimaryColor position
+     * @return int the PrimaryColor
+     */
+    public int getPrimaryColor(int i) {
+        return primary[i];
+    }
+
+    /**
+     * Returns the SecondaryColor in this ColorWheel at position i
+     * @param i int the SecondaryColor position
+     * @return int the SecondaryColor
+     */
+    public int getSecondaryColor(int i) {
+        return secondary[i];
+    }
+
+    /**
+     * Returns the NUM_COLORS in the color wheel
+     * @return int the NUM_COLORS in the color wheel
+     */
+    public int getNumColors() {
+        return NUM_COLORS;
     }
 
     /**
@@ -64,31 +88,4 @@ public class ColorWheel {
             };
         }
     }
-
-    /**
-     * Gets the next primary color in the color wheel
-     * @return the next primary color in the color wheel
-     */
-    public int nextPrimary() {
-        if (pCount != sCount) {
-            pCount++;
-            sCount = pCount;
-        }
-        int result = primary[pCount % NUM_COLORS];
-        pCount++;
-        return result;
-    }
-
-    /**
-     * Gets the next secondary color in the color whell
-     * @return the next secondary color in the color wheel
-     */
-    public int nextSecondary() {
-        if (sCount != pCount - 1)
-            sCount = pCount - 1;
-        int result = secondary[sCount % NUM_COLORS];
-        sCount++;
-        return result;
-    }
-
 }

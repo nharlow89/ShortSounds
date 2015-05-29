@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -85,7 +86,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
         viewHolder.setTitleView(position);
-        viewHolder.setUpColorsIfNeeded();
+        viewHolder.setUpColorsIfNeeded(position);
         setColorOnView(viewHolder);
         viewHolder.setUpVolume(position);
         viewHolder.setInitToggleState(position);
@@ -305,10 +306,17 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         /**
          * assigns a color to a ViewHolder if one has not been previously assigned
          */
-        private void setUpColorsIfNeeded() {
+        private void setUpColorsIfNeeded(int position) {
+            int color = main.getTrackColor(position);
+            if (color != -1) {
+                mPrimaryColor = color;
+                mSecondaryColor = color;
+            }
             if (mPrimaryColor == null || mSecondaryColor == null) {
-                mPrimaryColor = ColorWheel.instance().nextPrimary();
-                mSecondaryColor = ColorWheel.instance().nextSecondary();
+                int colorNum = (main.getNextColorNum() + main.getCurrentShortSoundId()) % colorWheel.getNumColors();
+                mPrimaryColor = ColorWheel.instance().getPrimaryColor(colorNum);
+                mSecondaryColor = ColorWheel.instance().getSecondaryColor(colorNum);
+                main.setTrackColor(position,mPrimaryColor);
             }
         }
 
