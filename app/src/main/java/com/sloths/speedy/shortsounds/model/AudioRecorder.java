@@ -16,7 +16,7 @@ import java.util.UUID;
 public class AudioRecorder {
     // global vars
     public static final int AUDIO_SOURCE = MediaRecorder.AudioSource.DEFAULT;
-    public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_MONO;
+    public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_STEREO;
     public static final int BUFFER_ELEMENTS_TO_REC = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
     public static int BUFFER_SIZE;
     // instance vars
@@ -81,7 +81,6 @@ public class AudioRecorder {
 //            System.out.println("Short writing to file" + frameBuffer.toString());
             try {
                 // Put de gains
-                /*
                 int i = 0;
                 while ( i < bytesRead ) {
                     float sample = (float)( frameBuffer[ i ] & 0xFF
@@ -90,7 +89,7 @@ public class AudioRecorder {
                     // Increase level by about 6dB:
                     // sample *= 2;
                     // Or increase level by 20dB:
-                    sample *= 10;
+                    sample *= 8;
                     // Or if you prefer any dB value, then calculate the gain factor outside the loop
                     // float gainFactor = (float)Math.pow( 10., dB / 20. );    // dB to gain factor
                     // sample *= gainFactor;
@@ -109,7 +108,6 @@ public class AudioRecorder {
                     }
                     i += 2;
                 }
-                */
                 mOutputStream.write(frameBuffer, 0, BUFFER_ELEMENTS_TO_REC);
             } catch (IOException e) {
                 e.printStackTrace();
