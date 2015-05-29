@@ -795,6 +795,14 @@ public class MainActivity extends FragmentActivity
     }
 
     /**
+     * returns the id of the current ShortSound
+     * @return int the id of the current ShortSound
+     */
+    public int getCurrentShortSoundId() {
+        return (int) mActiveShortSound.getId();
+    }
+
+    /**
      * Removes a track from the ShortSound
      * @param track The track to remove
      */
@@ -885,6 +893,35 @@ public class MainActivity extends FragmentActivity
                     .findViewById(R.id.track_list))
                     .notifyTrackNameChanged();
         }
+    }
+
+    /**
+     * Sets the int representation of a Color of the ShortSoundTrack
+     * at Position track
+     * @param track int the position of the track
+     * @param color int the Inteer representing the Color
+     */
+    public void setTrackColor(int track, int color) {
+        mActiveShortSound.getTracks().get(track).setColor(color);
+    }
+
+    /**
+     * Returns the int representation of the Color of the ShortSoundTrack at
+     * position track
+     * @param track int the position of the ShortSoundTrack
+     * @return int the int representaiton of the Color of the ShortSoundTrack
+     */
+    public int getTrackColor(int track) {
+        return mActiveShortSound.getTracks().get(track).getColor();
+    }
+
+    /**
+     * Returns the next available int representation for a
+     * ShortSoundTrack color
+     * @return int representation of a Color
+     */
+    public int getNextColorNum() {
+        return mActiveShortSound.getNextTrackNumber();
     }
 
     /**

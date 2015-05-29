@@ -47,6 +47,7 @@ public class ShortSoundTrack {
     private float volume;
     private boolean isSolo;
     private long mTrackLength;
+    private int mColor;
 
     /**
      * Create a ShortSoundTrack provided an existing audio file.
@@ -57,6 +58,7 @@ public class ShortSoundTrack {
      */
     public ShortSoundTrack( File audioFile, long shortSoundId ) {
         this.title = DEFAULT_TITLE;
+        this.mColor = -1;
         this.parentId = shortSoundId;
         this.mEqEffect = new EqEffect();
         this.mReverbEffect = new ReverbEffect();
@@ -85,6 +87,7 @@ public class ShortSoundTrack {
         if ( !map.containsKey( sqlHelper.TRACK_LENGTH) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.TRACK_LENGTH + " field.");
         if ( !map.containsKey( sqlHelper.VOLUME_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.VOLUME_PARAMS + " field.");
         if ( !map.containsKey( sqlHelper.SOLO_PARAMS ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.SOLO_PARAMS + " field.");
+        if ( !map.containsKey( sqlHelper.TRACK_COLOR ) ) throw new AssertionError("Error decoding ShortSoundTrack, missing " + sqlHelper.TRACK_COLOR + " field.");
 
         this.id = Long.parseLong(map.get(sqlHelper.KEY_ID));
         this.fileName = map.get(sqlHelper.KEY_TRACK_FILENAME_MODIFIED);
@@ -96,6 +99,7 @@ public class ShortSoundTrack {
         this.mTrackLength = Long.parseLong(map.get(sqlHelper.TRACK_LENGTH));
         if  (this.mTrackLength == 0) throw new AssertionError("Length can't be 0");
         this.isSolo = map.get(sqlHelper.SOLO_PARAMS).equals("t");
+        this.mColor = Integer.parseInt(map.get(sqlHelper.TRACK_COLOR));
         repInvariant();
     }
 
@@ -136,6 +140,26 @@ public class ShortSoundTrack {
             PointF[] points = new PointF[]{mReverbEffect.getPointVal()};
             return points;
         }
+    }
+
+    /**
+     * Returns the int representation of the Color associated with this
+     * ShortSoundTrack
+     * @return int the int representation of the Color associated with this
+     * ShortSoundTrack
+     */
+    public int getColor() {
+        return mColor;
+    }
+
+    /**
+     * Sets the Color asssociated with this ShortSoundTrack
+     * @param color int the representation of the Color to set to this
+     * ShortSoundTrack
+     */
+    public void setColor(int color) {
+        this.mColor = color;
+        sqlHelper.updateShortSoundTrack(this);
     }
 
     /**
