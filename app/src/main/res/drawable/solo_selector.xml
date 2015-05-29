@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_active="false" android:drawable="@drawable/solo_indicator_off" />
+    <item android:state_active="true" android:drawable="@drawable/solo_indicator" />
+    <item                           android:drawable="@drawable/solo_indicator_off" />
+</selector>
