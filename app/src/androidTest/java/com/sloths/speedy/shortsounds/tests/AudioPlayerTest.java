@@ -1,16 +1,12 @@
 package com.sloths.speedy.shortsounds.tests;
 
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
-import com.sloths.speedy.shortsounds.view.ShortSoundsApplication;
 
 import junit.framework.TestCase;
-
-import java.io.File;
 
 /**
  * Created by jbusc_000 on 5/15/2015.
@@ -107,25 +103,6 @@ public class AudioPlayerTest extends TestCase {
         player.stopAll();
         assertEquals("stopAll Failure, player state incorrect.",
                 AudioPlayer.PlayerState.STOPPED_ALL, player.getPlayerState());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // pauseAllChangesState Test
-    // Dependencies: testConstructor must pass, playAll must start playing
-    // Tests that AudioPlayer changes its state when pauseAll is called
-    ///////////////////////////////////////////////////////////////////////////
-    public void testPauseAllChangesState() {
-        AudioPlayer player = constructEmptyPlayer();
-        //Test when initally stopped.
-        player.pauseAll();
-        assertEquals("pauseAll Failure, player state incorrect.",
-                AudioPlayer.PlayerState.PAUSED_ALL, player.getPlayerState());
-
-        //Test after playing has started
-        player.playAll(0);
-        player.pauseAll();
-        assertEquals("pauseAll Failure, player state incorrect.",
-                AudioPlayer.PlayerState.PAUSED_ALL, player.getPlayerState());
     }
 
     ///////////////////////////////////////////////////////////////////////////

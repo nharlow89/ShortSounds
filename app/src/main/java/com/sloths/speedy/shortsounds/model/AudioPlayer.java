@@ -134,17 +134,6 @@ public class AudioPlayer {
     }
 
     /**
-     * Pause all tracks in this AudioPlayer. When a track is paused it's current position
-     * is saved and the audio buffer remains in memory.
-     */
-    public void pauseAll() {
-        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
-            entry.getValue().pause();
-        }
-        playerState = PlayerState.PAUSED_ALL;
-    }
-
-    /**
      * Determines whether or not all the tracks are being played
      * @return Boolean value for whether All tracks are being played.
      */
@@ -197,45 +186,6 @@ public class AudioPlayer {
             trackPlayers.get(sst).audioTrack.setVolume(sst.getVolume());
         else
             trackPlayers.get(sst).audioTrack.setVolume(0.0f);
-    }
-
-    /**
-     * Play a single track within this AudioPlayer.
-     * @param track to specify the desired track in the ShortSound
-     * @param position the position at which to start playing
-     */
-    public void playTrack( ShortSoundTrack track, int position ) {
-        pauseAll();
-        TrackPlayer targetPlayer = trackPlayers.get( track );
-        targetPlayer.play(position);
-    }
-
-    /**
-     * Pause a single track.
-     * @param track The track to pause
-     */
-    public void pauseTrack( ShortSoundTrack track ) {
-        TrackPlayer targetPlayer = trackPlayers.get( track );
-        targetPlayer.pause();
-    }
-
-    /**
-     * Stop a single track.
-     * @param track The track to stop
-     */
-    public void stopTrack( ShortSoundTrack track ) {
-        TrackPlayer targetPlayer = trackPlayers.get( track );
-        targetPlayer.stop();
-    }
-
-    /**
-     * Determine whether a given track is playing or not.
-     * @param track Target ShortSoundTrack
-     * @return true if playing, otherwise false
-     */
-    public boolean isPlayingTrack( ShortSoundTrack track ) {
-        TrackPlayer player = trackPlayers.get( track );
-        return player.trackState == TrackState.PLAYING;
     }
 
     /**
@@ -464,20 +414,6 @@ public class AudioPlayer {
                 }
             } else {
                 Log.w(TAG, "Tried to stop track[" + track.getId() + "] but was already stopped");
-            }
-        }
-
-        /**
-         * Pause this track.
-         */
-        public void pause() {
-            if ( trackState == TrackState.PLAYING ) {
-                Log.d(TAG, "Pause track [" + track.getId() + "]");
-                audioTrack.pause();
-                trackState = TrackState.PAUSED;
-//                track.getmEqEffect().disable();  // TODO remove after eq debugging
-            } else {
-                Log.e(TAG, "Tried to pause track ["+track.getId()+"] in invalid state ["+trackState+"]");
             }
         }
 

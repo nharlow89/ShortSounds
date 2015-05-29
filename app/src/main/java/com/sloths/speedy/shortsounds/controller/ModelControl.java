@@ -50,7 +50,7 @@ public class ModelControl implements PlaybackListener {
     public boolean onPlayToggle() {
         boolean isPlaying = mAudioPlayer != null && mAudioPlayer.isPlayingAll();
         if ( isPlaying ) {
-            mAudioPlayer.pauseAll();
+            mAudioPlayer.stopAll();
         } else {
             mAudioPlayer.playAll(seekBarPosition);
         }
