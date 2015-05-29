@@ -681,14 +681,14 @@ public class MainActivity extends FragmentActivity
 
         mShareActionProvider.setOnShareTargetSelectedListener(
                 new ShareActionProvider.OnShareTargetSelectedListener() {
-            @Override
-            public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
-                Log.i(TAG, "share target selected clicked");
-                source.setShareIntent(createShareIntent());
-                //return type doesn't matter, api says return false for consistency
-                return false;
-            }
-        });
+                    @Override
+                    public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
+                        Log.i(TAG, "share target selected clicked");
+                        source.setShareIntent(createShareIntent());
+                        //return type doesn't matter, api says return false for consistency
+                        return false;
+                    }
+                });
 
         return true;
     }
@@ -702,10 +702,23 @@ public class MainActivity extends FragmentActivity
             return null;
         }
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        try {
-            File absolutePath = mActiveShortSound.generateAudioFile();
 
-            Uri contentURI = FileProvider.getUriForFile(MainActivity.this, "com.sloths.speedy.shortsounds.fileprovider", absolutePath);
+        try {
+            File absolutePath = null;
+            int tries = 0;
+            while (absolutePath == null || absolutePath.length() == 0) {
+                Log.d(TAG, "trying to generate an audio file. try no. " + tries);
+                if (tries == 5) {
+                    ((ShortSoundsApplication) getApplicationContext()).showToast("Could not " +
+                            "generate an audio file, please try again later");
+                    return null;
+                }
+                absolutePath = mActiveShortSound.generateAudioFile();
+                tries++;
+            }
+
+            Uri contentURI = FileProvider.getUriForFile(MainActivity.this,
+                    "com.sloths.speedy.shortsounds.fileprovider", absolutePath);
 
             if (contentURI != null) {
                 shareIntent.putExtra(Intent.EXTRA_STREAM, contentURI);
@@ -716,6 +729,7 @@ public class MainActivity extends FragmentActivity
             e.printStackTrace();
         }
         return shareIntent;
+
     }
 
     /**
