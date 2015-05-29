@@ -195,6 +195,9 @@ public class AudioPlayer {
     public void addTrack( ShortSoundTrack track ) {
         tracks.add(track);
         TrackPlayer tp = new TrackPlayer(track, this);
+        if (mLongestTrackPlayer == null) {
+            mLongestTrackPlayer = tp;
+        }
         trackPlayers.put(track, tp);
         if(mLongestTrack != null && track.getLengthInBytes() >= mLongestTrack.getLengthInBytes()) {
             mLongestTrack = track;
@@ -283,7 +286,7 @@ public class AudioPlayer {
                     ShortSoundTrack.AUDIO_FORMAT,
                     ShortSoundTrack.BUFFER_SIZE,
                     ShortSoundTrack.MODE);
-            audioTrack.setPositionNotificationPeriod( ShortSoundTrack.SAMPLE_RATE );
+            audioTrack.setPositionNotificationPeriod( ShortSoundTrack.SAMPLE_RATE);
             audioTrack.setPlaybackPositionUpdateListener(new AudioTrack.OnPlaybackPositionUpdateListener() {
                 @Override
                 public void onMarkerReached(AudioTrack track) {
