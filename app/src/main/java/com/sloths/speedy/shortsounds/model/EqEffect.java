@@ -66,7 +66,6 @@ public class EqEffect extends Effect {
             this.effect.setEnabled( isActive );
             Log.d(TAG, "Enabled [" + effect.getEnabled() + "]");
         } catch( Exception e ) {
-            Log.e(TAG, "Error creating the Equalizer");
             e.printStackTrace();
         }
     }
@@ -111,7 +110,11 @@ public class EqEffect extends Effect {
                 float width = (levelRange[1] - levelRange[0]) / 2;
                 bandVal = (bandVal * width) + mid;
             }
-            eq.setBandLevel(i, (short) (bandVal * eq.getNumberOfBands()));
+            try {
+                eq.setBandLevel(i, (short) (bandVal * eq.getNumberOfBands()));
+            } catch (Exception e) {
+                Log.d(TAG, "Exception thrown setting band level: " + e.toString());
+            }
         }
     }
 
@@ -250,7 +253,7 @@ public class EqEffect extends Effect {
             return "NULL";
         }
         String retVal = new String();
-        if ( this.effect != null && this.effect.getEnabled() ) {
+        if ( isActive ) {
             retVal += "ON";
         } else {
             retVal += "OFF";
@@ -268,30 +271,20 @@ public class EqEffect extends Effect {
      */
     @Override
     public void enable() {
-        if ( this.effect == null ) {
-            //TODO DO NOT ERASE
-            //TODO deal with null case
-            Log.e(TAG, "Error trying to enable EQ effect that is null");
-        } else {
-            Log.d(TAG, "Enabled EQ effect");
+        if ( this.effect !=null) {
             this.effect.setEnabled(true);
-            isActive = true;
         }
+        isActive = true;
     }
 
     /**
      * Disable the actual EQ effect
      */
     public void disable() {
-        if ( this.effect == null ) {
-            //TODO DO NOT ERASE
-            //TODO deal with null case
-            Log.e(TAG, "Error trying to disable EQ effect that is null");
-        } else {
-            Log.d(TAG, "Disabled EQ effect");
+        if ( this.effect != null) {
             this.effect.setEnabled(false);
-            isActive = false;
         }
+        isActive = false;
     }
 
     /**
@@ -322,7 +315,9 @@ public class EqEffect extends Effect {
         this.eqPoints[0] = points[0];
         this.eqPoints[1] = points[1];
         // This updates the actual effect's properties
-        setEffectProperties();
+        if (effect != null) {
+            setEffectProperties();
+        }
     }
 
     /**
@@ -332,7 +327,9 @@ public class EqEffect extends Effect {
         PointF lo = new PointF(DEFAULT_X1, DEFAULT_Y);
         PointF hi = new PointF(DEFAULT_X2, DEFAULT_Y);
         this.eqPoints = new PointF[]{lo, hi};
-        setEffectProperties();
+        if (effect != null) {
+            setEffectProperties();
+        }
     }
 
     /**
@@ -343,5 +340,12 @@ public class EqEffect extends Effect {
         if (eqPoints == null) {
             throw new AssertionError("Invalid point value");
         }
+    }
+
+    /**
+     * Whether or not the Equalizer effect is enabled.
+     */
+    public boolean getEnabled() {
+        return isActive;
     }
 }
