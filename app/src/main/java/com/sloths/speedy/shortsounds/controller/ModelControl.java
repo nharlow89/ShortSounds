@@ -25,7 +25,6 @@ public class ModelControl implements PlaybackListener {
     private SeekBar mGlobalSeekBar;
     private boolean isRecording;
 
-
     /**
      * Private Constructor for a ModelControl
      */
@@ -53,6 +52,8 @@ public class ModelControl implements PlaybackListener {
         boolean isPlaying = mAudioPlayer != null && mAudioPlayer.isPlayingAll();
         if ( isPlaying ) {
             mAudioPlayer.stopAll();
+            mGlobalSeekBar.setProgress(seekBarPosition);
+            Log.d("DEBUG", "current POSITION IS " + seekBarPosition);
         } else {
             mAudioPlayer.playAll(seekBarPosition);
         }
