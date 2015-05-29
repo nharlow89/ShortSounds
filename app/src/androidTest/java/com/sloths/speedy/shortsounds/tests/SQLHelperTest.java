@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.List;
 
 /**
+ * Tests the ShortSoundSQLHelper
  * Created by neilharlow on 4/27/15.
  */
 public class SQLHelperTest extends AndroidTestCase {
@@ -18,6 +19,10 @@ public class SQLHelperTest extends AndroidTestCase {
     private ShortSoundSQLHelper db;
     private RenamingDelegatingContext context;
 
+    /**
+     * Sets up the database
+     * @throws Exception
+     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -25,6 +30,10 @@ public class SQLHelperTest extends AndroidTestCase {
         db = ShortSoundSQLHelper.getTestInstance( context );
     }
 
+    /**
+     * Tears down the database
+     * @throws Exception
+     */
     @Override
     public void tearDown() throws Exception {
         db.close();

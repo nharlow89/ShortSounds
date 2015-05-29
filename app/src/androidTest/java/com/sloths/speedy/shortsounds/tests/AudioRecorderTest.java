@@ -9,7 +9,8 @@ import junit.framework.TestCase;
 import java.io.File;
 
 /**
- * Created by jbusc_000 on 5/15/2015.
+ * Tests the AudioRecorder class
+ * @author John Buscher
  */
 public class AudioRecorderTest  extends TestCase {
 
