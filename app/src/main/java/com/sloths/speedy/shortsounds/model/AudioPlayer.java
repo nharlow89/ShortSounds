@@ -235,6 +235,8 @@ public class AudioPlayer {
      */
     private void updateLongestTrack() {
         if (tracks.size() == 0) {
+            mLongestTrack = null;
+            mLongestTrackPlayer = null;
             return;
         } else {
             mLongestTrack = tracks.get(0);
