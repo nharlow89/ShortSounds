@@ -207,7 +207,7 @@ public class ShortSoundTest extends TestCase {
     }
 
     /*
-     * getTracks
+   =  * getTracks
      */
 
     /**
@@ -269,8 +269,8 @@ public class ShortSoundTest extends TestCase {
     public void testRemoveTrackWhenTrackIsNotInShortSound() {
         HashMap<String, String> testMap = makeTestMap();
         ShortSound ss = new ShortSound(testMap);
-        ShortSoundTrack shortSoundTrack = new ShortSoundTrack(new File(""), 1);
-        ShortSoundTrack trackToTryToRemove = new ShortSoundTrack(new File(""), 1);
+        ShortSoundTrack shortSoundTrack = new ShortSoundTrack(new File(""), ss.getId());
+        ShortSoundTrack trackToTryToRemove = new ShortSoundTrack(new File(""), ss.getId());
         ss.addTrack(shortSoundTrack);
 
         ss.removeTrack(trackToTryToRemove);
@@ -304,8 +304,8 @@ public class ShortSoundTest extends TestCase {
     public void testRemoveTrackWhenTrackIsInShortSoundAndThereAreMultipleTracks() {
         HashMap<String, String> testMap = makeTestMap();
         ShortSound ss = new ShortSound(testMap);
-        ShortSoundTrack shortSoundTrack = new ShortSoundTrack(new File(""), 1);
-        ShortSoundTrack trackToTryToRemove = new ShortSoundTrack(new File(""), 1);
+        ShortSoundTrack shortSoundTrack = new ShortSoundTrack(new File(""), ss.getId());
+        ShortSoundTrack trackToTryToRemove = new ShortSoundTrack(new File(""), ss.getId());
         ss.addTrack(shortSoundTrack);
         ss.addTrack(trackToTryToRemove);
 
