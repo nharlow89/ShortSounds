@@ -2,6 +2,7 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -20,6 +21,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
     private View mView;
     private int mWidth;
     private float mDownX;
+    private float mDownY;
     private boolean mSwiping;
     private long mAnimationTime;
     private int mSwipingSlop;
@@ -35,7 +37,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
         mView = v;
         mListener = listener;
         ViewConfiguration vc = ViewConfiguration.get(v.getContext());
-        mSlop = vc.getScaledTouchSlop() / 2;
+        mSlop = vc.getScaledTouchSlop();
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity() * 4;
         mMaxFlingVelocity = vc.getScaledMaximumFlingVelocity();
         mDeleted = false;
@@ -60,10 +62,12 @@ public class TrackSwipeListener implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN:
                 // The user has pressed somewhere on the track, begin the tracking.
                 mDownX = event.getRawX();
+                mDownY = event.getRawY();
                 mVelocityTracker = VelocityTracker.obtain();
                 mVelocityTracker.addMovement( event );
                 return false;
             case MotionEvent.ACTION_UP:  // Release of the view
+                Log.d(TAG, "ACTION_UP");
                 // This occurs when the user lifts their finger up.
                 // 1. If we were not swiping, then it was a press and need to edit title.
                 if ( !mSwiping )
@@ -110,12 +114,13 @@ public class TrackSwipeListener implements View.OnTouchListener {
                             .setListener(null);
                 }
                 mDownX = 0;
+                mDownY = 0;
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
                 mSwiping = false;
                 break;
             case MotionEvent.ACTION_CANCEL:
-                // The cancel event occurs when the user stops dragging a track. Here we need
+                // The cancel event occurs when the users dragging goes outside of this view. Here we need
                 // to animate the track back to its original position.
                 if ( mVelocityTracker == null )
                     break;
@@ -128,6 +133,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
                             .setListener(null);
                 }
                 mDownX = 0;
+                mDownY = 0;
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
                 mSwiping = false;
@@ -139,7 +145,8 @@ public class TrackSwipeListener implements View.OnTouchListener {
                     break;
                 mVelocityTracker.addMovement(event);
                 float newDeltaX = event.getRawX() - mDownX;
-                if ( Math.abs(newDeltaX) > mSlop ) {
+                float deltaY = event.getRawY() - mDownY;
+                if ( Math.abs(newDeltaX) > mSlop && Math.abs(deltaY) < Math.abs(newDeltaX) / 2) {
                     mSwiping = true;
                     mSwipingSlop = (newDeltaX > 0 ? mSlop : -mSlop);
                 }
