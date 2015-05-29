@@ -408,7 +408,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
 //                            main.removeShortSoundTrack(position);
 //                            Log.i(TAG, "track " + position + " deleted");
 //                            notifyItemRemoved(position);
-//                            main.updateViewStateBasedOnTrackCount();
+//                            main.updateMainViewState();
 //                        }
 //                        @Override
 //                        public void onAnimationRepeat(Animation animation) { }
@@ -418,7 +418,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
 //                    int position = getPosition();
 //                    main.removeShortSoundTrack(position);
 //                    notifyItemRemoved(position);
-//                    main.updateViewStateBasedOnTrackCount();
+//                    main.updateMainViewState();
 //                }
 //
 //

@@ -1,13 +1,13 @@
 package com.sloths.speedy.shortsounds.controller;
 
 import android.util.Log;
-import android.widget.SeekBar;
 
 import com.sloths.speedy.shortsounds.model.AudioPlayer;
 import com.sloths.speedy.shortsounds.model.AudioRecorder;
 import com.sloths.speedy.shortsounds.model.Effect;
 import com.sloths.speedy.shortsounds.model.ShortSound;
 import com.sloths.speedy.shortsounds.model.ShortSoundTrack;
+import com.sloths.speedy.shortsounds.view.MainActivity;
 
 import java.io.File;
 
@@ -22,14 +22,13 @@ public class ModelControl implements PlaybackListener {
     private AudioRecorder mAudioRecorder;
     private int seekBarPosition;
     private static ModelControl instance = null;
-    private SeekBar mGlobalSeekBar;
 
 
     /**
      * Private Constructor for a ModelControl
      */
     private ModelControl() {
-        seekBarPosition = 0;
+//        seekBarPosition = 0;
     }
 
     /**
@@ -48,13 +47,16 @@ public class ModelControl implements PlaybackListener {
      */
     @Override
     public boolean onPlayToggle() {
-        boolean isPlaying = mAudioPlayer != null && mAudioPlayer.isPlayingAll();
-        if ( isPlaying ) {
-            mAudioPlayer.pauseAll();
-        } else {
-            mAudioPlayer.playAll(seekBarPosition);
+        if (mAudioPlayer != null) {
+            boolean isPlaying = mAudioPlayer.isPlayingAll();
+            if (isPlaying) {
+                mAudioPlayer.stopAll();
+            } else {
+                mAudioPlayer.playAll(seekBarPosition);
+            }
+            return isPlaying;
         }
-        return isPlaying;
+        return false;
     }
 
     /**
@@ -62,10 +64,12 @@ public class ModelControl implements PlaybackListener {
      */
     @Override
     public void onRecordStart() {
-//        main.onRecordStart();
+//        main.updateTrackPositions();
         if (mAudioPlayer != null) {
-            Log.d("Debug", "onRecordStart() playALL!!!");
-            mAudioPlayer.playAll(0);  // Play from the beginning
+            Log.d("Debug", "updateTrackPositions() playALL!!!");
+//            mAudioPlayer.playAll(0);  // Play from the beginning
+//            mAudioPlayer.getTrackPositions();
+            mAudioPlayer.playAll(0);
         }
         // Setup the MediaRecorder
         mAudioRecorder.start();
@@ -81,25 +85,16 @@ public class ModelControl implements PlaybackListener {
         File recordedFile = mAudioRecorder.end();
         mAudioPlayer.stopAll();
         // Create the new ShortSoundTrack (that this will record to)
-        int nextTrackNum = mActiveShortSound.getNextTrackNumber();
         ShortSoundTrack newTrack = new ShortSoundTrack( recordedFile, mActiveShortSound.getId() );
         mActiveShortSound.addTrack(newTrack);
         mAudioPlayer.addTrack(newTrack);
         mAudioRecorder.reset();  // Have to reset for the next recording
     }
 
-    /**
-     * Updates the current position of the seek bar
-     * @param position the position of the seek bar
-     */
-    @Override
-    public void updateCurrentPosition(int position) {
-        this.seekBarPosition = position;
-        if (mAudioPlayer != null) {
-            if (!mAudioRecorder.isRecording()) {
-                mAudioPlayer.stopAll();
-            }
-        }
+
+    public int getCurrentSeekBarPosition() {
+        return seekBarPosition;
+//        return mAudioPlayer.getLongestTrackPosition();
     }
 
     /**
@@ -111,22 +106,30 @@ public class ModelControl implements PlaybackListener {
         }
     }
 
+//    public void pauseAll() {
+//        if (mAudioPlayer != null)
+//            mAudioPlayer.pauseAll();
+//    }
+
     /**
      * Notifies the seek bar of a change in position
      * @param position the new position
      */
-    public void notifySeekBarOfChangeInPos(int position) {
-        this.seekBarPosition = position;
-        mGlobalSeekBar.setProgress(position);
+    public void notifySeekBarOfChangeInPos(int position, boolean updateModel) {
+        seekBarPosition = position;
+        if (updateModel) {
+            mAudioPlayer.stopAll();
+            mAudioPlayer.setTrackPositionsSeekBarPosition(seekBarPosition);
+        }
     }
 
-    /**
-     * Sets the global seek bar
-     * @param sb a seek bar to set the global seek bar to
-     */
-    public void setGlobalSeekBar(SeekBar sb) {
-        mGlobalSeekBar = sb;
-    }
+//    /**
+//     * Sets the global seek bar
+//     * @param sb a seek bar to set the global seek bar to
+//     */
+//    public void setGlobalSeekBar(SeekBar sb) {
+//        mGlobalSeekBar = sb;
+//    }
 
     /**
      * Mutes the effects

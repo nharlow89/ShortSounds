@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -66,6 +65,7 @@ public class MainActivity extends FragmentActivity
     public static final String TRACKS = "tracks";
     public static final int SLIDE_DURATION = 400;
     public static final String UNTITLED = "Untitled";
+    public static final int SEEKBAR_SIZE = 10000;
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -126,20 +126,18 @@ public class MainActivity extends FragmentActivity
      */
     private void setUpControllerView() {
         mGlobalSeekBar = (SeekBar) findViewById(R.id.seekBar);
-        mGlobalSeekBar.setMax(100);  // Set the max value (0-100)
-
-        mGlobalSeekBar.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return modelControl.isRecording();
-            }
-        });
+        mGlobalSeekBar.setMax(SEEKBAR_SIZE);
 
         SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // TODO Auto-generated method stub
+                if (seekBar.getProgress() == SEEKBAR_SIZE) {
+                    drawPlayButton();
+                    modelControl.notifySeekBarOfChangeInPos(0, true);
+                    seekBar.setProgress(0);
+                }
             }
 
             @Override
@@ -150,25 +148,25 @@ public class MainActivity extends FragmentActivity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // The current progress level. This will be in the range 0..max
-                // where max was set by setMax(int). (The default value for max is 100.)
+                // where max was set by setMax(int). (The default value for max is 10000.)
                 // TODO Auto-generated method stub
 
-                if(fromUser) { //!modelControl.isRecording()
+                if(fromUser) {
                     Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
-                    modelControl.updateCurrentPosition(progress);
+                    modelControl.notifySeekBarOfChangeInPos(progress, true);
                     drawPlayButton();
                 } else {
-                    if(progress == 100) {
-                        drawPlayButton();
-                        mGlobalSeekBar.setProgress(0);
-                        modelControl.updateCurrentPosition(0);
-                    }
+//                    if(progress == SEEKBAR_SIZE) {
+//                        drawPlayButton();
+//                        modelControl.notifySeekBarOfChangeInPos(0, true);
+//                        seekBar.setProgress(0);
+//                    }
                 }
             }
         };
 
         mGlobalSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
-        modelControl.setGlobalSeekBar(mGlobalSeekBar);
+//        modelControl.setGlobalSeekBar(mGlobalSeekBar);
         mGlobalPlayButton = (ImageButton)findViewById(R.id.imageButtonPlay);
         drawPlayButton();
         Log.d("DEBUG", "Found the global play button! " + mGlobalPlayButton);
@@ -176,10 +174,14 @@ public class MainActivity extends FragmentActivity
             @Override
             public void onClick(View v) {
                 if (!modelControl.onPlayToggle()) {
+                    Log.i(TAG, "Play Button Clicked");
                     mGlobalPlayButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_pause));
                     mGlobalPlayButton.setColorFilter(getResources().getColor(R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY);
+                    startTimer(View.INVISIBLE);
                 } else {
+                    Log.i(TAG, "Pause Button Clicked");
                     drawPlayButton();
+                    stopTimer();
                 }
             }
         });
@@ -208,16 +210,13 @@ public class MainActivity extends FragmentActivity
                 public void onCheckedChanged(FloatingActionButton fabView, boolean isChecked) {
                     if ( !isChecked ) {
                         endRecording();
-                        setPlayerVisibility(View.VISIBLE);
-                        mGlobalSeekBar.setEnabled(true);
                         stopTimer();
-                        resetSeekBarToZero();
                     } else {
-                        mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
-                        mGlobalSeekBar.setEnabled(false);
-                        startTimer();
+                        startTimer(View.VISIBLE);
                     }
+                    mGlobalSeekBar.setEnabled(!isChecked);
+                    mGlobalPlayButton.setEnabled(!isChecked);
                 }
             });
         } else {
@@ -227,14 +226,11 @@ public class MainActivity extends FragmentActivity
                 public void onClick(View v) {
                     if (modelControl.isRecording()) {
                         endRecording();
-                        setPlayerVisibility(View.VISIBLE);
-                        mGlobalSeekBar.setEnabled(true);
-                        resetSeekBarToZero();
                     } else {
-                        mGlobalPlayButton.setEnabled(false);
                         modelControl.onRecordStart();
-                        mGlobalSeekBar.setEnabled(false);;
                     }
+                    mGlobalSeekBar.setEnabled(!modelControl.isRecording());
+                    mGlobalPlayButton.setEnabled(!modelControl.isRecording());
                 }
             });
         }
@@ -428,7 +424,6 @@ public class MainActivity extends FragmentActivity
             throw new IllegalArgumentException("invalid position: " + position + ", sounds.size = " + sounds.size());
 
         modelControl.stopAllFromPlaying();
-        resetSeekBarToZero();
         mActiveShortSound = sounds.get(position);// Set the currently active ShortSound.
         Log.d("SHORT_SOUNDS", "Selected ShortSound ["+mActiveShortSound.getId()+"] from the sidebar.");
         //TODO double check this is not causing bugs
@@ -439,9 +434,7 @@ public class MainActivity extends FragmentActivity
         setTitle(mActiveShortSound.getTitle());
 
         updateCurrentTrackView();
-        updateViewStateBasedOnTrackCount();
-        invalidateOptionsMenu();
-        resetSeekBarToZero();
+
         // selected mix is loaded so close the drawer
         mDrawerLayout.closeDrawer(mDrawerList);
     }
@@ -450,7 +443,7 @@ public class MainActivity extends FragmentActivity
      * Resets the seek bar to 0
      */
     private void resetSeekBarToZero() {
-        modelControl.updateCurrentPosition(0);
+//        modelControl.updateCurrentPosition(0);
         mGlobalSeekBar.setProgress(0);
     }
 
@@ -460,17 +453,21 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onBackPressed() {
         if (currentView.equals(TRACKS)) {
+            // if the current view is a track
+            //TODO put code effect cleanup for quitting the application here
             super.onBackPressed();
         } else {
+            // if the current view in an effect
             animateToTrack();
+            // Controller is global because this method needs knowledge of
+            // the last stored values, where model values are always up to date
+            if (effectController != null) {
+                // Resets model to default values
+                effectController.resetModel();
+                effectController = null;
+            }
         }
-        // Controller is global because this method needs knowledge of
-        // the last stored values, where model values are always up to date
-        if (effectController != null) {
-            // Resets model to default values
-            effectController.resetModel();
-            effectController = null;
-        }
+
     }
 
     /**
@@ -555,67 +552,67 @@ public class MainActivity extends FragmentActivity
      * @param effect the effect to load on the track
      */
     public void effectEditSelected(int track, String effect) {
-
         // Setups the effect to be shown (connects model-controller-view)
-        setupEffect(track, effect);
+        PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
+        if (effect.equals(EQ))
+            setUpEq(values, track);
+        else if (effect.equals(REVERB))
+            setUpReverb(values[0], track);
 
         // Change the view to the effect
         animator.setDisplayedChild(viewMap.get(effect));
         currentView = effect;
 
-        //TODO make fun of whoever kept this here
-        //TODO what does the drawer have to do with effects?
-//        mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
-        // Highlight item, update title, close drawer
-//        mDrawerList.setItemChecked(position, true);
-//        mDrawerLayout.closeDrawer(mDrawerList);
-//        setTitle(mShortSoundsTitles[position]);
-//        invalidateOptionsMenu();
     }
 
     /**
-     * This method sets up the effect views.  Its main two purposes are currently
-     * for the EQ & Reverb effect.  It gets the view, attaches the controller to it,
+     * This method sets up the reverb view.  It gets the view, attaches the controller to it,
      * attaches the model to the controller, and then sets the click listeners for cancel
      * and save.
      * @param track The track to set up the effect view on
-     * @param effect The name of the effect being set up
+     * @param value The initial value of the effect view
      */
-    private void setupEffect(int track, String effect) {
-        PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
-        if (effect.equals(EQ)) {
-            // Set saved values -- if null it defaults
-            Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
-            eqCanvas.setValues(values);
+    private void setUpReverb(PointF value, int track) {
+        // Set saved point value (if null it defaults)
+        Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
+        reverbCanvas.setValue(value);
 
-            // Attach the EQ model to the EQ controller & controller to view
-            EqEffect eqEffect = mActiveShortSound.getTracks().get(track).getmEqEffect();
-            EQEffectController eqController = new EQEffectController(eqEffect, values);
-            eqCanvas.setController(eqController);
+        // Attach the model to controller & controller to view
+        ReverbEffect reverbEffect = mActiveShortSound.getTracks().get(track).getmReverbEffect();
+        ReverbEffectController reverbController = new ReverbEffectController(reverbEffect, value);
+        reverbCanvas.setController(reverbController);
 
-            // Set current controller
-            effectController = eqController;
+        // Set current controller
+        effectController = reverbController;
 
-            findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(effect, track));
-            findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(effect));
-        } else if (effect.equals(REVERB)) {
-            // Set saved point value (if null it defaults)
-            Fx_ReverbCanvas reverbCanvas = (Fx_ReverbCanvas) findViewById(R.id.reverb_canvas);
-            reverbCanvas.setValue(values[0]);
-
-            // Attach the model to controller & controller to view
-            ReverbEffect reverbEffect = mActiveShortSound.getTracks().get(track).getmReverbEffect();
-            ReverbEffectController reverbController = new ReverbEffectController(reverbEffect, values[0]);
-            reverbCanvas.setController(reverbController);
-
-            // Set current controller
-            effectController = reverbController;
-
-            findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect, track));
-            findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
-        }
+        findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(REVERB, track));
+        findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(REVERB));
     }
 
+    /**
+     * This method sets up the eq view.  It gets the view, attaches the controller to it,
+     * attaches the model to the controller, and then sets the click listeners for cancel
+     * and save.
+     * @param track The track to set up the effect view on
+     * @param values The initial values of the effect view
+     */
+    private void setUpEq(PointF[] values, int track) {
+        // Set saved values -- if null it defaults
+        Fx_EQCanvas eqCanvas = (Fx_EQCanvas) findViewById(R.id.eq_canvas);
+
+        eqCanvas.setValues(values);
+
+        // Attach the EQ model to the EQ controller & controller to view
+        EqEffect eqEffect = mActiveShortSound.getTracks().get(track).getmEqEffect();
+        EQEffectController eqController = new EQEffectController(eqEffect, values);
+        eqCanvas.setController(eqController);
+
+        // Set current controller
+        effectController = eqController;
+
+        findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(EQ, track));
+        findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(EQ));
+    }
 
     /**
      * Sets the Title on the action bar to the parameter title
@@ -630,17 +627,17 @@ public class MainActivity extends FragmentActivity
     /**
      * Start a timer that times the how long a track is recording for
      */
-    private void startTimer() {
+    private void startTimer(int visiblility) {
+        mElapsedTime = 0;
         mRecordTimer = new Timer();
         TextView timerTextView = (TextView)findViewById(R.id.timerView);
-        timerTextView.setVisibility(View.VISIBLE);
+        timerTextView.setVisibility(visiblility);
         mRecordTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 mElapsedTime += 1; //increase every sec
                 mTimeHandler.obtainMessage(1).sendToTarget();
-
             }
-        }, 0, 1000);
+        }, 0, 100);
     }
 
     /**
@@ -649,12 +646,14 @@ public class MainActivity extends FragmentActivity
     private Handler mTimeHandler = new Handler() {
         public void handleMessage(Message msg) {
             TextView timerTextView = (TextView)findViewById(R.id.timerView);
-            int minutes = mElapsedTime / 60;
-            int seconds = mElapsedTime - (60 * minutes);
+            int minutes = mElapsedTime / 600;
+            int seconds = (mElapsedTime % 1000) / 10;
             String z = "";
             if (seconds < 10) z = "0";
             String time = "0" + minutes + ":" + z + seconds;
             timerTextView.setText(time);
+//            Log.i(TAG, "timer position = " + modelControl.getCurrentSeekBarPosition());
+            mGlobalSeekBar.setProgress(modelControl.getCurrentSeekBarPosition());
         }
     };
 
@@ -666,7 +665,6 @@ public class MainActivity extends FragmentActivity
         TextView timerTextView = (TextView)findViewById(R.id.timerView);
         timerTextView.setVisibility(View.INVISIBLE);
         timerTextView.setText("00:00");
-        mElapsedTime = 0;
     }
 
     /**
@@ -781,14 +779,10 @@ public class MainActivity extends FragmentActivity
             mActiveShortSound.removeShortSound();
             mDrawerList.setAdapter(new ArrayAdapter<>(this,
                     R.layout.drawer_list_item, getShortSoundTitles()));
-            if (!sounds.isEmpty()) {
+            if (!sounds.isEmpty())
                 selectShortSoundFromDrawer(0);
-            } else {
+            else
                 createNew();
-//                updateCurrentTrackView();
-//                invalidateOptionsMenu();
-//                resetSeekBarToZero();
-            }
         }
     }
 
@@ -799,10 +793,8 @@ public class MainActivity extends FragmentActivity
     public void removeShortSoundTrack(int track) {
         modelControl.removeTrack(track);
         mActiveShortSound.removeTrack(mActiveShortSound.getTracks().get(track));
-        updateViewStateBasedOnTrackCount();
+        updateMainViewState();
     }
-
-
 
     /**
      * Creates a new ShortSound and takes it to an empty screen with no
@@ -812,7 +804,7 @@ public class MainActivity extends FragmentActivity
         ShortSound newSound = new ShortSound();
         setTitle(newSound.getTitle());
         sounds.add(newSound);
-        modelControl.setmAudioPlayer(new AudioPlayer(newSound));  // Clear the existing AudioPlayer
+//        modelControl.setmAudioPlayer(new AudioPlayer(newSound));  // Clear the existing AudioPlayer
         mActiveShortSound = newSound;
         mDrawerList.setAdapter(new ArrayAdapter<>(this,
                 R.layout.drawer_list_item, getShortSoundTitles()));
@@ -831,9 +823,8 @@ public class MainActivity extends FragmentActivity
         View add = getLayoutInflater().inflate(R.layout.empty_tracks, tvp, false);
         animator.addView(add, viewMap.get(TRACKS) + 1);
         animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
-        updateViewStateBasedOnTrackCount();
         animator.removeViewAt(viewMap.get(TRACKS));
-        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+        updateMainViewState();
     }
 
     /**
@@ -889,23 +880,22 @@ public class MainActivity extends FragmentActivity
      * @throws IllegalStateException if mActiveShortSound is null
      */
     private void endRecording() {
-        mGlobalPlayButton.setEnabled(true);
-        drawPlayButton();
+
         if (mActiveShortSound == null)
             throw new IllegalStateException("mActiveShortSound was null");
-        modelControl.onRecordStop( mActiveShortSound );
+        modelControl.onRecordStop(mActiveShortSound);
         // Update the existing fragment manager to add new track to list
         ((TrackList) animator.getChildAt(viewMap.get(TRACKS))
                 .findViewById(R.id.track_list))
                 .notifyTrackAdded(mActiveShortSound.getSize());
-        updateViewStateBasedOnTrackCount();
+        updateMainViewState();
     }
 
-    public void updateViewStateBasedOnTrackCount() {
     /**
-     * Updates the record text
+     * Updates the state of the view based on ShortSound size
      */
-    public void updateRecordText() {
+    public void updateMainViewState() {
+
         TextView recordSound =
                 (TextView) animator.getChildAt(viewMap.get(TRACKS))
                         .findViewById(R.id.recordSoundText);
@@ -918,7 +908,9 @@ public class MainActivity extends FragmentActivity
                 setPlayerVisibility(View.VISIBLE);
             }
         }
+        drawPlayButton();
         resetSeekBarToZero();
+        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
     }
 
     /**

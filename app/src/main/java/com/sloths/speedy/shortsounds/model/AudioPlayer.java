@@ -6,6 +6,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.sloths.speedy.shortsounds.controller.ModelControl;
+import com.sloths.speedy.shortsounds.view.MainActivity;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -28,6 +29,8 @@ public class AudioPlayer {
     public Float MIN_VOLUME = 0.0f;
 
 
+
+
     public static enum PlayerState { PLAYING_ALL, STOPPED_ALL, PAUSED_ALL };
     private static enum TrackState { PLAYING, PAUSED, STOPPED };
     private PlayerState playerState;
@@ -36,7 +39,7 @@ public class AudioPlayer {
     private List<ShortSoundTrack> tracks;
     private ShortSound mCurrentShortSound;
     private ShortSoundTrack mLongestTrack;
-    private TrackPlayer mLongestTrackPlayer;
+//    private TrackPlayer mLongestTrackPlayer;
     private ModelControl mModelControl;
 
     /**
@@ -54,9 +57,9 @@ public class AudioPlayer {
             TrackPlayer tp = new TrackPlayer(track, this);
             trackPlayers.put(track, tp);
             tracks.add(track);
-            if (track == mLongestTrack) {
-                mLongestTrackPlayer = tp;
-            }
+//            if (track == mLongestTrack) {
+//                mLongestTrackPlayer = tp;
+//            }
         }
         playerState = PlayerState.STOPPED_ALL;
     }
@@ -72,54 +75,127 @@ public class AudioPlayer {
         }
     }
 
+//    public void playAll() {
+//        mLongestTrack = mCurrentShortSound.getLongestTrack();
+//        if (mLongestTrack != null && mCurrentShortSound.getSize() != 0) {
+//            for (ShortSoundTrack sst : trackPlayers.keySet()) {
+//                long sstLength = sst.getLengthInBytes();
+//                if (sstLength < mLongestTrack.getLengthInBytes()) {
+//                    TrackPlayer tp = trackPlayers.get(sst);
+//                    tp.play(getTrackPosition(sst));
+//                }
+//            }
+//            playerState = PlayerState.PLAYING_ALL;
+//        }
+//
+//    }
+
+    public void setTrackPositionsSeekBarPosition(long bytes) {
+        mLongestTrack = mCurrentShortSound.getLongestTrack();
+        if (mLongestTrack != null && mLongestTrack.getLengthInBytes() > 0) {
+            double longestTrackPosition = 1.0 * trackPlayers.get(mLongestTrack).currentTrackPosition;
+            double seekBarRatio = 1.0 * bytes / MainActivity.SEEKBAR_SIZE;
+            long resultPosition = (long) (longestTrackPosition * seekBarRatio * mLongestTrack.getLengthInBytes());
+            for (TrackPlayer tp : trackPlayers.values())
+                tp.currentTrackPosition = resultPosition;
+        }
+    }
+    public void setTrackPositionsByByte(long bytes) {
+        for (TrackPlayer tp : trackPlayers.values())
+            tp.currentTrackPosition = bytes;
+    }
+
+    private void debug(String preface) {
+        Log.i(TAG, preface);
+        String state = "unknown";
+        if (playerState == PlayerState.PLAYING_ALL)
+            state = "playing all";
+        else if (playerState == PlayerState.PAUSED_ALL)
+            state = "paused all";
+        else if (playerState == PlayerState.STOPPED_ALL)
+            state = "stopped all";
+        Log.i(TAG, "Track state = " + state);
+        for (ShortSoundTrack sst : trackPlayers.keySet()) {
+            TrackPlayer tp = trackPlayers.get(sst);
+            String name = sst.getTitle();
+            Log.i(TAG, name + ", currentTrackPosition = " + tp.currentTrackPosition);
+        }
+    }
     /**
      * Play all tracks that are in this AudioPlayer, starting from a given point
      * (an integer percentage of the total length).
      */
     public void playAll( int position ) {
+        playerState = PlayerState.PLAYING_ALL;
         Log.d(TAG, "Play all tracks starting at ["+position+"%]");
-        if (mCurrentShortSound.getLongestTrack() == null) {
-            return;
-        }
-        long longestTrackMaxByteOffset = mCurrentShortSound.getLongestTrack().getLengthInBytes();
-        long longestBytePosition = (longestTrackMaxByteOffset * position) / 100 ;
-        //if (longestBytePosition % 2 == 1) longestBytePosition--;
-        Log.d(TAG, "longestTrackMaxByteOffset ["+longestTrackMaxByteOffset+"]");
-        Log.d(TAG, "longestBytePosition ["+longestBytePosition+"]");
+        mLongestTrack = mCurrentShortSound.getLongestTrack();
+        if (mLongestTrack != null) {
+//        long longestTrackMaxByteOffset = mLongestTrack.getLengthInBytes();
+            long longestBytePosition = trackPlayers.get(mLongestTrack).currentTrackPosition;//(longestTrackMaxByteOffset * position) / MainActivity.SEEKBAR_SIZE ;
+//        if (longestBytePosition % 2 == 1) longestBytePosition--;
+//        Log.d(TAG, "longestTrackMaxByteOffset ["+longestTrackMaxByteOffset+"]");
+//        Log.d(TAG, "longestBytePosition ["+longestBytePosition+"]");
 
-        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry: trackPlayers.entrySet() ) {
-            entry.getValue().stop();
-
-            if (position == 0) {
-                Log.d(TAG,"play position 0");
-                entry.getValue().play(position);
-            } else {
-                ShortSoundTrack currentTrack = entry.getKey();
-                long currentTrackMaxByteOffset = currentTrack.getLengthInBytes();
-                boolean isPlayable = currentTrackMaxByteOffset >= longestBytePosition;
-                if ( isPlayable ) {
-                    // play with a normalized position
-                    Log.d(TAG, "DIV " + longestBytePosition + "/" + currentTrackMaxByteOffset);
-                    double normalizedPosition = ((double)longestBytePosition / (double)currentTrackMaxByteOffset) * 100.0 ;
-                    Log.d(TAG, "normalized position ["+(int)Math.round(normalizedPosition)+"]");
-                    entry.getValue().play((int)Math.round(normalizedPosition));
+            for (TrackPlayer tp : trackPlayers.values()) {
+                if (tp.isPlaying())
+                    tp.stop();
+                if (position == 0) {
+//                Log.d(TAG,"play position 0");
+                    setTrackPositionsByByte(0);
+                    tp.play();//position);
+                } else {
+                    tp.currentTrackPosition = longestBytePosition;
+//                    ShortSoundTrack currentTrack = entry.getKey();
+//                    long currentTrackMaxByteOffset = currentTrack.getLengthInBytes();
+                    boolean isPlayable = tp.currentTrackPosition < tp.trackLength;
+                    if (isPlayable) {
+                        // play with a normalized position
+//                    Log.d(TAG, "DIV " + longestBytePosition + "/" + currentTrackMaxByteOffset); //TODO was 100.0
+//                        int normalizedPosition = getTrackPosition(longestBytePosition);//((double)longestBytePosition / (double)currentTrackMaxByteOffset) * MainActivity.SEEKBAR_SIZE ;
+//                    Log.d(TAG, "normalized position ["+ normalizedPosition +"]");
+                        tp.play();//normalizedPosition);
+                    }
                 }
             }
         }
+        debug("after playing all but before setting state = PlayingAll");
         playerState = PlayerState.PLAYING_ALL;
     }
 
-
     /**
-     * Notifies the model control of the track position
-     * @param notifier the TrackPlayer that will notify  the model
-     * @param position the position to notify the model of
+     * Get the current tracks position [0-100].
+     * @return integer value representing the position as a percentage of the overall track length.
      */
-    public void notifyModelControlOfTrackPosition(TrackPlayer notifier, int position) {
-        if (notifier == mLongestTrackPlayer) {
-            mModelControl.notifySeekBarOfChangeInPos(position);
-        }
+//    public int getLongestTrackPosition() {//long currentTrackPosition) {
+//        if (mLongestTrack == null)
+//            mLongestTrack = mCurrentShortSound.getLongestTrack();
+//        return getTrackPosition(mLongestTrack);
+//    }
+    /**
+     * Get the current tracks position [0-100].
+     * @return integer value representing the position as a percentage of the overall track length.
+     */
+    public int getTrackPosition(long currentTrackPosition) {//long currentTrackPosition) {
+//        if (sst == null || trackPlayers.get(sst) == null)
+//            return 0;
+//        long position = trackPlayers.get(sst).currentTrackPosition;
+        if (mLongestTrack == null || mLongestTrack.getLengthInBytes() == 0)
+            return 0;
+//        Log.i(TAG, "given track position = " + currentTrackPosition);
+        return (int)(1.0 * currentTrackPosition * MainActivity.SEEKBAR_SIZE /
+                           mLongestTrack.getLengthInBytes());
     }
+
+//    /**
+//     * Notifies the model control of the track position
+//     * @param notifier the TrackPlayer that will notify  the model
+//     * @param position the position to notify the model of
+//     */
+//    public void notifyModelControlOfTrackPosition(TrackPlayer notifier, int position) {
+//        if (notifier == mLongestTrackPlayer) {
+//            mModelControl.notifySeekBarOfChangeInPos(position);
+//        }
+//    }
 
 
     /**
@@ -129,20 +205,22 @@ public class AudioPlayer {
     public void stopAll() {
         for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
             entry.getValue().stop();
+            entry.getValue().currentTrackPosition = 0;
         }
         playerState = PlayerState.STOPPED_ALL;
+        debug("after stopping all but before setting state = StoppedAll");
     }
 
-    /**
-     * Pause all tracks in this AudioPlayer. When a track is paused it's current position
-     * is saved and the audio buffer remains in memory.
-     */
-    public void pauseAll() {
-        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
-            entry.getValue().pause();
-        }
-        playerState = PlayerState.PAUSED_ALL;
-    }
+//    /**
+//     * Pause all tracks in this AudioPlayer. When a track is paused it's current position
+//     * is saved and the audio buffer remains in memory.
+//     */
+//    public void pauseAll() {
+//        for ( Map.Entry<ShortSoundTrack, TrackPlayer> entry : trackPlayers.entrySet() ) {
+//            entry.getValue().pause();
+//        }
+//        playerState = PlayerState.PAUSED_ALL;
+//    }
 
     /**
      * Determines whether or not all the tracks are being played
@@ -199,44 +277,44 @@ public class AudioPlayer {
             trackPlayers.get(sst).audioTrack.setVolume(0.0f);
     }
 
-    /**
-     * Play a single track within this AudioPlayer.
-     * @param track to specify the desired track in the ShortSound
-     * @param position the position at which to start playing
-     */
-    public void playTrack( ShortSoundTrack track, int position ) {
-        pauseAll();
-        TrackPlayer targetPlayer = trackPlayers.get( track );
-        targetPlayer.play(position);
-    }
-
-    /**
-     * Pause a single track.
-     * @param track The track to pause
-     */
-    public void pauseTrack( ShortSoundTrack track ) {
-        TrackPlayer targetPlayer = trackPlayers.get( track );
-        targetPlayer.pause();
-    }
-
-    /**
-     * Stop a single track.
-     * @param track The track to stop
-     */
-    public void stopTrack( ShortSoundTrack track ) {
-        TrackPlayer targetPlayer = trackPlayers.get( track );
-        targetPlayer.stop();
-    }
-
-    /**
-     * Determine whether a given track is playing or not.
-     * @param track Target ShortSoundTrack
-     * @return true if playing, otherwise false
-     */
-    public boolean isPlayingTrack( ShortSoundTrack track ) {
-        TrackPlayer player = trackPlayers.get( track );
-        return player.trackState == TrackState.PLAYING;
-    }
+//    /**
+//     * Play a single track within this AudioPlayer.
+//     * @param track to specify the desired track in the ShortSound
+//     * @param position the position at which to start playing
+//     */
+//    public void playTrack( ShortSoundTrack track, int position ) {
+//        pauseAll();
+//        TrackPlayer targetPlayer = trackPlayers.get( track );
+//        targetPlayer.play( );//position);
+//    }
+//
+//    /**
+//     * Pause a single track.
+//     * @param track The track to pause
+//     */
+//    public void pauseTrack( ShortSoundTrack track ) {
+//        TrackPlayer targetPlayer = trackPlayers.get( track );
+//        targetPlayer.pause();
+//    }
+//
+//    /**
+//     * Stop a single track.
+//     * @param track The track to stop
+//     */
+//    public void stopTrack( ShortSoundTrack track ) {
+//        TrackPlayer targetPlayer = trackPlayers.get( track );
+//        targetPlayer.stop();
+//    }
+//
+//    /**
+//     * Determine whether a given track is playing or not.
+//     * @param track Target ShortSoundTrack
+//     * @return true if playing, otherwise false
+//     */
+//    public boolean isPlayingTrack( ShortSoundTrack track ) {
+//        TrackPlayer player = trackPlayers.get( track );
+//        return player.trackState == TrackState.PLAYING;
+//    }
 
     /**
      * Add an additional ShortSoundTrack to this AudioPlayer.
@@ -248,7 +326,7 @@ public class AudioPlayer {
         trackPlayers.put(track, tp);
         if(mLongestTrack != null && track.getLengthInBytes() >= mLongestTrack.getLengthInBytes()) {
             mLongestTrack = track;
-            mLongestTrackPlayer = tp;
+//            mLongestTrackPlayer = tp;
         } else if (mLongestTrack == null) {
             mLongestTrack = track;
         }
@@ -261,13 +339,14 @@ public class AudioPlayer {
     public void removeTrack( ShortSoundTrack track ) {
         trackPlayers.remove(track);
         tracks.remove(track);
-        if(mLongestTrack.getLengthInBytes() == track.getLengthInBytes()) {
+        if(mLongestTrack.equals(track)) {
             mLongestTrack = mCurrentShortSound.getLongestTrack();
-            for(ShortSoundTrack sst : trackPlayers.keySet()) {
-                if(sst.getLengthInBytes() == mLongestTrack.getLengthInBytes()) {
-                    mLongestTrackPlayer = trackPlayers.get(sst);
-                }
-            }
+//            mLongestTrackPlayer = trackPlayers.get(mLongestTrack);
+//            for(ShortSoundTrack sst : trackPlayers.keySet()) {
+//                if(sst.getLengthInBytes() == mLongestTrack.getLengthInBytes()) {
+//                    mLongestTrackPlayer = trackPlayers.get(sst);
+//                }
+//            }
         }
     }
 
@@ -314,6 +393,7 @@ public class AudioPlayer {
             this.track = track;
             this.mAudioPlayerListener = parent;
             setupTrack();
+            currentTrackPosition = 0;
         }
 
         /**
@@ -398,9 +478,9 @@ public class AudioPlayer {
 
         /**
          * Sets the input stream
-         * @param position The position currently seeked to in the track
+//         * @param position The position currently seeked to in the track
          */
-        private void setInputStream( int position ) {
+        private void setInputStream( ) {//int position ) {
             if ( audioInputStream != null ) {
                 try {
                     audioInputStream.close();
@@ -412,12 +492,12 @@ public class AudioPlayer {
             try {
                 fileInputStream = new FileInputStream( this.file );
                 audioInputStream = new DataInputStream( fileInputStream );
-                long bytesToSkip = (long)(trackLength * (position / 100.0));
-                if ( (int)bytesToSkip % 2 == 1 ) {
-                    bytesToSkip--;
-                }
-                currentTrackPosition = bytesToSkip;
-                audioInputStream.skip( bytesToSkip );
+//                long bytesToSkip = (long)(mLongestTrack.getLengthInBytes() * (1.0 * position / MainActivity.SEEKBAR_SIZE));
+//                if ( (int)bytesToSkip % 2 == 1 ) {
+//                    bytesToSkip--;
+//                }
+//                currentTrackPosition = //bytesToSkip;
+                audioInputStream.skip( currentTrackPosition );//bytesToSkip );
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -427,33 +507,36 @@ public class AudioPlayer {
 
         /**
          * Play the audio track associated with this ShortSound.
-         * @param position The posision currently seeked to in the track
+//         * @param position The posision currently seeked to in the track
          */
-        public void play( int position ) {
+        public void play() {//int position ) {
             Log.d("AudioPlayer", "Playing track-" + audioTrack.getAudioSessionId());
             Log.d("AudioPlayer", "EQ effect is enabled? " + track.getmEqEffect().getEnabled());
             Log.d("AudioPlayer", "Reverb effect is enabled? " + track.getmReverbEffect().getEnabled());
+            Log.i(TAG, "position = " + currentTrackPosition + ", length = " + this.trackLength);
             // If the track is Stopped then we need to reset the input stream so the AudioTrack starts
             // from the beginning again.
-            if ( trackState == TrackState.STOPPED ) {
-                setInputStream( position );
+            if (currentTrackPosition < track.getLengthInBytes()) {
+                if (trackState != TrackState.PLAYING) {
+                    setInputStream();//position );
+                }
+                if (audioThread != null) {
+                    audioThread.interrupt();
+                }
+                trackState = TrackState.PLAYING;
+                AudioTask task = new AudioTask();
+                audioThread = new Thread(task);
+                audioThread.start();
+                Log.d(TAG, "Play track [" + track.getId() + "] from new thread.");
             }
-            if ( audioThread != null ) {
-                audioThread.interrupt();
-            }
-            trackState = TrackState.PLAYING;
-            AudioTask task = new AudioTask();
-            audioThread = new Thread(task);
-            audioThread.start();
-            Log.d(TAG, "Play track [" + track.getId() + "] from new thread.");
         }
 
         /**
          * Stop playing this track and reset its position to the beginning of the audio file.
          */
         public void stop() {
-            if ( trackState == TrackState.PLAYING || trackState == TrackState.PAUSED ) {
-                Log.d(TAG, "Stop track["+track.getId()+"].");
+            if ( trackState != TrackState.STOPPED ) {
+                Log.d(TAG, "Stop track[" + track.getId() + "].");
                 audioTrack.flush();  // Clear the playback buffer and set Playback position to 0
                 trackState = TrackState.STOPPED;
                 try {
@@ -466,28 +549,23 @@ public class AudioPlayer {
                 Log.w(TAG, "Tried to stop track[" + track.getId() + "] but was already stopped");
             }
         }
+//
+//        /**
+//         *  this track.
+//         */
+//        public void pause() {
+//            if ( trackState == TrackState.PLAYING ) {
+//                Log.d(TAG, "Pause track [" + track.getId() + "]");
+//                audioTrack.pause();
+//                trackState = TrackState.PAUSED;
+////                notifyAudioPlayerOfPosition();
+////                track.getmEqEffect().disable();  // TODO remove after eq debugging
+//            } else {
+//                Log.e(TAG, "Tried to pause track ["+track.getId()+"] in invalid state ["+trackState+"]");
+//            }
+//        }
 
-        /**
-         * Pause this track.
-         */
-        public void pause() {
-            if ( trackState == TrackState.PLAYING ) {
-                Log.d(TAG, "Pause track [" + track.getId() + "]");
-                audioTrack.pause();
-                trackState = TrackState.PAUSED;
-//                track.getmEqEffect().disable();  // TODO remove after eq debugging
-            } else {
-                Log.e(TAG, "Tried to pause track ["+track.getId()+"] in invalid state ["+trackState+"]");
-            }
-        }
 
-        /**
-         * Get the current tracks position [0-100].
-         * @return integer value representing the position as a percentage of the overall track length.
-         */
-        public int getCurrentTrackPosition() {
-            return (int)Math.round(currentTrackPosition * 1.0 / trackLength * 100);
-        }
 
         /**
          * Whether or not this ShortSoundTrack is currently playing.
@@ -501,22 +579,30 @@ public class AudioPlayer {
          * This class represents an audio task
          */
         private class AudioTask implements Runnable {
-
             /**
              * Runs a thread to play an audio track
              */
             @Override
             public void run() {
                 try {
+                    boolean longestTrack = track.equals(mLongestTrack);
                     Log.d(TAG, "Running thread to play ShortSoundTrack["+track.getId()+"]");
                     audioTrack.play();
                     int bytesRead;
-                    while( trackState == TrackState.PLAYING && (bytesRead = audioInputStream.read( audioTrackBuffer ) ) != -1 ) {
+                    while( trackState == TrackState.PLAYING && playerState == PlayerState.PLAYING_ALL &&
+                            (bytesRead = audioInputStream.read( audioTrackBuffer ) ) != -1 ) {
                         // NOTE: this is blocking, so the next frame will not be loaded until ready.
                         // Look at AudioTrack docs for more info.
+
+                        audioTrack.write(audioTrackBuffer, 0, bytesRead);
                         currentTrackPosition+= bytesRead;
-                        notifyAudioPlayerOfPosition();
-                        audioTrack.write( audioTrackBuffer, 0, bytesRead );
+//                        Log.i(TAG, "currentTrackPosition = " + currentTrackPosition);
+                        if (longestTrack && trackState == TrackState.PLAYING) {
+                            int position = getTrackPosition(currentTrackPosition);
+                            mModelControl.notifySeekBarOfChangeInPos(position, false);
+                        } else if (track.getLengthInBytes() <= currentTrackPosition) {
+                            Log.i(TAG, "PLAYING PAST END BAD!!!!, bytes read = " + bytesRead);
+                        }
                     }
                     if ( trackState == TrackState.PLAYING ) {
                         // We reached the end of the track
@@ -527,14 +613,6 @@ public class AudioPlayer {
                     e.printStackTrace();
                 }
             }
-        }
-
-        /**
-         * Notifies the audio player of the current position in the track
-         */
-        private void notifyAudioPlayerOfPosition() {
-            int currentPos = getCurrentTrackPosition();
-            mAudioPlayerListener.notifyModelControlOfTrackPosition(this,currentPos);
         }
     }
 

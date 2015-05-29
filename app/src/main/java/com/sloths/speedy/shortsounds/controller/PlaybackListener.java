@@ -50,7 +50,7 @@ public interface PlaybackListener {
      * Updates the current position in the track
      * @param position desired position
      */
-    void updateCurrentPosition(int position);
+//    void updateCurrentPosition(int position);
 
     /**
      * Mutes an effect
