@@ -214,11 +214,33 @@ public class AudioPlayer {
     public void removeTrack( ShortSoundTrack track ) {
         trackPlayers.remove(track);
         tracks.remove(track);
-        if(mLongestTrack.getLengthInBytes() == track.getLengthInBytes()) {
-            mLongestTrack = mCurrentShortSound.getLongestTrack();
+
+        boolean removedTrackWasLongestTrack = mLongestTrack.getLengthInBytes() == track.getLengthInBytes();
+        if(removedTrackWasLongestTrack) {
+            updateLongestTrack();
+            Log.d("DEBUG", "mLongestTrack SET!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             for(ShortSoundTrack sst : trackPlayers.keySet()) {
+                Log.d("DEBUG", "sst.getLengthInBytes =" + sst.getLengthInBytes() );
+                Log.d("DEBUG", "mLongestTrack.getLengthInBytes() =" + mLongestTrack.getLengthInBytes());
                 if(sst.getLengthInBytes() == mLongestTrack.getLengthInBytes()) {
+                    Log.d("DEBUG", "mLongestTrackPlayer SET!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                     mLongestTrackPlayer = trackPlayers.get(sst);
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates mLongestTrack to be accurate. Helper Method for removeTrack.
+     */
+    private void updateLongestTrack() {
+        if (tracks.size() == 0) {
+            return;
+        } else {
+            mLongestTrack = tracks.get(0);
+            for ( ShortSoundTrack sst : tracks ) {
+                if (sst.getLengthInBytes() >= mLongestTrack.getLengthInBytes()) {
+                    mLongestTrack = sst;
                 }
             }
         }
