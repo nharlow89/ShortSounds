@@ -275,8 +275,10 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if ( isChecked ) {
                             modelControl.turnOnEffect(effectTypes[i_], getPosition());
+                            effectButtons[i_].setTextColor(main.getResources().getColor(R.color.accent_material_dark));
                         } else {
                             modelControl.muteEffect(effectTypes[i_], getPosition());
+                            effectButtons[i_].setTextColor(main.getResources().getColor(R.color.white));
                         }
                     }
                 });
