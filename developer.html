@@ -58,7 +58,7 @@
           <b>java/com/sloths/speedy/shortsounds</b>: Contains all the Java source code for the main app.<br>
           <b>res/</b>: Contains various resources necessary for the main app (image files, XML files of the layout etc.<br>
         </div>
-        <b>androidTest/java/com/sloths/speedy/shortsounds/</b>: Contains all the Java source code for the tests.<br>
+        <b>java/com/sloths/speedy/shortsounds/test</b>: Contains all the Java source code for the tests.<br>
       </div>
       <b>README.md</b>: Contains a link to the development webpage and documentation for both users and developers.
     </p>
@@ -118,10 +118,25 @@
       Running the Test Suite
     </h3>
     <p>
-      To run all of test suites, first start an emulator, or plug in a debug enabled android device into your computer. Then, open the ShortSounds directory in terminal or in cmd. Mac/Linux users should type and run the command <b>./test_suite.sh</b>. Windows users should type the command <b>test_suite.bat</b>. The first time this is done, the files necessary for the test suite will be automatically downloaded and extracted. Afterwards the test suite should run, and a browser window should open up with the results of all the test results. Below is a screenshot of a sample webpage that should open after a test suite is ran.
+      Before running any test, be sure to sync your gradle with the project, this can be done through cleaning and building the project. To run all of test suites, first start an emulator, or plug in a debug enabled android device into your computer. Then, open the ShortSounds directory in terminal or in cmd. Mac/Linux users should type and run the command <b>./test_suite.sh</b>. Windows users should type the command <b>test_suite.bat</b>. The first time this is done, the files necessary for the test suite will be automatically downloaded and extracted. Afterwards the test suite should run, and a browser window should open up with the results of all the test results. Below is a screenshot of a sample webpage that should open after a test suite is ran.
     </p>
     <p>
       <img src="https://raw.githubusercontent.com/nharlow89/ShortSounds/gh-pages/deliverables/sample_test_summary.png" width="100%"><br>
+    </p>
+
+    <h3>
+      <a class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+      Code Test Coverage
+    </h3>
+    <p>
+      We used Intellij IDEA for the test coverage metric. This tool is run via AndroidStudio. In order to get the test coverage tool to run properly we had to meet the following conditions:
+      <ul>
+        <li>Java version < 1.7.0_45</li>
+        <li>AndroidStudio >= 1.2</li>
+      </ul>
+      Once these conditions are met, choose the ApplicationTests configuration within android studio and click the ‘Run ApplicationTests with Coverage’.
+      <br>
+      We will note that due to particularities of how our IDE (Android Studio), building and testing frameworks interoperated, code coverage was difficult to make feasible.  We attempted to use Cobertura, EMMA, JaCoCo and the native Intellij tool built into Android Studio and after spending ~30 worker-hours on the issue and subsequently speaking with client representatives, we decided it was not expedient to continue, given the time constraints.
     </p>
 
 
