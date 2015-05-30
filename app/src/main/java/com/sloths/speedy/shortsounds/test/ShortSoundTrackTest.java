@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds.tests;
+package com.sloths.speedy.shortsounds.test;
 
 import android.graphics.PointF;
 import android.test.AndroidTestCase;
