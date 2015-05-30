@@ -482,9 +482,6 @@ public class MainActivity extends FragmentActivity
     private void animateToTrack() {
         Animation in = animator.getInAnimation();
         Animation out = animator.getOutAnimation();
-        if (currentView == EQ) {
-
-        }
         animator.setInAnimation(inFromLeftAnimation());
         animator.setOutAnimation(outToRightAnimation());
         animator.setDisplayedChild(viewMap.get(TRACKS));
@@ -792,14 +789,10 @@ public class MainActivity extends FragmentActivity
             mActiveShortSound.removeShortSound();
             mDrawerList.setAdapter(new ArrayAdapter<>(this,
                     R.layout.drawer_list_item, getShortSoundTitles()));
-            if (!sounds.isEmpty()) {
-                selectShortSoundFromDrawer(0);
-            } else {
+            if (!sounds.isEmpty())
+                selectShortSoundFromDrawer(Math.max(0, index - 1));
+            else
                 createNew();
-//                updateCurrentTrackView();
-//                invalidateOptionsMenu();
-//                resetSeekBarToZero();
-            }
         }
     }
 
@@ -849,10 +842,13 @@ public class MainActivity extends FragmentActivity
     private void updateCurrentTrackView() {
         RelativeLayout tvp = (RelativeLayout) findViewById(R.id.track_list_parent);
         View add = getLayoutInflater().inflate(R.layout.empty_tracks, tvp, false);
+
+        animateToTrack();
+
         animator.addView(add, viewMap.get(TRACKS) + 1);
         animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
-        updateViewStateBasedOnTrackCount();
         animator.removeViewAt(viewMap.get(TRACKS));
+        updateViewStateBasedOnTrackCount();
         invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
     }
 
