@@ -84,14 +84,6 @@ public class AudioPlayerTest extends TestCase {
         assertTrue("playAll Failure, State should remain stopped if no tracks contained.",
                 !player.isPlayingAll());
 
-        //TODO Make tests capable of playing fake tracks to confirm behavior
-        // AudioPlayer player2 = constructPlayerWithTracks();
-/*        player.playAll(0);
-        assertTrue("playAll Failure, State should change to Playing when play all is called" +
-                        "with non-null tracks in the audio player.",
-                player.isPlayingAll());
-*/
-
     }
 
     ///////////////////////////////////////////////////////////////////////////

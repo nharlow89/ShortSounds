@@ -121,9 +121,6 @@ public class ShortSoundTrackTest extends AndroidTestCase {
         assert(test.getmReverbEffect() != null);
     }
 
-    /*
-     * addEffect TODO: Currently this method does nothing. Come back to this when it works
-     */
 
     /*
      * getEffectVals

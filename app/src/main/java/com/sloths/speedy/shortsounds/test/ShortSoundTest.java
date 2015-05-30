@@ -19,23 +19,6 @@ public class ShortSoundTest extends TestCase {
     private static final String TEST_ID = "1";
     private static final String TEST_TITLE = "Test";
 
-    /*
-     * Constructor
-     */
-
-    /**
-     * tests to confirm constructor makes a non-null shortsound and
-     * that it contains an empty list of tracks.
-     */
-/*    public void testConstructor() {
-        ShortSound ss = new ShortSound();
-        assertNotNull(ss);
-        assertEquals(0, ss.getTracks().size());
-
-        // So that the fact that ss is inserted into the database doesn't affect the other tests.
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
-    }*/
-
     /**
      * Tests that an empty map passed to the constructor results in an AssertionError.
      */
@@ -106,42 +89,6 @@ public class ShortSoundTest extends TestCase {
         assertEquals(0, ss.getTracks().size());
     }
 
-    /*
-     * getAll
-     */
-
-    /**
-     * Tests that getAll returns an empty List when no ShortSounds have been constructed.
-     */
-/*    public void testGetAllWithNoShortSounds() {
-        List<ShortSound> shortSounds = ShortSound.getAll();
-
-        assertNotNull(shortSounds);
-        assertEquals(0, shortSounds.size());
-    }
-*/
-    /**
-     * Tests that getAll returns a List with the proper number of ShortSounds when 1 ShortSound
-     * has been constructed and that it is the same as the constructed ShortSound.
-     */
-/*    public void testGetAllWithOneShortSound() {
-        ShortSound ss = new ShortSound();
-        List<ShortSound> shortSounds = ShortSound.getAll();
-
-        assertNotNull(shortSounds);
-        assertEquals(1, shortSounds.size());
-
-        ShortSound retreivedSS = shortSounds.get(0);
-        assertEquals(ss.getTitle(), retreivedSS.getTitle());
-        assertEquals(ss.getTracks().size(), retreivedSS.getTracks().size());
-        assertEquals(ss.getId(), retreivedSS.getId());
-
-        ShortSoundSQLHelper.getInstance().removeShortSound(ss);
-    }
-*/
-    /*
-     * getById
-     */
 
     /**
      * Tests that calling getById with an ID that doesn't exist returns null.
@@ -150,22 +97,6 @@ public class ShortSoundTest extends TestCase {
         assertNull(ShortSound.getById(-1));
     }
 
-    /**
-     * Tests that calling getById with an ID that exists returns the correct ShortSound.
-     */
-/*    public void testGetByIdWithMatchingId() {
-        ShortSound ss = new ShortSound(makeTestMap());
-        ShortSound retreivedSS = ShortSound.getById(ss.getId());
-
-        assertNotNull(retreivedSS);
-        assertEquals(ss.getTitle(), retreivedSS.getTitle());
-        assertEquals(ss.getTracks().size(), retreivedSS.getTracks().size());
-        assertEquals(ss.getId(), retreivedSS.getId());
-    }*/
-
-    /*
-     * getLongestTrack
-     */
 
     /**
      * Tests that the returned track is null if there are no tracks
