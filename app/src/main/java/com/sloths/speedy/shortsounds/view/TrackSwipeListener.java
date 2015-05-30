@@ -89,7 +89,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
                 float absVelocityX = Math.abs(velocityX);
                 boolean dismiss = false;
                 boolean dismissRight = false;
-                if ( Math.abs(deltaX) > mWidth / 1.65f && mSwiping ) {
+                if ( Math.abs(deltaX) > mWidth / 3.5f && mSwiping ) {
                     dismiss = true;
                     dismissRight = deltaX > 0;
                 } else if (mMinFlingVelocity <= absVelocityX && absVelocityX <= mMaxFlingVelocity && mSwiping) {
