@@ -28,7 +28,7 @@ public class ShortSoundTrack {
     // AudioTrack Params
     public static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
     public static final int SAMPLE_RATE = 44100;  // NOTE: also used for buffer size
-    public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_MONO;
+    public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_STEREO;
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     public static final int MODE = AudioTrack.MODE_STREAM;
     public static int BUFFER_SIZE = 44100; // Default
@@ -299,7 +299,7 @@ public class ShortSoundTrack {
         if ( this.fileName == null || !(this.fileName instanceof String) ) throw new AssertionError("Invalid filename");
         if ( this.mEqEffect == null || !(this.mEqEffect instanceof EqEffect) ) throw new AssertionError("Missing EqEffect");
         if ( this.mReverbEffect == null || !(this.mReverbEffect instanceof ReverbEffect) ) throw new AssertionError("Missing ReverbEffect");
-        if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id);
+        if ( this.id < 0 ) throw new AssertionError("Invalid id: " + this.id);
 
         // Check that the files are on disk
 //        File file = new File( this.fileName);

@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds.tests;
+package com.sloths.speedy.shortsounds.test;
 
 import com.sloths.speedy.shortsounds.*;
 import com.sloths.speedy.shortsounds.R;

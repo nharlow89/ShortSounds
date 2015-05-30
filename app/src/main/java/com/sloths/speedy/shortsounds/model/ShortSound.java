@@ -275,7 +275,7 @@ public class ShortSound {
      */
     private void repInvariant() {
         if ( this.title == null || !(this.title instanceof String) ) throw new AssertionError("Invalid title");
-        if ( this.id < 1 ) throw new AssertionError("Invalid id: " + this.id );
+        if ( this.id < 0 ) throw new AssertionError("Invalid id: " + this.id );
         for (int i = 0; i < this.tracks.size(); i++) {
             ShortSoundTrack track = this.tracks.get( i );
             if ( !( track instanceof  ShortSoundTrack ) ) throw new AssertionError("List of tracks contains an invalid object!");

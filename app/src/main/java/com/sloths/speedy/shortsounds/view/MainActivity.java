@@ -460,6 +460,8 @@ public class MainActivity extends FragmentActivity
      */
     @Override
     public void onBackPressed() {
+        if ( modelControl.isRecording() ) endRecording();
+        if ( modelControl.isPlaying() ) modelControl.stopAllFromPlaying();
         if (currentView.equals(TRACKS)) {
             super.onBackPressed();
         } else {
@@ -556,22 +558,12 @@ public class MainActivity extends FragmentActivity
      * @param effect the effect to load on the track
      */
     public void effectEditSelected(int track, String effect) {
-
         // Setups the effect to be shown (connects model-controller-view)
         setupEffect(track, effect);
 
         // Change the view to the effect
         animator.setDisplayedChild(viewMap.get(effect));
         currentView = effect;
-
-        //TODO make fun of whoever kept this here
-        //TODO what does the drawer have to do with effects?
-//        mActiveShortSound = sounds.get( position );  // Set the currently active ShortSound.
-        // Highlight item, update title, close drawer
-//        mDrawerList.setItemChecked(position, true);
-//        mDrawerLayout.closeDrawer(mDrawerList);
-//        setTitle(mShortSoundsTitles[position]);
-//        invalidateOptionsMenu();
     }
 
     /**
@@ -688,14 +680,14 @@ public class MainActivity extends FragmentActivity
 
         mShareActionProvider.setOnShareTargetSelectedListener(
                 new ShareActionProvider.OnShareTargetSelectedListener() {
-            @Override
-            public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
-                Log.i(TAG, "share target selected clicked");
-                source.setShareIntent(createShareIntent());
-                //return type doesn't matter, api says return false for consistency
-                return false;
-            }
-        });
+                    @Override
+                    public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
+                        Log.i(TAG, "share target selected clicked");
+                        source.setShareIntent(createShareIntent());
+                        //return type doesn't matter, api says return false for consistency
+                        return false;
+                    }
+                });
 
         return true;
     }
@@ -709,10 +701,23 @@ public class MainActivity extends FragmentActivity
             return null;
         }
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        try {
-            File absolutePath = mActiveShortSound.generateAudioFile();
 
-            Uri contentURI = FileProvider.getUriForFile(MainActivity.this, "com.sloths.speedy.shortsounds.fileprovider", absolutePath);
+        try {
+            File absolutePath = null;
+            int tries = 0;
+            while (absolutePath == null || absolutePath.length() == 0) {
+                Log.d(TAG, "trying to generate an audio file. try no. " + tries);
+                if (tries == 5) {
+                    ((ShortSoundsApplication) getApplicationContext()).showToast("Could not " +
+                            "generate an audio file, please try again later");
+                    return null;
+                }
+                absolutePath = mActiveShortSound.generateAudioFile();
+                tries++;
+            }
+
+            Uri contentURI = FileProvider.getUriForFile(MainActivity.this,
+                    "com.sloths.speedy.shortsounds.fileprovider", absolutePath);
 
             if (contentURI != null) {
                 shareIntent.putExtra(Intent.EXTRA_STREAM, contentURI);
@@ -723,6 +728,7 @@ public class MainActivity extends FragmentActivity
             e.printStackTrace();
         }
         return shareIntent;
+
     }
 
     /**
@@ -783,14 +789,10 @@ public class MainActivity extends FragmentActivity
             mActiveShortSound.removeShortSound();
             mDrawerList.setAdapter(new ArrayAdapter<>(this,
                     R.layout.drawer_list_item, getShortSoundTitles()));
-            if (!sounds.isEmpty()) {
-                selectShortSoundFromDrawer(0);
-            } else {
+            if (!sounds.isEmpty())
+                selectShortSoundFromDrawer(Math.max(0, index - 1));
+            else
                 createNew();
-//                updateCurrentTrackView();
-//                invalidateOptionsMenu();
-//                resetSeekBarToZero();
-            }
         }
     }
 
@@ -840,10 +842,13 @@ public class MainActivity extends FragmentActivity
     private void updateCurrentTrackView() {
         RelativeLayout tvp = (RelativeLayout) findViewById(R.id.track_list_parent);
         View add = getLayoutInflater().inflate(R.layout.empty_tracks, tvp, false);
+
+        animateToTrack();
+
         animator.addView(add, viewMap.get(TRACKS) + 1);
         animator.setDisplayedChild(viewMap.get(TRACKS) + 1);
-        updateViewStateBasedOnTrackCount();
         animator.removeViewAt(viewMap.get(TRACKS));
+        updateViewStateBasedOnTrackCount();
         invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
     }
 

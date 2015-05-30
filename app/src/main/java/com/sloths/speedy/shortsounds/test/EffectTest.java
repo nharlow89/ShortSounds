@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds.tests;
+package com.sloths.speedy.shortsounds.test;
 
 import junit.framework.TestCase;
 import com.sloths.speedy.shortsounds.model.Effect;

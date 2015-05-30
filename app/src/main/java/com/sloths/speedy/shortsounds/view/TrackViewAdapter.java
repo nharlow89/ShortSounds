@@ -39,7 +39,6 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
     private ModelControl modelControl;
     private List<ViewHolder> mViews;
     public static final int MAX_VOLUME = 100;
-    private final int screenWidth;
     private final int screenHeight;
     private ColorWheel colorWheel;
 
@@ -52,14 +51,13 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         this.mContext = context;
         main = (MainActivity) context;
         colorWheel = ColorWheel.instance();
-        colorWheel.buildWheel(mContext);
+        colorWheel.buildWheelIfNeeded(mContext);
         modelControl = ModelControl.instance();
         mViews = new ArrayList<>();
         Display display = ((Activity)mContext).getWindowManager().getDefaultDisplay();
         Point p = new Point();
         display.getSize(p);
         screenHeight = p.y;
-        screenWidth = p.x;
     }
 
     /**
@@ -295,21 +293,18 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
             }
         }
 
-
         /**
          * assigns a color to a ViewHolder if one has not been previously assigned
          */
         private void setUpColorsIfNeeded(int position) {
-            int color = main.getTrackColor(position);
-            if (color != -1) {
-                mPrimaryColor = color;
-                mSecondaryColor = color;
-            }
+            int colorNum = main.getTrackColor(position) % ColorWheel.NUM_COLORS;
+            if (colorNum == -1)
+                colorNum = (main.getNextColorNum() + main.getCurrentShortSoundId()) % ColorWheel.NUM_COLORS;
+
             if (mPrimaryColor == null || mSecondaryColor == null) {
-                int colorNum = (main.getNextColorNum() + main.getCurrentShortSoundId()) % colorWheel.getNumColors();
-                mPrimaryColor = ColorWheel.instance().getPrimaryColor(colorNum);
-                mSecondaryColor = ColorWheel.instance().getSecondaryColor(colorNum);
-                main.setTrackColor(position,mPrimaryColor);
+                mPrimaryColor = colorWheel.getPrimaryColor(colorNum);
+                mSecondaryColor = colorWheel.getSecondaryColor(colorNum);
+                main.setTrackColor(position, colorNum);
             }
         }
 

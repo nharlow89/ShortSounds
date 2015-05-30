@@ -14,7 +14,7 @@ public class ColorWheel {
     private int sCount;
     private int[] primary;
     private int[] secondary;
-    private static final int NUM_COLORS = 6;
+    public static final int NUM_COLORS = 6;
 
 
     /**
@@ -44,14 +44,6 @@ public class ColorWheel {
     }
 
     /**
-     * Returns the NUM_COLORS in the color wheel
-     * @return int the NUM_COLORS in the color wheel
-     */
-    public int getNumColors() {
-        return NUM_COLORS;
-    }
-
-    /**
      * If no color wheel exists, constructs and returns one,
      * else returns the instance of the colorwheel
      * @return a static instance of this colorwheel
@@ -66,7 +58,7 @@ public class ColorWheel {
      * Takes a context to define colors and builds the values of the colorwheel
      * @param mContext The context of the app
      */
-    public void buildWheel(Context mContext) {
+    public void buildWheelIfNeeded(Context mContext) {
         if (primary == null) {
             primary = new int[]{
                     mContext.getResources().getColor(R.color.purple_500),

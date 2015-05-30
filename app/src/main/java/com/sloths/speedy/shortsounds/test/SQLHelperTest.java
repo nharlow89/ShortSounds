@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds.tests;
+package com.sloths.speedy.shortsounds.test;
 
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;

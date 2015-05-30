@@ -1,4 +1,4 @@
-package com.sloths.speedy.shortsounds.tests;
+package com.sloths.speedy.shortsounds.test;
 
 import android.graphics.PointF;
 import android.test.AndroidTestCase;
@@ -21,6 +21,7 @@ public class ShortSoundTrackTest extends AndroidTestCase {
     private static final String TEST_TITLE = "TestTrack";
     private static final String TEST_FILE_NAME = "test-file-modified";
     private static final String TEST_EFFECT_PARAMETERS = "NULL";
+    private static int id = 1;
 
     /*
      * Constructor
@@ -258,17 +259,17 @@ public class ShortSoundTrackTest extends AndroidTestCase {
      */
     public static HashMap<String, String> makeTestValues() {
         HashMap<String, String> testValues = new HashMap<String, String>();
-
         testValues.put(ShortSoundSQLHelper.KEY_ID, "1");
         testValues.put(ShortSoundSQLHelper.KEY_TRACK_FILENAME_MODIFIED, TEST_FILE_NAME);
         testValues.put(ShortSoundSQLHelper.KEY_TITLE, TEST_TITLE);
-        testValues.put(ShortSoundSQLHelper.KEY_SHORT_SOUND_ID, "0");
+        testValues.put(ShortSoundSQLHelper.KEY_SHORT_SOUND_ID, "" + id);
         testValues.put(ShortSoundSQLHelper.EQ_EFFECT_PARAMS, TEST_EFFECT_PARAMETERS);
         testValues.put(ShortSoundSQLHelper.REVERB_EFFECT_PARAMS, TEST_EFFECT_PARAMETERS);
         testValues.put(ShortSoundSQLHelper.VOLUME_PARAMS, "0");
         testValues.put(ShortSoundSQLHelper.SOLO_PARAMS, "false");
         testValues.put(ShortSoundSQLHelper.TRACK_LENGTH, "1");
-
+        testValues.put(ShortSoundSQLHelper.TRACK_COLOR, "0");
+        id++;
         return testValues;
     }
 

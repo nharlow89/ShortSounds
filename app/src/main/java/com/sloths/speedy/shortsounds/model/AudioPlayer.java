@@ -117,6 +117,8 @@ public class AudioPlayer {
      */
     public void notifyModelControlOfTrackPosition(TrackPlayer notifier, int position) {
         if (notifier == mLongestTrackPlayer) {
+            Log.d("DEBUG", "mLongestTrack is " + mLongestTrackPlayer);
+            Log.d("DEBUG", "notifier is " + notifier);
             mModelControl.notifySeekBarOfChangeInPos(position);
         }
     }
@@ -235,6 +237,8 @@ public class AudioPlayer {
      */
     private void updateLongestTrack() {
         if (tracks.size() == 0) {
+            mLongestTrack = null;
+            mLongestTrackPlayer = null;
             return;
         } else {
             mLongestTrack = tracks.get(0);

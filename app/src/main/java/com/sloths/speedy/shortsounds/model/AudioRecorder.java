@@ -15,9 +15,10 @@ import java.util.UUID;
  */
 public class AudioRecorder {
     // global vars
-    public static final int AUDIO_SOURCE = MediaRecorder.AudioSource.DEFAULT;
-    public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_MONO;
+    public static final int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
+    public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_STEREO;
     public static final int BUFFER_ELEMENTS_TO_REC = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
+    public static final int GAIN_LEVEL = 8;
     public static int BUFFER_SIZE;
     // instance vars
     private AudioRecord mTrackRecorder;
@@ -81,7 +82,6 @@ public class AudioRecorder {
 //            System.out.println("Short writing to file" + frameBuffer.toString());
             try {
                 // Put de gains
-                /*
                 int i = 0;
                 while ( i < bytesRead ) {
                     float sample = (float)( frameBuffer[ i ] & 0xFF
@@ -90,7 +90,7 @@ public class AudioRecorder {
                     // Increase level by about 6dB:
                     // sample *= 2;
                     // Or increase level by 20dB:
-                    sample *= 10;
+                    sample *= GAIN_LEVEL;
                     // Or if you prefer any dB value, then calculate the gain factor outside the loop
                     // float gainFactor = (float)Math.pow( 10., dB / 20. );    // dB to gain factor
                     // sample *= gainFactor;
@@ -109,7 +109,6 @@ public class AudioRecorder {
                     }
                     i += 2;
                 }
-                */
                 mOutputStream.write(frameBuffer, 0, BUFFER_ELEMENTS_TO_REC);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -136,8 +135,6 @@ public class AudioRecorder {
             mRecordingThread = null;
             mIsRecording = false;
         }
-//        setup();
-//        repInvariant();
         return mTempAudioFile;
     }
 
@@ -150,26 +147,9 @@ public class AudioRecorder {
     }
 
     /**
-     * Converts a short to a byte
-     * @param sData the short to be converted
-     * @return byte array of converted bytes
-     */
-    private byte[] short2byte(short[] sData) {
-        int shortArrsize = sData.length;
-        byte[] bytes = new byte[shortArrsize * 2];
-        for (int i = 0; i < shortArrsize; i++) {
-            bytes[i * 2] = (byte) (sData[i] & 0x00FF);
-            bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
-            sData[i] = 0;
-        }
-        return bytes;
-    }
-
-    /**
      * Reset the AudioRecorder. This method needs to be called after each recording.
      */
     public void reset() {
-        // TODO: cleanup resources from previous recording? temp file?
         setup();
     }
 

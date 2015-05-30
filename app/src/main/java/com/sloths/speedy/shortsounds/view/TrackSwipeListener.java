@@ -2,11 +2,17 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.TextView;
+
+import com.sloths.speedy.shortsounds.R;
+import com.sloths.speedy.shortsounds.controller.ModelControl;
 
 /**
  * TrackSwipeListener is a helper class that takes care of the "swipe to delete" feature as well
@@ -83,7 +89,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
                 float absVelocityX = Math.abs(velocityX);
                 boolean dismiss = false;
                 boolean dismissRight = false;
-                if ( Math.abs(deltaX) > mWidth / 1.65f && mSwiping ) {
+                if ( Math.abs(deltaX) > mWidth / 3.5f && mSwiping ) {
                     dismiss = true;
                     dismissRight = deltaX > 0;
                 } else if (mMinFlingVelocity <= absVelocityX && absVelocityX <= mMaxFlingVelocity && mSwiping) {
@@ -100,7 +106,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
                             .setListener(new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
-                                    mListener.onTrackDelete();
+                                    confirmDelete();
                                 }
                             });
                     mDeleted = true;
@@ -146,7 +152,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
                 mVelocityTracker.addMovement(event);
                 float newDeltaX = event.getRawX() - mDownX;
                 float deltaY = event.getRawY() - mDownY;
-                if ( Math.abs(newDeltaX) > mSlop && Math.abs(deltaY) < Math.abs(newDeltaX) / 2) {
+                if (Math.abs(newDeltaX) > mSlop && Math.abs(deltaY) < Math.abs(newDeltaX) / 2) {
                     mSwiping = true;
                     mSwipingSlop = (newDeltaX > 0 ? mSlop : -mSlop);
                 }
@@ -161,28 +167,45 @@ public class TrackSwipeListener implements View.OnTouchListener {
         }
         return false;
     }
-//    private void confirmDelete() {
-//        if (!ModelControl.instance().isPlaying() && !ModelControl.instance().isRecording()) {
-//            final String name = ((TextView)mView.findViewById(R.id.track_title)).getText().toString();
-//            new AlertDialog.Builder(mView.getContext())
-//                    .setTitle("\tDelete track?")
-//                    .setIcon(R.drawable.ic_action_mic)
-//                    .setMessage("Are you sure you want to delete track" + name + "?")
-//                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            dialog.dismiss();
-//                        }
-//                    })
-//                    .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            mListener.onTrackDelete();
-//                            ((ShortSoundsApplication) mView.getContext().getApplicationContext())
-//                                    .showToast(name + " deleted");
-//                            dialog.dismiss();
-//                        }
-//                    }).create().show();
-//        }
-//    }
+
+    /**
+     * Prompts a confirmation dialogue to check if the user wants to
+     * delete a track after swiping.
+     */
+    private void confirmDelete() {
+        if (!ModelControl.instance().isPlaying() && !ModelControl.instance().isRecording()) {
+            final String name = ((TextView)mView.findViewById(R.id.track_title)).getText().toString();
+            new AlertDialog.Builder(mView.getContext())
+                .setTitle("\tDelete track?")
+                .setIcon(R.drawable.ic_action_mic)
+                .setMessage("Are you sure you want to delete track" + name + "?")
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mView.animate()
+                                .translationX(0)
+                                .alpha(1)
+                                .setDuration(mAnimationTime)
+                                .setListener(null);
+                        mDeleted = false;
+                        mDownX = 0;
+                        mDownY = 0;
+                        mVelocityTracker.recycle();
+                        mVelocityTracker = null;
+                        mSwiping = false;
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mListener.onTrackDelete();
+                        ((ShortSoundsApplication) mView.getContext().getApplicationContext())
+                                .showToast(name + " deleted");
+                        dialog.dismiss();
+                    }
+                }
+            ).create().show();
+        }
+    }
 }
