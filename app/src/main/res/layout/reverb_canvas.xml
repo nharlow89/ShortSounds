@@ -6,16 +6,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout android:id="@+id/topPanel"
+    <LinearLayout android:id="@+id/reverbTopPanel"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight=".2"
         android:orientation="vertical"
         android:minHeight="30dp">
-        <TextView android:id="@+id/effectNameTitle"
+        <TextView android:id="@+id/reverbTitle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
+            android:textColor="@color/button_material_dark"
             android:text="Reverb"
             android:textSize="60dp"
             android:minHeight="30dp">
@@ -39,6 +40,7 @@
         <com.sloths.speedy.shortsounds.view.Fx_ReverbCanvas
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/button_material_dark"
             android:id="@+id/reverb_canvas"/>
         <View
             android:layout_width="match_parent"
@@ -47,6 +49,7 @@
     </LinearLayout>
 
     <RelativeLayout
+        android:id="@+id/reverbBottomPanel"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="bottom"

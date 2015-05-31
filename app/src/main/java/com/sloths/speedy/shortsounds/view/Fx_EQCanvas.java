@@ -2,16 +2,15 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.controller.EQEffectController;
 import com.sloths.speedy.shortsounds.model.EqEffect;
 
@@ -83,16 +82,16 @@ public class Fx_EQCanvas extends View {
     private void setStyles() {
         // Paint specs for line
         linePaint.setAntiAlias(true);
-        linePaint.setColor(Color.GREEN);
+        linePaint.setColor(getContext().getResources().getColor(R.color.primary_extra_light_green));
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeJoin(Paint.Join.ROUND);
-        linePaint.setStrokeWidth(Math.max(getMeasuredWidth() / 50f, 20f));
+        linePaint.setStrokeWidth(Math.max(getMeasuredWidth() / 60f, 20f));
 
         // Paint specs for points
         pointPaint.setAntiAlias(true);
-        pointPaint.setColor(Color.RED);
+        pointPaint.setColor(getContext().getResources().getColor(R.color.accent_lime_green));
         pointPaint.setStyle(Paint.Style.STROKE);
-        pointPaint.setStrokeWidth(getMeasuredWidth() / 12f);
+        pointPaint.setStrokeWidth(getMeasuredWidth() / 16f);
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
     }
 
@@ -114,11 +113,9 @@ public class Fx_EQCanvas extends View {
         canvas.drawPath(linePath, linePaint);
         // draw the two points
         if (lo.enabled) {
-            pointPaint.setColor(Color.RED);
             canvas.drawPoint(lo.centerPoint.x, lo.centerPoint.y, pointPaint);
         }
         if (hi.enabled) {
-            pointPaint.setColor(Color.BLUE);
             canvas.drawPoint(hi.centerPoint.x, hi.centerPoint.y, pointPaint);
         }
     }
@@ -339,7 +336,6 @@ public class Fx_EQCanvas extends View {
         public final int BANDWIDTH_DIVIDER = 8;
         public final int WIDTH_DIVIDER = 4;
         public final float RECTSIZE;
-        private PointInit init;
         boolean enabled;
         RectF rect;
         private EQPointF leftPoint;
@@ -352,8 +348,7 @@ public class Fx_EQCanvas extends View {
          */
         PointGroup(PointInit init) {
             BANDWIDTH = getMeasuredWidth() / BANDWIDTH_DIVIDER;
-            RECTSIZE = BANDWIDTH / RECT_DIVIDER;
-            this.init = init;
+            RECTSIZE = getMeasuredWidth() / 16f;
             int x = getMeasuredWidth() / WIDTH_DIVIDER;
             int y = getMeasuredHeight() / RECT_DIVIDER;
             if (init == PointInit.HI)

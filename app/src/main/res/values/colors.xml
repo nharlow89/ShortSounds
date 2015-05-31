@@ -18,6 +18,11 @@
     <color name="indigo_500">#5C6BC0</color>
     <color name="indigo_200">#9FA8DA</color>
     <color name="green_500">#4CAF50</color>
+    <color name="accent_lime_green">#CDDC39</color>
+    <color name="primary_dark_indigo">#30359F</color>
+    <color name="primary_light_indigo">#C5CAE9</color>
+    <color name="primary_extra_light_green">#F0F4C3</color>
+    <color name="primary_forest_green">#388E3C</color>
     <color name="white">#FFFFFF</color>
     <color name="cross_view_stroke_color">@android:color/black</color>
 </resources>

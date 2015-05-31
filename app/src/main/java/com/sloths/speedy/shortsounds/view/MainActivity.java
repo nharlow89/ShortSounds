@@ -139,20 +139,16 @@ public class MainActivity extends FragmentActivity
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
             }
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // The current progress level. This will be in the range 0..max
                 // where max was set by setMax(int). (The default value for max is 100.)
-                // TODO Auto-generated method stub
-
                 if(fromUser) { //!modelControl.isRecording()
                     Log.d("DB_TEST", "SeekBar Progress Changed By User to " + progress);
                     modelControl.updateCurrentPosition(progress);
@@ -415,7 +411,6 @@ public class MainActivity extends FragmentActivity
         animator = (ViewAnimator) findViewById(R.id.view_animator);
         animator.setInAnimation(inFromRightAnimation());
         animator.setOutAnimation(outToLeftAnimation());
-
     }
 
     /**
@@ -575,6 +570,10 @@ public class MainActivity extends FragmentActivity
      * @param effect The name of the effect being set up
      */
     private void setupEffect(int track, String effect) {
+        int primaryColor = ColorWheel.instance().getPrimaryColor(getTrackColor(track));
+        int secondaryColor = ColorWheel.instance().getSecondaryColor(getTrackColor(track));
+
+
         PointF[] values = mActiveShortSound.getTracks().get(track).getEffectVals(effect);
         if (effect.equals(EQ)) {
             // Set saved values -- if null it defaults
@@ -589,6 +588,8 @@ public class MainActivity extends FragmentActivity
             // Set current controller
             effectController = eqController;
 
+            findViewById(R.id.eqTopPanel).setBackgroundColor(secondaryColor);
+            findViewById(R.id.eqBottomPanel).setBackgroundColor(secondaryColor);
             findViewById(R.id.saveEQButton).setOnClickListener(new SaveButtonListener(effect, track));
             findViewById(R.id.cancelEQButton).setOnClickListener(new CancelButtonListener(effect));
         } else if (effect.equals(REVERB)) {
@@ -604,6 +605,8 @@ public class MainActivity extends FragmentActivity
             // Set current controller
             effectController = reverbController;
 
+            findViewById(R.id.reverbTopPanel).setBackgroundColor(secondaryColor);
+            findViewById(R.id.reverbBottomPanel).setBackgroundColor(secondaryColor);
             findViewById(R.id.saveReverbButton).setOnClickListener(new SaveButtonListener(effect, track));
             findViewById(R.id.cancelReverbButton).setOnClickListener(new CancelButtonListener(effect));
         }
@@ -904,7 +907,7 @@ public class MainActivity extends FragmentActivity
      * Sets the int representation of a Color of the ShortSoundTrack
      * at Position track
      * @param track int the position of the track
-     * @param color int the Inteer representing the Color
+     * @param color int the index of the Color in the ColorWheel
      */
     public void setTrackColor(int track, int color) {
         mActiveShortSound.getTracks().get(track).setColor(color);
@@ -914,7 +917,7 @@ public class MainActivity extends FragmentActivity
      * Returns the int representation of the Color of the ShortSoundTrack at
      * position track
      * @param track int the position of the ShortSoundTrack
-     * @return int the int representaiton of the Color of the ShortSoundTrack
+     * @return int the index of the Color in the ColorWheel
      */
     public int getTrackColor(int track) {
         return mActiveShortSound.getTracks().get(track).getColor();

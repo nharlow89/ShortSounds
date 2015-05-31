@@ -2,7 +2,6 @@ package com.sloths.speedy.shortsounds.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -10,6 +9,8 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.controller.ReverbEffectController;
 import java.util.Random;
 
@@ -19,8 +20,6 @@ import java.util.Random;
 public class Fx_ReverbCanvas extends View {
 
     private static final String TAG = "EffectCanvas";
-    private Path xAxis;
-    private Path yAxis;
     private Path linePath;
     private EchoGraphics echoLines;
     private Paint linePaint;
@@ -45,8 +44,6 @@ public class Fx_ReverbCanvas extends View {
         super(c, attrs);
         firstDraw = true;
 
-        xAxis = new Path();
-        yAxis = new Path();
         linePath = new Path();
 
         linePaint = new Paint();
@@ -66,14 +63,14 @@ public class Fx_ReverbCanvas extends View {
     void setStyles() {
         // Paint specs for line
         linePaint.setAntiAlias(true);
-        linePaint.setColor(Color.BLUE);
+        linePaint.setColor(getContext().getResources().getColor(R.color.primary_dark_indigo));
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeJoin(Paint.Join.ROUND);
-        linePaint.setStrokeWidth(Math.max(getMeasuredWidth() / 50f, 20f));
+        linePaint.setStrokeWidth(Math.max(getMeasuredWidth() / 60f, 20f));
 
         // Paint specs for points
         pointPaint.setAntiAlias(true);
-        pointPaint.setColor(Color.WHITE);
+        pointPaint.setColor(getContext().getResources().getColor(R.color.accent_lime_green));
         pointPaint.setStyle(Paint.Style.STROKE);
         pointPaint.setStrokeWidth(getMeasuredWidth() / 16f);
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -96,10 +93,7 @@ public class Fx_ReverbCanvas extends View {
         }
 
         echoLines.draw(canvas);
-        linePaint.setColor(Color.BLUE);
         canvas.drawPath(linePath, linePaint);
-        canvas.drawPath(xAxis, linePaint);
-        canvas.drawPath(yAxis, linePaint);
         canvas.drawPoint(point.x, point.y, pointPaint);
     }
 
@@ -108,14 +102,9 @@ public class Fx_ReverbCanvas extends View {
      */
     private void setUpGraph() {
         Y_MAX = MARGIN;
-        Y_MIN = getMeasuredHeight() - MARGIN;
+        Y_MIN = getMeasuredHeight();
         X_MIN = MARGIN;
-        X_MAX = getMeasuredWidth() - MARGIN;
-
-        xAxis.moveTo(MARGIN, Y_MIN);
-        yAxis.moveTo(MARGIN, Y_MIN);
-        xAxis.lineTo(X_MAX, Y_MIN);
-        yAxis.lineTo(MARGIN, Y_MAX);
+        X_MAX = getMeasuredWidth() + MARGIN;
 
         left.x = X_MIN;
         right.x = X_MAX;
@@ -147,7 +136,7 @@ public class Fx_ReverbCanvas extends View {
         right.y = height1;
 
         linePath.reset();
-        linePath.moveTo(left.x, left.y);
+        linePath.moveTo(left.x - MARGIN, left.y);
         linePath.quadTo(right.x / 2, point.y, right.x, right.y);
     }
 
@@ -282,7 +271,7 @@ public class Fx_ReverbCanvas extends View {
          * @param y The new y value for the point
          */
         void set(float x, float y) {
-            if (x > X_MIN + 4 * MARGIN && x < X_MAX - 4 * MARGIN)
+            if (x > X_MIN + 4 * MARGIN && x < X_MAX - 5 * MARGIN)
                 this.x = x;
             if (y  < Y_MIN - 4 * MARGIN && y  > Y_MAX + 4 * MARGIN)
                 this.y = y;
@@ -335,7 +324,7 @@ public class Fx_ReverbCanvas extends View {
             // Paint specs for line
             p = new Paint();
             p.setAntiAlias(true);
-            p.setColor(Color.YELLOW);
+            p.setColor(getContext().getResources().getColor(R.color.primary_light_indigo));
             p.setStyle(Paint.Style.STROKE);
             p.setStrokeJoin(Paint.Join.ROUND);
             p.setStrokeWidth(5f);
@@ -373,9 +362,6 @@ public class Fx_ReverbCanvas extends View {
     private void repInvariant() {
         if (left == null || right == null) {
             throw new AssertionError("Invalid left point value");
-        }
-        if (xAxis == null || yAxis == null) {
-            throw new AssertionError("Invalid axis value");
         }
         if (linePaint == null || pointPaint == null) {
             throw new AssertionError("Invalid paint value");
