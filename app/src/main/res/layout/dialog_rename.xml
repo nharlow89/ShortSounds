@@ -35,4 +35,5 @@
         android:textColor="#fff"
         android:textStyle="bold" />
     </LinearLayout>
+
 </LinearLayout>

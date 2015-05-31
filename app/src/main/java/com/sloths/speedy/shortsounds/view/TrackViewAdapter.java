@@ -11,10 +11,12 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.sloths.speedy.shortsounds.R;
 import com.sloths.speedy.shortsounds.controller.ModelControl;
@@ -125,7 +127,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         private Integer mSecondaryColor = null;
         int soloOff;
         // Switches
-        private CrossView[] xViews;
+        private ToggleButton[] effectToggles;
         private Button[] effectButtons;
         private Effect.Type[] effectTypes;
         private TrackAnimator trackAnimator;
@@ -146,14 +148,14 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
             vTitle.setOnClickListener(trackAnimator);
             vTrackChild = (LinearLayout) v.findViewById(R.id.track_child);
             vTrackChild.setVisibility(View.GONE);
-            xViews = new CrossView[]{
-                                    ((CrossView) v.findViewById(R.id.eq_switch)),
-                                    ((CrossView) v.findViewById(R.id.reverb_switch))
-                                };
             effectTypes = new Effect.Type[]{Effect.Type.EQ, Effect.Type.REVERB};
             effectButtons = new Button[]{
                                         ((Button) v.findViewById(R.id.eq_button)),
                                         ((Button) v.findViewById(R.id.reverb_button))
+                                    };
+            effectToggles = new ToggleButton[]{
+                                        ((ToggleButton) v.findViewById(R.id.eq_switch)),
+                                        ((ToggleButton) v.findViewById(R.id.reverb_switch))
                                     };
             v.findViewById(R.id.track_list_parent);
             // perform setup
@@ -221,20 +223,18 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         }
 
         /**
-         * Set the event handler for the Play button on a given track.
+         * Set the event handler for the Solo button on a given track.
          */
         private void setUpSolo() {
             soloOff = mContext.getResources().getColor(R.color.button_material_light);
-            final Button mSoloButton = (Button) vView.findViewById(R.id.trackSolo);
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mSoloButton.getLayoutParams();
-            int size = Math.max (params.width, params.height);
-            mSoloButton.setLayoutParams(new LinearLayout.LayoutParams(size, size));
-            mSoloButton.setOnClickListener(new View.OnClickListener() {
+            final ToggleButton mSoloSwitch = (ToggleButton) vView.findViewById(R.id.trackSolo);
+            mSoloSwitch.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    if (!modelControl.isTrackSolo(getPosition()))
-                        mSoloButton.setBackgroundColor(mSecondaryColor);
-                    else
-                        mSoloButton.setBackgroundColor(soloOff);
+                    if (!modelControl.isTrackSolo(getPosition())) {
+//                        mSoloButton.set( mContext.getResources().getColor(R.color.button_material_dark) );
+                    } else {
+//                        mSoloButton.setBackgroundColor( mContext.getResources().getColor(R.color.button_material_light) );
+                    }
                     modelControl.soloTrack(getPosition());
                 }
             });
@@ -267,19 +267,17 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
          * sets up the effect toggle switch
          */
         private void setUpToggle() {
-            for (int i = 0; i < xViews.length; i++) {
+            for (int i = 0; i < effectToggles.length; i++) {
                 final int i_ = i;
-                xViews[i].setOnClickListener(new View.OnClickListener() {
+                effectToggles[i].setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
                     @Override
-                    public void onClick(View v) {
-                        if (!xViews[i_].isOn()) {//((MainActivity)mContext).getEffectChecked(effectTypes[i_], getPosition())) {
-                            xViews[i_].cross();
-                            effectButtons[i_].setEnabled(false);
-                            modelControl.muteEffect(effectTypes[i_], getPosition());
-                        } else {
-                            xViews[i_].plus();
-                            effectButtons[i_].setEnabled(true);
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if ( isChecked ) {
                             modelControl.turnOnEffect(effectTypes[i_], getPosition());
+                            effectButtons[i_].setTextColor(main.getResources().getColor(R.color.accent_material_dark));
+                        } else {
+                            modelControl.muteEffect(effectTypes[i_], getPosition());
+                            effectButtons[i_].setTextColor(main.getResources().getColor(R.color.white));
                         }
                     }
                 });
@@ -290,10 +288,9 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
          * Sets up the initial toggle values and effect button state
          */
         public void setInitToggleState(int position) {
-            for (int i = 0; i < xViews.length; i++) {
+            for (int i = 0; i < effectToggles.length; i++) {
                 boolean checked = main.isEffectOn(effectTypes[i], position);
-                xViews[i].setInitialState(checked);
-                effectButtons[i].setEnabled(checked);
+                effectToggles[i].setChecked(checked);
             }
         }
 
