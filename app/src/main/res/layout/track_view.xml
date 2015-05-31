@@ -52,8 +52,6 @@
                 android:layout_alignRight="@+id/track_title"
                 android:background="#00ffffff" />
 
-
-
         </RelativeLayout>
 
         <LinearLayout
