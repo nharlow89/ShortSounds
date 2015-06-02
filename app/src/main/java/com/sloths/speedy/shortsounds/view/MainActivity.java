@@ -1099,28 +1099,33 @@ public class MainActivity extends FragmentActivity
      * delete a the short sound.
      */
     private void confirmDelete() {
-
-        new AlertDialog.Builder(this)
-                .setCancelable(false)
-                .setTitle("\tDelete Short Sound Mix?")
-                .setIcon(R.drawable.ic_action_mic)
-                .setMessage("Are you sure you want to delete the current mix \"" +
-                            mActiveShortSound.getTitle() + "\"?")
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+        if (sounds != null && sounds.size() > 0 ) {
+            if (mActiveShortSound.getSize() == 0) {
+                deleteShortSound();
+            } else {
+                new AlertDialog.Builder(this)
+                        .setCancelable(false)
+                        .setTitle("\tDelete Short Sound Mix?")
+                        .setIcon(R.drawable.ic_action_mic)
+                        .setMessage("Are you sure you want to delete the current mix \"" +
+                                mActiveShortSound.getTitle() + "\"?")
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                deleteShortSound();
-                                ((ShortSoundsApplication) getApplicationContext())
-                                        .showToast(mActiveShortSound.getTitle() + " deleted");
                                 dialog.dismiss();
                             }
-                        }
-                ).create().show();
+                        })
+                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        deleteShortSound();
+                                        ((ShortSoundsApplication) getApplicationContext())
+                                                .showToast(mActiveShortSound.getTitle() + " deleted");
+                                        dialog.dismiss();
+                                    }
+                                }
+                        ).create().show();
+            }
+        }
     }
 }
