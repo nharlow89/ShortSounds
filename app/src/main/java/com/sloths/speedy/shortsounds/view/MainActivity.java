@@ -7,6 +7,7 @@ import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
@@ -26,6 +27,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -202,17 +204,14 @@ public class MainActivity extends FragmentActivity
             button.setOnCheckedChangeListener(new FloatingActionButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(FloatingActionButton fabView, boolean isChecked) {
-                    if ( !isChecked ) {
+                    if ( !isChecked ) {  // The user is recording
                         endRecording();
                         setPlayerVisibility(View.VISIBLE);
                         mGlobalSeekBar.setEnabled(true);
                         stopTimer();
                         resetSeekBarToZero();
-                    } else {
-                        mGlobalPlayButton.setEnabled(false);
-                        modelControl.onRecordStart();
-                        mGlobalSeekBar.setEnabled(false);
-                        startTimer();
+                    } else {  // The user is not recording yet
+                        mCountdownTimer.start();
                     }
                 }
             });
@@ -235,13 +234,56 @@ public class MainActivity extends FragmentActivity
             });
         }
     }
+
+    /**
+     * This is the CountdownTimer used for the recording process. 3..2..1..RECORD!
+     */
+    private CountDownTimer mCountdownTimer = new CountDownTimer( 5000, 1000 ) {
+        @Override
+        public void onTick(long millisUntilFinished) {
+            int value = (int) millisUntilFinished / 1000 - 1;
+            if ( value < 1 ) {
+                recordCountdownFinish();
+                this.cancel();
+            } else {
+                updateRecordCountdown( value );
+            }
+        }
+        @Override
+        public void onFinish() {
+            // I didnt use this because there was a noticable delay for some reason.
+        }
+    };
+
+    private void updateRecordCountdown( int value ) {
+        FloatingActionButton button = mActionBarFragment.getActionButton();
+        button.setEnabled( false );
+        TextView countdownTextView = (TextView)button.findViewById(R.id.fab_countdown);
+        ImageView stopRecordImageView = (ImageView) button.findViewById(R.id.fab_image);
+        countdownTextView.setVisibility( View.VISIBLE );
+        countdownTextView.setText( "" + value );
+        stopRecordImageView.setVisibility( View.GONE );
+    }
+
+    private void recordCountdownFinish() {
+        FloatingActionButton button = mActionBarFragment.getActionButton();
+        TextView countdownTextView = (TextView)button.findViewById(R.id.fab_countdown);
+        ImageView stopRecordImageView = (ImageView) button.findViewById(R.id.fab_image);
+        countdownTextView.setVisibility( View.GONE );
+        stopRecordImageView.setVisibility( View.VISIBLE );
+        button.setEnabled( true );
+        mGlobalPlayButton.setEnabled( false );
+        modelControl.onRecordStart();
+        mGlobalSeekBar.setEnabled( false );
+        startTimer();
+    }
     
     /**
      * Retrieve the currently selected ShortSound track names.
      * @return the name of the current track
     */
     public String getCurrentTrackNameAt(int track) {
-        Log.i(TAG, "getcurrentShortSoundNames()");
+        Log.i(TAG, "getCurrentShortSoundNames()");
         return mActiveShortSound.getTrackName(track);
     }
 

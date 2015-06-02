@@ -18,12 +18,25 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true">
 
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/fab_countdown"
+            android:gravity="center"
+            android:text="3"
+            android:textSize="20dp"
+            android:background="@color/background_floating_material_light"
+            android:textColor="@color/fab_color_1"
+            android:visibility="gone"/>
+
         <ImageView
             android:layout_width="@dimen/fab_icon_size"
             android:layout_height="@dimen/fab_icon_size"
             android:src="@drawable/fab_icons"
+            android:id="@+id/fab_image"
             android:layout_gravity="center"
             android:duplicateParentState="true"/>
+
 
     </com.sloths.speedy.shortsounds.view.FloatingActionButton>
 </RelativeLayout>

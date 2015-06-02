@@ -59,7 +59,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/track_child"
             android:layout_below="@+id/track_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="20dp">
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -138,10 +139,9 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight=".3"
+                android:layout_height="wrap_content"
                 android:id="@+id/upperTrackView"
-                android:layout_margin="20dp">
+                android:layout_marginTop="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
