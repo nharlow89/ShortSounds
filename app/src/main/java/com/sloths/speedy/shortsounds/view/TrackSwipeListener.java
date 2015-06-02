@@ -102,9 +102,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
                     dismissRight = velocityX > 0;
                 }
                 if ( dismiss ) {
-
                     confirmDelete();
-
                     // dismiss
                     mView.animate()
                             .translationX(dismissRight ? mWidth : -mWidth)
@@ -162,7 +160,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
                 .setCancelable(false)
                 .setTitle("\tDelete track?")
             .setIcon(R.drawable.ic_action_mic)
-            .setMessage("Are you sure you want to delete track" + name + "?")
+            .setMessage("Are you sure you want to delete \"" + name + "\"?")
             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -174,7 +172,8 @@ public class TrackSwipeListener implements View.OnTouchListener {
                     mDeleted = false;
                     mDownX = 0;
                     mDownY = 0;
-                    mVelocityTracker.recycle();
+                    if (mVelocityTracker != null)
+                        mVelocityTracker.recycle();
                     mVelocityTracker = null;
 
                     dialog.dismiss();

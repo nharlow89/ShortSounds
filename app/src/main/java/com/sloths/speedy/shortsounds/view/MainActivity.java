@@ -1,6 +1,8 @@
 package com.sloths.speedy.shortsounds.view;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PointF;
@@ -67,7 +69,6 @@ public class MainActivity extends FragmentActivity
     public static final String REVERB = "Reverb";
     public static final String TRACKS = "tracks";
     public static final int SLIDE_DURATION = 400;
-    public static final String UNTITLED = "Untitled";
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -261,7 +262,7 @@ public class MainActivity extends FragmentActivity
         TextView countdownTextView = (TextView)button.findViewById(R.id.fab_countdown);
         ImageView stopRecordImageView = (ImageView) button.findViewById(R.id.fab_image);
         countdownTextView.setVisibility( View.VISIBLE );
-        countdownTextView.setText( "" + value );
+        countdownTextView.setText("" + value);
         stopRecordImageView.setVisibility( View.GONE );
     }
 
@@ -791,7 +792,7 @@ public class MainActivity extends FragmentActivity
 
         switch (item.getItemId()) {
             case R.id.action_delete:
-                deleteShortSound();
+                confirmDelete();
                 return true;
             case R.id.action_new:
                 createNew();
@@ -876,7 +877,7 @@ public class MainActivity extends FragmentActivity
         selectShortSoundFromDrawer(sounds.indexOf(mActiveShortSound));
         ActionBar ab = getActionBar();
         if (ab != null)
-            ab.setTitle("ShortSounds");
+            ab.setTitle(newSound.getTitle());
     }
 
 
@@ -1091,5 +1092,35 @@ public class MainActivity extends FragmentActivity
      */
     public boolean isEffectOn(Effect.Type effect, int position) {
         return mActiveShortSound.isEffectOn(effect, position);
+    }
+
+    /**
+     * Prompts a confirmation dialogue to check if the user wants to
+     * delete a the short sound.
+     */
+    private void confirmDelete() {
+
+        new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("\tDelete Short Sound Mix?")
+                .setIcon(R.drawable.ic_action_mic)
+                .setMessage("Are you sure you want to delete the current mix \"" +
+                            mActiveShortSound.getTitle() + "\"?")
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                deleteShortSound();
+                                ((ShortSoundsApplication) getApplicationContext())
+                                        .showToast(mActiveShortSound.getTitle() + " deleted");
+                                dialog.dismiss();
+                            }
+                        }
+                ).create().show();
     }
 }
