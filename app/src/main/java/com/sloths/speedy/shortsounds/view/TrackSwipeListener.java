@@ -1,7 +1,5 @@
 package com.sloths.speedy.shortsounds.view;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.util.Log;
@@ -44,7 +42,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
         mListener = listener;
         ViewConfiguration vc = ViewConfiguration.get(v.getContext());
         mSlop = vc.getScaledTouchSlop();
-        mMinFlingVelocity = vc.getScaledMinimumFlingVelocity() * 4;
+        mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
         mMaxFlingVelocity = vc.getScaledMaximumFlingVelocity();
         mDeleted = false;
         mWidth = 1;
@@ -59,6 +57,9 @@ public class TrackSwipeListener implements View.OnTouchListener {
      */
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+//        Log.i(TAG, "tItem touch location (" + event.getRawX() + ", " + event.getRawY() + "), event #" + event.getAction());
+        if (ModelControl.instance().isPlaying() || ModelControl.instance().isRecording())
+            return true;
         if ( mDeleted )
             return true;
         if ( mWidth == 1 )
@@ -66,6 +67,8 @@ public class TrackSwipeListener implements View.OnTouchListener {
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
+                Log.d(TAG, "ACTION_DOWN");
+                mListener.onActionDown();
                 // The user has pressed somewhere on the track, begin the tracking.
                 mDownX = event.getRawX();
                 mDownY = event.getRawY();
@@ -74,6 +77,7 @@ public class TrackSwipeListener implements View.OnTouchListener {
                 return false;
             case MotionEvent.ACTION_UP:  // Release of the view
                 Log.d(TAG, "ACTION_UP");
+                mListener.onActionUp();
                 // This occurs when the user lifts their finger up.
                 // 1. If we were not swiping, then it was a press and need to edit title.
                 if ( !mSwiping )
@@ -98,39 +102,17 @@ public class TrackSwipeListener implements View.OnTouchListener {
                     dismissRight = velocityX > 0;
                 }
                 if ( dismiss ) {
+
+                    confirmDelete();
+
                     // dismiss
                     mView.animate()
                             .translationX(dismissRight ? mWidth : -mWidth)
                             .alpha(0)
                             .setDuration(mAnimationTime)
-                            .setListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    confirmDelete();
-                                }
-                            });
-                    mDeleted = true;
+                            .setListener(null);
                     return true;
                 } else {
-                    // cancel
-                    mView.animate()
-                            .translationX(0)
-                            .alpha(1)
-                            .setDuration(mAnimationTime)
-                            .setListener(null);
-                }
-                mDownX = 0;
-                mDownY = 0;
-                mVelocityTracker.recycle();
-                mVelocityTracker = null;
-                mSwiping = false;
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                // The cancel event occurs when the users dragging goes outside of this view. Here we need
-                // to animate the track back to its original position.
-                if ( mVelocityTracker == null )
-                    break;
-                if (mView != null && mSwiping) {
                     // cancel
                     mView.animate()
                             .translationX(0)
@@ -173,39 +155,41 @@ public class TrackSwipeListener implements View.OnTouchListener {
      * delete a track after swiping.
      */
     private void confirmDelete() {
-        if (!ModelControl.instance().isPlaying() && !ModelControl.instance().isRecording()) {
-            final String name = ((TextView)mView.findViewById(R.id.track_title)).getText().toString();
-            new AlertDialog.Builder(mView.getContext())
+        mSwiping = false;
+
+        final String name = ((TextView)mView.findViewById(R.id.track_title)).getText().toString();
+        new AlertDialog.Builder(mView.getContext())
+                .setCancelable(false)
                 .setTitle("\tDelete track?")
-                .setIcon(R.drawable.ic_action_mic)
-                .setMessage("Are you sure you want to delete track" + name + "?")
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mView.animate()
-                                .translationX(0)
-                                .alpha(1)
-                                .setDuration(mAnimationTime)
-                                .setListener(null);
-                        mDeleted = false;
-                        mDownX = 0;
-                        mDownY = 0;
-                        mVelocityTracker.recycle();
-                        mVelocityTracker = null;
-                        mSwiping = false;
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mListener.onTrackDelete();
-                        ((ShortSoundsApplication) mView.getContext().getApplicationContext())
-                                .showToast(name + " deleted");
-                        dialog.dismiss();
-                    }
+            .setIcon(R.drawable.ic_action_mic)
+            .setMessage("Are you sure you want to delete track" + name + "?")
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mView.animate()
+                            .translationX(0)
+                            .alpha(1)
+                            .setDuration(mAnimationTime)
+                            .setListener(null);
+                    mDeleted = false;
+                    mDownX = 0;
+                    mDownY = 0;
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+
+                    dialog.dismiss();
                 }
+            })
+            .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            mListener.onTrackDelete();
+                            mDeleted = true;
+                            ((ShortSoundsApplication) mView.getContext().getApplicationContext())
+                                    .showToast(name + " deleted");
+                            dialog.dismiss();
+                        }
+                    }
             ).create().show();
-        }
     }
 }

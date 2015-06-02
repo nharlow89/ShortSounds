@@ -3,9 +3,12 @@ package com.sloths.speedy.shortsounds.view;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -28,8 +31,6 @@ import java.util.List;
 /**
  * The RecyclerViewAdapter takes track data and uses it to populate the views associated
  * with the RecyclerView
- *
- * @author Joel Sigo
  */
 public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.ViewHolder> {
     public static final String TAG = "RecyclerViewAdapter";
@@ -40,6 +41,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
     public static final int MAX_VOLUME = 100;
     private final int screenHeight;
     private ColorWheel colorWheel;
+    private int currentSwipe;
 
 
     /**
@@ -57,6 +59,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         Point p = new Point();
         display.getSize(p);
         screenHeight = p.y;
+        currentSwipe = -1;
     }
 
     /**
@@ -103,6 +106,19 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
     }
 
     /**
+     * notifies the currently swiping view of a touch event
+     * which allows the TrackSwipeListener to detect motion outside of
+     * the y-axis view constraints
+     * @param event the current touch event
+     */
+    public void notifyTouch(MotionEvent event) {
+        if (currentSwipe != -1) {
+            ViewHolder vh = mViews.get(currentSwipe);
+            vh.swipeListener.onTouch(vh.vView, event);
+        }
+    }
+
+    /**
      *  Return the size of your dataset (invoked by the layout manager)
      * @return An int representing the number of Tracks
      */
@@ -131,6 +147,8 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         private Button[] effectButtons;
         private Effect.Type[] effectTypes;
         private TrackAnimator trackAnimator;
+        private TrackSwipeListener swipeListener;
+
 
 
         /**
@@ -165,12 +183,14 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
             setUpSwipeListener();
         }
 
+
         /**
          * Sets up the "swipe to delete" and click handler for the track title.
          */
         private void setUpSwipeListener() {
             vTitle.setOnClickListener(null);
-            vTitle.setOnTouchListener(new TrackSwipeListener(vView, new SwipeToDeleteListener() {
+
+            swipeListener = new TrackSwipeListener(vView, new SwipeToDeleteListener() {
                 @Override
                 public void onTrackDelete() {
                     trackAnimator.deleteTrackView();
@@ -180,7 +200,18 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                 public void onEditTrackTitle() {
                     main.renameTrack(getPosition());
                 }
-            }));
+
+                @Override
+                public void onActionDown() {
+                    currentSwipe = getPosition();
+                }
+
+                @Override
+                public void onActionUp() {
+                    currentSwipe = -1;
+                }
+            });
+            vTitle.setOnTouchListener(swipeListener);
         }
 
         /**
@@ -395,6 +426,7 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
                 // to begin with.
                 ((RecyclerView)vView.getParent()).removeView( vView );
                 notifyItemRemoved(position);
+                mViews.remove(position);
             }
 
             /**

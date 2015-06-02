@@ -4,7 +4,10 @@ import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sloths.speedy.shortsounds.R;
@@ -13,6 +16,7 @@ import com.sloths.speedy.shortsounds.R;
  * A TrackView represents the views associated with individual tracks.
  */
 public class TrackList extends RecyclerView {
+    public static final String TAG = "TrackList";
     private RecyclerView.LayoutManager mLayoutManager;
     private TrackViewAdapter mAdapter;
     private TextView recordSound;
@@ -34,6 +38,15 @@ public class TrackList extends RecyclerView {
 
         recordSound = (TextView) findViewById(R.id.recordSoundText);
         assert recordSound != null;
+
+
+        setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                mAdapter.notifyTouch(event);
+                return false;
+            }
+        });
     }
 
     /**
@@ -51,4 +64,5 @@ public class TrackList extends RecyclerView {
     public void notifyTrackAdded( int index ) {
         mAdapter.notifyItemInserted(index);
     }
+
 }

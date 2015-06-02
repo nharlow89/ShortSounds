@@ -709,7 +709,6 @@ public class MainActivity extends FragmentActivity
             File absolutePath = null;
             int tries = 0;
             while (absolutePath == null || absolutePath.length() == 0) {
-                Log.d(TAG, "trying to generate an audio file. try no. " + tries);
                 if (tries == 5) {
                     ((ShortSoundsApplication) getApplicationContext()).showToast("Could not " +
                             "generate an audio file, please try again later");
@@ -844,8 +843,7 @@ public class MainActivity extends FragmentActivity
      */
     private void updateCurrentTrackView() {
         RelativeLayout tvp = (RelativeLayout) findViewById(R.id.track_list_parent);
-        View add = getLayoutInflater().inflate(R.layout.empty_tracks, tvp, false);
-
+        View add = getLayoutInflater().inflate(R.layout.track_list_view, tvp, false);
         animateToTrack();
 
         animator.addView(add, viewMap.get(TRACKS) + 1);
