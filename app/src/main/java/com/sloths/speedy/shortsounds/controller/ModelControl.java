@@ -66,7 +66,6 @@ public class ModelControl implements PlaybackListener {
      */
     @Override
     public void onRecordStart() {
-//        main.onRecordStart();
         if (mAudioPlayer != null) {
             Log.d("Debug", "onRecordStart() playALL!!!");
             mAudioPlayer.preparePlayAll(0);  // Play from the beginning
@@ -77,7 +76,6 @@ public class ModelControl implements PlaybackListener {
             Log.i(TAG, "Waiting for recorder");
         }
         mAudioPlayer.startPlayAll();
-
     }
 
     /**
