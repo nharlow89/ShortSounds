@@ -76,7 +76,7 @@ public class AudioPlayer {
      * Play all tracks that are in this AudioPlayer, starting from a given point
      * (an integer percentage of the total length).
      */
-    public void playAll( int position ) {
+    public void preparePlayAll(int position) {
         Log.d(TAG, "Play all tracks starting at ["+position+"%]");
         if (mCurrentShortSound.getLongestTrack() == null) {
             return;
@@ -106,6 +106,14 @@ public class AudioPlayer {
                 }
             }
         }
+    }
+
+    /**
+     * starts all prepared tracks for playback
+     */
+    public void startPlayAll() {
+        for (TrackPlayer tp : trackPlayers.values())
+            tp.audioThread.start();
         playerState = PlayerState.PLAYING_ALL;
     }
 
@@ -365,7 +373,7 @@ public class AudioPlayer {
         private void attachEffects () {
             // Reverb
             ReverbEffect reverb = track.getmReverbEffect();
-            reverb.setupReverbEffect( audioTrack.getAudioSessionId() );
+            reverb.setupReverbEffect(audioTrack.getAudioSessionId());
 
             // Equalizer
             EqEffect eq = track.getmEqEffect();
@@ -426,7 +434,7 @@ public class AudioPlayer {
             trackState = TrackState.PLAYING;
             AudioTask task = new AudioTask();
             audioThread = new Thread(task);
-            audioThread.start();
+//            audioThread.start();
             Log.d(TAG, "Play track [" + track.getId() + "] from new thread.");
         }
 

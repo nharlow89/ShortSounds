@@ -80,15 +80,16 @@ public class AudioPlayerTest extends TestCase {
 
         // test that state is properly changed
         AudioPlayer player = constructEmptyPlayer();
-        player.playAll(0);
-        assertTrue("playAll Failure, State should remain stopped if no tracks contained.",
+        player.preparePlayAll(0);
+        player.startPlayAll();
+        assertTrue("preparePlayAll Failure, State should remain stopped if no tracks contained.",
                 !player.isPlayingAll());
 
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // stopAllChangeState Test
-    // Dependencies: testConstructor must pass, playAll must start playing
+    // Dependencies: testConstructor must pass, preparePlayAll must start playing
     //Tests that AudioPlayer changes its state when stopAll is called
     ///////////////////////////////////////////////////////////////////////////
     public void testStopAllChangesState() {
@@ -99,7 +100,8 @@ public class AudioPlayerTest extends TestCase {
                 AudioPlayer.PlayerState.STOPPED_ALL, player.getPlayerState());
 
         //Test after playing has started
-        player.playAll(0);
+        player.preparePlayAll(0);
+        player.startPlayAll();
         player.stopAll();
         assertEquals("stopAll Failure, player state incorrect.",
                 AudioPlayer.PlayerState.STOPPED_ALL, player.getPlayerState());

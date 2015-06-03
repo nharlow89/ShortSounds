@@ -55,7 +55,8 @@ public class ModelControl implements PlaybackListener {
             mGlobalSeekBar.setProgress(seekBarPosition);
             Log.d("DEBUG", "current POSITION IS " + seekBarPosition);
         } else {
-            mAudioPlayer.playAll(seekBarPosition);
+            mAudioPlayer.preparePlayAll(seekBarPosition);
+            mAudioPlayer.startPlayAll();
         }
         return isPlaying;
     }
@@ -66,15 +67,17 @@ public class ModelControl implements PlaybackListener {
     @Override
     public void onRecordStart() {
 //        main.onRecordStart();
+        if (mAudioPlayer != null) {
+            Log.d("Debug", "onRecordStart() playALL!!!");
+            mAudioPlayer.preparePlayAll(0);  // Play from the beginning
+        }
         // Setup the MediaRecorder
         mAudioRecorder.start();
         while (!(isRecording = mAudioRecorder.isRecording())) {
             Log.i(TAG, "Waiting for recorder");
         }
-        if (mAudioPlayer != null) {
-            Log.d("Debug", "onRecordStart() playALL!!!");
-            mAudioPlayer.playAll(0);  // Play from the beginning
-        }
+        mAudioPlayer.startPlayAll();
+
     }
 
     /**
