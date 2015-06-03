@@ -469,7 +469,6 @@ public class MainActivity extends FragmentActivity
         resetSeekBarToZero();
         mActiveShortSound = sounds.get(position);// Set the currently active ShortSound.
         Log.d("SHORT_SOUNDS", "Selected ShortSound ["+mActiveShortSound.getId()+"] from the sidebar.");
-        //TODO double check this is not causing bugs
         modelControl.release();
         modelControl.setmAudioPlayer(new AudioPlayer(mActiveShortSound));  // Setup the new AudioPlayer for this SS.
         currentView = TRACKS;
@@ -819,7 +818,6 @@ public class MainActivity extends FragmentActivity
             selectShortSoundFromDrawer(0);
         else
             createNew();
-
     }
 
     /**

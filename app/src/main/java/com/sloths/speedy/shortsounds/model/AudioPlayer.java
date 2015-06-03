@@ -190,6 +190,7 @@ public class AudioPlayer {
             trackPlayers.get(sst).audioTrack.setVolume(0.0f);
     }
 
+
     /**
      * Add an additional ShortSoundTrack to this AudioPlayer.
      * @param track The track to add
@@ -312,7 +313,7 @@ public class AudioPlayer {
                     ShortSoundTrack.AUDIO_FORMAT,
                     ShortSoundTrack.BUFFER_SIZE,
                     ShortSoundTrack.MODE);
-            audioTrack.setPositionNotificationPeriod( ShortSoundTrack.SAMPLE_RATE);
+            audioTrack.setPositionNotificationPeriod(ShortSoundTrack.SAMPLE_RATE);
             audioTrack.setPlaybackPositionUpdateListener(new AudioTrack.OnPlaybackPositionUpdateListener() {
                 @Override
                 public void onMarkerReached(AudioTrack track) {
@@ -326,6 +327,8 @@ public class AudioPlayer {
                 }
             });
             audioTrackBuffer = new byte[ShortSoundTrack.BUFFER_SIZE * 2];
+            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP )
+                audioTrack.setVolume(track.isSolo() ? 0.0f : track.getVolume());
             trackState = TrackState.STOPPED;
             this.file = new File( ShortSoundTrack.STORAGE_PATH, track.getFileName() );
             this.trackLength = file.length();

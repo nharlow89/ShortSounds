@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class AudioMixer {
     private ShortSound shortSound;
+    public static final int BUFFER_SIZE = AudioRecorder.BUFFER_SIZE;
 
     /**
      * Creates a new Audio Mixer
@@ -50,7 +51,7 @@ public class AudioMixer {
                 DataInputStream trackInput = trackStreams.get(i);
                 if ( trackInput.available() > 0 ) {
                     // We read another chunk of data
-                    byte tempBuf[] = new byte[1024];
+                    byte tempBuf[] = new byte[BUFFER_SIZE];
                     trackInput.read(tempBuf);
                     chunksToMix.add( tempBuf );
                 } else {
@@ -76,9 +77,9 @@ public class AudioMixer {
      * @return a single byte array of the averages from the list of byte arrays passed in
      */
     private byte[] mixByteArrays(List<byte[]> chunksToMix) {
-        byte mixedBuf[] = new byte[1024];
+        byte mixedBuf[] = new byte[BUFFER_SIZE];
         // For each byte in the arrays
-        for (int i = 0; i < 1024; i++) {
+        for (int i = 0; i < BUFFER_SIZE; i++) {
             long mixedByte = 0;
             for (int j = 0; j < chunksToMix.size(); j++) {
                 mixedByte+= chunksToMix.get(j)[i];
@@ -113,7 +114,7 @@ public class AudioMixer {
         long mySubChunk1Size = 16;  // 16bit PCM
         int myBitsPerSample = 16;
         int myFormat = 1;  // 1 = PCM
-        long myChannels = 1;  // Mono
+        long myChannels = 2;  // Stereo
         long mySampleRate = ShortSoundTrack.SAMPLE_RATE;  // Sample rate
         long myByteRate = mySampleRate * myChannels * myBitsPerSample / 8;
         int myBlockAlign = (int) (myChannels * myBitsPerSample / 8);

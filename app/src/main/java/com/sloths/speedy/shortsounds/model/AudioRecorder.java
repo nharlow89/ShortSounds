@@ -18,7 +18,7 @@ public class AudioRecorder {
     public static final int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
     public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_STEREO;
     public static final int BUFFER_ELEMENTS_TO_REC = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
-    public static final int GAIN_LEVEL = 8;
+    public static final int GAIN_LEVEL = 4;
     public static int BUFFER_SIZE;
     // instance vars
     private AudioRecord mTrackRecorder;
