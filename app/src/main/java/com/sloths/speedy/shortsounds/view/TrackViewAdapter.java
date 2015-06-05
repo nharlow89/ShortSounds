@@ -78,6 +78,11 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         return vh;
     }
 
+    /**
+     * sets the title at the given position
+     * @param position
+     */
+
     public void setTitleView(int position) {
         mViews.get(position).vTitle.setText(main.getCurrentTrackNameAt(position));
     }
