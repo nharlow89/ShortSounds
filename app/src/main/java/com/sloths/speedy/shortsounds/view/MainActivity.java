@@ -938,7 +938,7 @@ public class MainActivity extends FragmentActivity
             mActiveShortSound.getTracks().get(track).saveTrackName(inputText);
             ((TrackList) animator.getChildAt(viewMap.get(TRACKS))
                     .findViewById(R.id.track_list))
-                    .notifyTrackNameChanged();
+                    .notifyTrackNameChanged(track);
         }
     }
 

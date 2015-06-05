@@ -78,6 +78,10 @@ public class TrackViewAdapter extends RecyclerView.Adapter<TrackViewAdapter.View
         return vh;
     }
 
+    public void setTitleView(int position) {
+        mViews.get(position).vTitle.setText(main.getCurrentTrackNameAt(position));
+    }
+
     /**
      * Replace the contents of a view (invoked by the layout manager)
      * @param viewHolder The ViewHolder

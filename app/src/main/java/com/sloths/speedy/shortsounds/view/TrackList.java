@@ -52,8 +52,8 @@ public class TrackList extends RecyclerView {
     /**
      * Notifies the RecyclerViewAdapter that the track name has changed.
      */
-    public void notifyTrackNameChanged() {
-        mAdapter.notifyDataSetChanged();
+    public void notifyTrackNameChanged(int position) {
+        mAdapter.setTitleView(position);
     }
 
 
